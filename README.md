@@ -1,11 +1,6 @@
-# Abhinav Tiwari — Full Stack Developer (SDE 1)
 
-This repository contains my personal **portfolio website**, built using pure **HTML and CSS** with a dark, modern, and professional design.  
-It highlights my skills, experience, projects, and education — reflecting my journey as a Full Stack Developer.
 
----
-
-## 👨‍💻 About Me
+ 👨‍💻 About Me
 I’m **Abhinav Tiwari**, a passionate **Full Stack Developer** from India.  
 I specialize in building robust web applications using **Java, Spring Boot, ReactJS, and MySQL**.  
 With experience in delivering 10+ scalable web solutions, I focus on performance, responsive UI, and clean, maintainable code.
