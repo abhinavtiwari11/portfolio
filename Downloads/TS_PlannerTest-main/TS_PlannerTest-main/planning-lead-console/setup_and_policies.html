@@ -1,0 +1,1350 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Planning Lead Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 1rem;
+            --text-display-sm--line-height: 1.5rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        .focus-visible:focus-visible {
+            outline: 2px solid theme('colors.primary');
+            outline-offset: 2px;
+        }
+
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: theme('colors.slate.500');
+            margin-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-group-header:first-child {
+            margin-top: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: theme('radius.md');
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: theme('colors.slate.700');
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: theme('colors.slate.100');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active {
+            background-color: theme('colors.primary/10');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: theme('colors.primary');
+            border-radius: 0 2px 2px 0;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: white;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-slate-800">
+
+    <!-- Skip to main content -->
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+
+    <!-- Top Header -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b border-slate-200 sticky top-0 z-30">
+        <div class="flex items-center gap-4">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 focus-visible" aria-label="Open navigation menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                        <!-- Palette: navy (#0B63A7) and teal (#00A99D) -->
+                        <!-- Rounded calendar outline -->
+                        <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                        <!-- Day cells (3x2 grid) -->
+                        <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                            <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        </g>
+                        <!-- Asynchronous loop (teal) wrapping the calendar -->
+                        <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22"></path>
+                            <circle cx="300" cy="245" r="8"></circle>
+                            <circle cx="280" cy="200" r="8"></circle>
+                            <circle cx="270" cy="150" r="8"></circle>
+                            <path d="M260 100 L246 116 L274 116 Z"></path>
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="text-display-md leading-display-md font-bold text-primary">Planning Lead Console</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <!-- User Profile Button -->
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors focus-visible" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-medium text-slate-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-slate-200 rounded-xl shadow-lg p-4 w-64 z-50 hidden" role="dialog" aria-labelledby="userProfileTitle">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-slate-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-slate-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors focus-visible">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Desktop Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r border-slate-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-6" role="navigation" aria-label="Main navigation" id="sideNav">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        
+        <!-- Mobile Sidebar -->
+        <aside id="mobileSidebar" class="mobile-sidebar md:hidden">
+            <nav class="p-6" role="navigation" aria-label="Main navigation">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Setup &amp; Policies - Planning Lead Console</title>
+</head_content_code>
+
+<html_content_code>
+<section class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-4 mb-2">
+            <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                <i data-lucide="settings" class="w-5 h-5 text-primary"></i>
+            </div>
+            <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-slate-900">Setup &amp; Policies</h1>
+        </div>
+        <p class="text-sm leading-[1.375rem] text-slate-600">
+            Configure your team's timezone, capacity policies, and holiday profiles to ensure accurate planning.
+        </p>
+    </div>
+
+    <!-- Setup Wizard Container -->
+    <div class="bg-surface rounded-xl border border-slate-200 shadow-sm">
+        <!-- Progress Indicator -->
+        <div class="px-6 py-4 border-b border-slate-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div id="step1Indicator" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                        <span class="text-sm font-medium text-primary">Timezone</span>
+                    </div>
+                    <div class="w-8 h-px bg-slate-200"></div>
+                    <div id="step2Indicator" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                        <span class="text-sm text-slate-400">Policy</span>
+                    </div>
+                    <div class="w-8 h-px bg-slate-200"></div>
+                    <div id="step3Indicator" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                        <span class="text-sm text-slate-400">Holidays</span>
+                    </div>
+                    <div class="w-8 h-px bg-slate-200"></div>
+                    <div id="step4Indicator" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                        <span class="text-sm text-slate-400">Roster</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step Content -->
+        <div class="p-6">
+            <!-- Step 1: Timezone Configuration -->
+            <div id="step1Content" class="space-y-6">
+                <div>
+                    <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900 mb-2">Team Timezone</h2>
+                    <p class="text-sm leading-[1.375rem] text-slate-600 mb-6">
+                        Select your team's primary timezone. This determines when your work week starts (Wednesday) and ends (Monday), with planning happening on Tuesday.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="timezoneSelect" class="block text-sm font-medium text-slate-700 mb-2">
+                            Timezone <span class="text-red-500">*</span>
+                        </label>
+                        <select id="timezoneSelect" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" required="">
+                            <option value="">Select timezone...</option>
+                            <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                            <option value="America/Denver">America/Denver (MST/MDT)</option>
+                            <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+                            <option value="America/New_York">America/New_York (EST/EDT)</option>
+                            <option value="Europe/London">Europe/London (GMT/BST)</option>
+                            <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                            <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                            <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                            <option value="Australia/Sydney">Australia/Sydney (AEDT/AEST)</option>
+                        </select>
+                        <div id="timezoneError" class="hidden mt-1 text-sm text-red-600"></div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-slate-900 mb-2">Work Week Schedule</h3>
+                        <div id="weekPreview" class="text-sm text-slate-600 space-y-1">
+                            <div>• Planning: <span class="font-medium">Tuesday</span></div>
+                            <div>• Work week: <span class="font-medium">Wednesday - Monday</span></div>
+                            <div>• Next week preview will be shown here</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Policy Configuration -->
+            <div id="step2Content" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900 mb-2">Capacity Policy</h2>
+                    <p class="text-sm leading-[1.375rem] text-slate-600 mb-6">
+                        Configure how team capacity is allocated across different work categories and basic working parameters.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="policySelect" class="block text-sm font-medium text-slate-700 mb-2">
+                                Policy Template
+                            </label>
+                            <select id="policySelect" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="">Loading policies...</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="dailyBaselineHours" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Daily Hours
+                                </label>
+                                <input type="number" id="dailyBaselineHours" min="1" max="24" value="8" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            </div>
+                            <div>
+                                <label for="segmentSizeHours" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Segment Size (hrs)
+                                </label>
+                                <input type="number" id="segmentSizeHours" min="1" max="8" value="1" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h3 class="text-sm font-medium text-slate-900">Category Allocation</h3>
+                            <div>
+                                <label for="clientPct" class="block text-sm font-medium text-slate-700 mb-1">
+                                    Client-focused (%)
+                                </label>
+                                <input type="number" id="clientPct" min="0" max="100" step="5" value="50" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            </div>
+                            <div>
+                                <label for="techPct" class="block text-sm font-medium text-slate-700 mb-1">
+                                    Tech Debt (%)
+                                </label>
+                                <input type="number" id="techPct" min="0" max="100" step="5" value="25" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            </div>
+                            <div>
+                                <label for="rdPct" class="block text-sm font-medium text-slate-700 mb-1">
+                                    R&amp;D (%)
+                                </label>
+                                <input type="number" id="rdPct" min="0" max="100" step="5" value="25" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            </div>
+                            <div id="percentageError" class="hidden text-sm text-red-600"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-slate-900 mb-3">Policy Preview</h3>
+                        <div id="policyPreview" class="text-sm text-slate-600 space-y-2">
+                            <div>• <span class="font-medium">40 hours/week</span> baseline</div>
+                            <div>• <span class="font-medium">20 hours</span> client-focused</div>
+                            <div>• <span class="font-medium">10 hours</span> tech debt</div>
+                            <div>• <span class="font-medium">10 hours</span> R&amp;D</div>
+                            <div class="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-500">
+                                Allocation adjusts automatically based on actual availability and holidays.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Holiday Profile -->
+            <div id="step3Content" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900 mb-2">Holiday Profile</h2>
+                    <p class="text-sm leading-[1.375rem] text-slate-600 mb-6">
+                        Select which holidays automatically reduce baseline capacity for your team.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="holidayProfileSelect" class="block text-sm font-medium text-slate-700 mb-2">
+                            Holiday Profile
+                        </label>
+                        <select id="holidayProfileSelect" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                            <option value="">Loading holiday profiles...</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-slate-900 mb-3">Upcoming Holidays</h3>
+                        <div id="holidayPreview" class="text-sm text-slate-600 space-y-1">
+                            <div class="text-slate-500 italic">Select a profile to view holidays</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Team Roster Review -->
+            <div id="step4Content" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900 mb-2">Team Roster</h2>
+                    <p class="text-sm leading-[1.375rem] text-slate-600 mb-6">
+                        Review your current team members. User management is handled separately by administrators.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 rounded-lg p-4">
+                    <div id="rosterList" class="space-y-3">
+                        <!-- Team members will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wizard Footer -->
+        <div class="px-6 py-4 border-t border-slate-200 flex justify-between items-center">
+            <button id="prevBtn" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 disabled:text-slate-400 disabled:cursor-not-allowed" disabled="">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    Previous
+                </div>
+            </button>
+
+            <div class="flex items-center gap-3">
+                <button id="skipBtn" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">
+                    Skip Setup
+                </button>
+                <button id="nextBtn" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-sm font-medium">
+                    Next Step
+                </button>
+                <button id="saveBtn" class="hidden px-6 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 text-sm font-medium">
+                    Save Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="errorBanner" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-600"></i>
+            <span class="text-sm font-medium text-red-800">Configuration Error</span>
+        </div>
+        <p id="errorMessage" class="text-sm text-red-700 mt-1"></p>
+    </div>
+</section>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'PLC__';
+
+        // Mobile navigation toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = sidebar.classList.contains('open');
+                
+                btn.setAttribute('aria-expanded', String(!isOpen));
+                
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.focus();
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // Navigation active state management
+        function updateActiveNavItem() {
+            const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                               window.location.pathname.split('/').pop() || 
+                               'planning_week_overview.html';
+            
+            // Update both desktop and mobile nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const itemPage = item.getAttribute('data-page') || item.getAttribute('href');
+                if (itemPage === currentPage) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'page');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Update active state on page load and when navigation changes
+        updateActiveNavItem();
+        window.addEventListener('popstate', updateActiveNavItem);
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-alice');
+                    currentUserId = 'u-alice';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users_' + currentUserId);
+                try { 
+                    if (userData) return JSON.parse(userData);
+                    
+                    // Fallback to dummy data from localStorage if available
+                    const usersData = localStorage.getItem('plc::users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        if (user) return user;
+                    }
+                    
+                    // Final fallback
+                    return {
+                        id: 'u-alice',
+                        firstName: 'Alice',
+                        lastName: 'Nguyen',
+                        role: 'PLANNING_LEAD',
+                        email: 'alice.nguyen@example.local'
+                    };
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            const initials = UserUtils.getUserInitials(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverUserAvatar) popoverUserAvatar.textContent = initials;
+            if (popoverUserName) popoverUserName.textContent = displayName;
+            if (popoverUserEmail) popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover management
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popoverVisible = !popoverVisible;
+                
+                if (popoverVisible) {
+                    popover.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first interactive element in popover
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                } else {
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Sign out handler
+            const signOutBtn = document.getElementById('signOutButton');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        UserUtils.signOut();
+                    }
+                });
+            }
+        }());
+
+        // Import/Export functionality (namespaced)
+        document.getElementById('exportAppData')?.addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith(APP_PREFIX) || key.startsWith('plc::'))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "planning_console_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData')?.addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile')?.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX) || key.startsWith('plc::')) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        alert(`✅ Successfully imported ${importedCount} data items. Please refresh the page to see changes.`);
+                    } else {
+                        alert('⚠️ No compatible data found in the file.');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    alert('❌ Failed to import: Invalid JSON format or corrupted file.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions handler
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (error) {
+                    console.error(`Error executing action ${action}:`, error);
+                    el.setAttribute('disabled', 'true');
+                    el.setAttribute('title', 'Action failed');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Action not available');
+                console.warn(`Action ${action} not found in window.AppActions`);
+            }
+        });
+
+        // Toast notification helper
+        window.showToast = function(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-opacity duration-300 ${
+                type === 'success' ? 'bg-secondary' : 
+                type === 'error' ? 'bg-error' : 
+                'bg-slate-600'
+            }`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        };
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { 
+    getAppConfig, 
+    updateAppConfig,
+    getPolicies,
+    getActivePolicy,
+    updatePolicy,
+    getHolidayProfiles,
+    getActiveUsers,
+    getUpcomingHolidays,
+    calculateWeekPreview,
+    validatePolicyPercentages,
+    saveAuditEvent
+} from './page-logic.js';
+
+// Current wizard state
+let currentStep = 1;
+let totalSteps = 4;
+let configData = {
+    teamTimezone: '',
+    policyId: '',
+    dailyBaselineHours: 8,
+    segmentSizeHours: 1,
+    clientPct: 50,
+    techPct: 25,
+    rdPct: 25,
+    holidayProfileId: ''
+};
+
+// Initialize the setup wizard
+async function funInitializeSetupWizard() {
+    try {
+        // Load current configuration
+        // Method should return: { teamTimezone, policyId, holidayProfileId, notificationPrefs }
+        const currentConfig = await getAppConfig();
+        
+        if (currentConfig) {
+            configData.teamTimezone = currentConfig.teamTimezone || '';
+            configData.policyId = currentConfig.policyId || '';
+            configData.holidayProfileId = currentConfig.holidayProfileId || '';
+        }
+
+        // Load active policy details if available
+        // Method should return: { id, name, clientPct, techPct, rdPct, segmentSizeHours, dailyBaselineHours, ... }
+        const activePolicy = await getActivePolicy();
+        if (activePolicy) {
+            configData.dailyBaselineHours = activePolicy.dailyBaselineHours;
+            configData.segmentSizeHours = activePolicy.segmentSizeHours;
+            configData.clientPct = Math.round(activePolicy.clientPct * 100);
+            configData.techPct = Math.round(activePolicy.techPct * 100);
+            configData.rdPct = Math.round(activePolicy.rdPct * 100);
+        }
+
+        // Populate form fields with current values
+        funPopulateFormFields();
+        
+        // Load dropdown options
+        await funLoadPolicyOptions();
+        await funLoadHolidayProfiles();
+        
+        // Update previews
+        funUpdateWeekPreview();
+        funUpdatePolicyPreview();
+        
+    } catch (error) {
+        console.error('Failed to initialize setup wizard:', error);
+        funShowError('Failed to load current configuration. Please try again.');
+    }
+}
+
+// Populate form fields with current configuration
+function funPopulateFormFields() {
+    const timezoneSelect = document.getElementById('timezoneSelect');
+    const dailyBaselineHours = document.getElementById('dailyBaselineHours');
+    const segmentSizeHours = document.getElementById('segmentSizeHours');
+    const clientPct = document.getElementById('clientPct');
+    const techPct = document.getElementById('techPct');
+    const rdPct = document.getElementById('rdPct');
+
+    if (timezoneSelect) timezoneSelect.value = configData.teamTimezone;
+    if (dailyBaselineHours) dailyBaselineHours.value = configData.dailyBaselineHours;
+    if (segmentSizeHours) segmentSizeHours.value = configData.segmentSizeHours;
+    if (clientPct) clientPct.value = configData.clientPct;
+    if (techPct) techPct.value = configData.techPct;
+    if (rdPct) rdPct.value = configData.rdPct;
+}
+
+// Load policy options into dropdown
+async function funLoadPolicyOptions() {
+    try {
+        // Method should return array: [{ id, name, clientPct, techPct, rdPct, effectiveFrom, effectiveTo }]
+        // Should filter to show only currently active/effective policies
+        const policies = await getPolicies();
+        const policySelect = document.getElementById('policySelect');
+        
+        if (!policySelect) return;
+        
+        policySelect.innerHTML = '<option value="">Custom Configuration</option>';
+        
+        policies.forEach(policy => {
+            const option = document.createElement('option');
+            option.value = policy.id;
+            option.textContent = policy.name;
+            if (policy.id === configData.policyId) {
+                option.selected = true;
+            }
+            policySelect.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error('Failed to load policies:', error);
+        const policySelect = document.getElementById('policySelect');
+        if (policySelect) {
+            policySelect.innerHTML = '<option value="">Failed to load policies</option>';
+        }
+    }
+}
+
+// Load holiday profiles into dropdown
+async function funLoadHolidayProfiles() {
+    try {
+        // Method should return array: [{ id, name, region, description }]
+        // Each profile represents a collection of holidays for a region/country
+        const profiles = await getHolidayProfiles();
+        const holidaySelect = document.getElementById('holidayProfileSelect');
+        
+        if (!holidaySelect) return;
+        
+        holidaySelect.innerHTML = '<option value="">No holiday profile</option>';
+        
+        profiles.forEach(profile => {
+            const option = document.createElement('option');
+            option.value = profile.id;
+            option.textContent = `${profile.name} (${profile.region})`;
+            if (profile.id === configData.holidayProfileId) {
+                option.selected = true;
+            }
+            holidaySelect.appendChild(option);
+        });
+
+        // Update preview if profile is selected
+        if (configData.holidayProfileId) {
+            await funUpdateHolidayPreview(configData.holidayProfileId);
+        }
+
+    } catch (error) {
+        console.error('Failed to load holiday profiles:', error);
+        const holidaySelect = document.getElementById('holidayProfileSelect');
+        if (holidaySelect) {
+            holidaySelect.innerHTML = '<option value="">Failed to load profiles</option>';
+        }
+    }
+}
+
+// Update week preview based on selected timezone
+function funUpdateWeekPreview() {
+    const weekPreview = document.getElementById('weekPreview');
+    if (!weekPreview || !configData.teamTimezone) return;
+
+    try {
+        // Method should return: { planningDate, weekStart, weekEnd, weekId }
+        // Calculates next week dates in the selected timezone
+        const preview = calculateWeekPreview(configData.teamTimezone);
+        
+        weekPreview.innerHTML = `
+            <div>• Planning: <span class="font-medium">Tuesday (${preview.planningDate})</span></div>
+            <div>• Work week: <span class="font-medium">Wed ${preview.weekStart} - Mon ${preview.weekEnd}</span></div>
+            <div>• Week ID: <span class="font-medium">${preview.weekId}</span></div>
+        `;
+    } catch (error) {
+        weekPreview.innerHTML = `
+            <div class="text-red-600">• Invalid timezone selected</div>
+        `;
+    }
+}
+
+// Update policy preview based on current values
+function funUpdatePolicyPreview() {
+    const policyPreview = document.getElementById('policyPreview');
+    if (!policyPreview) return;
+
+    const totalHours = configData.dailyBaselineHours * 5; // 5 working days
+    const clientHours = Math.round(totalHours * configData.clientPct / 100);
+    const techHours = Math.round(totalHours * configData.techPct / 100);
+    const rdHours = Math.round(totalHours * configData.rdPct / 100);
+
+    policyPreview.innerHTML = `
+        <div>• <span class="font-medium">${totalHours} hours/week</span> baseline</div>
+        <div>• <span class="font-medium">${clientHours} hours</span> client-focused</div>
+        <div>• <span class="font-medium">${techHours} hours</span> tech debt</div>
+        <div>• <span class="font-medium">${rdHours} hours</span> R&D</div>
+        <div class="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-500">
+            Allocation adjusts automatically based on actual availability and holidays.
+        </div>
+    `;
+}
+
+// Update holiday preview for selected profile
+async function funUpdateHolidayPreview(profileId) {
+    const holidayPreview = document.getElementById('holidayPreview');
+    if (!holidayPreview) return;
+
+    if (!profileId) {
+        holidayPreview.innerHTML = '<div class="text-slate-500 italic">No holiday profile selected</div>';
+        return;
+    }
+
+    try {
+        // Method should return array: [{ date, description, reducesBaseline }]
+        // Should return next 3-5 upcoming holidays for the profile
+        const holidays = await getUpcomingHolidays(profileId);
+        
+        if (holidays.length === 0) {
+            holidayPreview.innerHTML = '<div class="text-slate-500 italic">No upcoming holidays</div>';
+            return;
+        }
+
+        const holidayHtml = holidays.map(holiday => {
+            const date = new Date(holiday.date).toLocaleDateString('en-GB', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            return `<div>• ${date} - ${holiday.description}</div>`;
+        }).join('');
+
+        holidayPreview.innerHTML = holidayHtml;
+
+    } catch (error) {
+        console.error('Failed to load holiday preview:', error);
+        holidayPreview.innerHTML = '<div class="text-red-600">Failed to load holidays</div>';
+    }
+}
+
+// Load and display team roster
+async function funLoadTeamRoster() {
+    try {
+        // Method should return array: [{ id, firstName, lastName, role, email, isActive }]
+        // Should only return active users
+        const users = await getActiveUsers();
+        const rosterList = document.getElementById('rosterList');
+        
+        if (!rosterList) return;
+
+        if (users.length === 0) {
+            rosterList.innerHTML = '<div class="text-slate-500 italic">No active team members found</div>';
+            return;
+        }
+
+        const rosterHtml = users.map(user => {
+            const displayName = `${user.firstName} ${user.lastName}`;
+            const roleColor = user.role === 'ADMIN' ? 'bg-accent/10 text-accent' : 
+                             user.role === 'PLANNING_LEAD' ? 'bg-primary/10 text-primary' : 
+                             'bg-secondary/10 text-secondary';
+            
+            return `
+                <div class="flex items-center justify-between py-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-medium">
+                            ${user.firstName.charAt(0)}${user.lastName.charAt(0)}
+                        </div>
+                        <div>
+                            <div class="font-medium text-slate-900">${displayName}</div>
+                            <div class="text-sm text-slate-500">${user.email}</div>
+                        </div>
+                    </div>
+                    <div class="px-2 py-1 rounded text-xs font-medium ${roleColor}">
+                        ${user.role.replace('_', ' ')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        rosterList.innerHTML = rosterHtml;
+
+    } catch (error) {
+        console.error('Failed to load team roster:', error);
+        const rosterList = document.getElementById('rosterList');
+        if (rosterList) {
+            rosterList.innerHTML = '<div class="text-red-600">Failed to load team roster</div>';
+        }
+    }
+}
+
+// Navigate to specific step
+function funNavigateToStep(step) {
+    if (step < 1 || step > totalSteps) return;
+
+    // Hide all step contents
+    for (let i = 1; i <= totalSteps; i++) {
+        const stepContent = document.getElementById(`step${i}Content`);
+        const stepIndicator = document.getElementById(`step${i}Indicator`);
+        
+        if (stepContent) {
+            stepContent.classList.add('hidden');
+        }
+        
+        if (stepIndicator) {
+            const circle = stepIndicator.querySelector('div');
+            const text = stepIndicator.querySelector('span');
+            
+            if (i < step) {
+                // Completed steps
+                circle.className = 'w-8 h-8 bg-secondary text-white rounded-full flex items-center justify-center text-sm font-medium';
+                circle.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+                text.className = 'text-sm text-secondary';
+            } else if (i === step) {
+                // Current step
+                circle.className = 'w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium';
+                circle.textContent = i;
+                text.className = 'text-sm font-medium text-primary';
+            } else {
+                // Future steps
+                circle.className = 'w-8 h-8 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center text-sm font-medium';
+                circle.textContent = i;
+                text.className = 'text-sm text-slate-400';
+            }
+        }
+    }
+
+    // Show current step
+    const currentStepContent = document.getElementById(`step${step}Content`);
+    if (currentStepContent) {
+        currentStepContent.classList.remove('hidden');
+    }
+
+    // Update button states
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const saveBtn = document.getElementById('saveBtn');
+
+    if (prevBtn) prevBtn.disabled = step === 1;
+    
+    if (step === totalSteps) {
+        if (nextBtn) nextBtn.classList.add('hidden');
+        if (saveBtn) saveBtn.classList.remove('hidden');
+        
+        // Load team roster for final step
+        funLoadTeamRoster();
+    } else {
+        if (nextBtn) nextBtn.classList.remove('hidden');
+        if (saveBtn) saveBtn.classList.add('hidden');
+    }
+
+    currentStep = step;
+    
+    // Refresh lucide icons for check marks
+    lucide.createIcons();
+}
+
+// Validate current step
+function funValidateCurrentStep() {
+    funHideError();
+
+    switch (currentStep) {
+        case 1:
+            if (!configData.teamTimezone) {
+                funShowError('Please select a timezone before proceeding.');
+                return false;
+            }
+            break;
+
+        case 2:
+            // Validate percentage totals
+            const total = configData.clientPct + configData.techPct + configData.rdPct;
+            if (total !== 100) {
+                funShowError('Category percentages must total exactly 100%.');
+                return false;
+            }
+            
+            if (configData.dailyBaselineHours < 1 || configData.dailyBaselineHours > 24) {
+                funShowError('Daily baseline hours must be between 1 and 24.');
+                return false;
+            }
+            
+            if (configData.segmentSizeHours < 1 || configData.segmentSizeHours > 8) {
+                funShowError('Segment size must be between 1 and 8 hours.');
+                return false;
+            }
+            break;
+
+        case 3:
+            // Holiday profile is optional, no validation needed
+            break;
+
+        case 4:
+            // Roster is read-only, no validation needed
+            break;
+    }
+
+    return true;
+}
+
+// Save configuration
+async function funSaveConfiguration() {
+    try {
+        funHideError();
+
+        // Final validation
+        if (!funValidateCurrentStep()) {
+            return;
+        }
+
+        // Prepare configuration object
+        const newConfig = {
+            teamTimezone: configData.teamTimezone,
+            policyId: configData.policyId,
+            holidayProfileId: configData.holidayProfileId,
+            notificationPrefs: JSON.stringify({ inApp: true, email: false })
+        };
+
+        // Prepare policy updates if custom configuration
+        const policyUpdates = {
+            dailyBaselineHours: configData.dailyBaselineHours,
+            segmentSizeHours: configData.segmentSizeHours,
+            clientPct: configData.clientPct / 100,
+            techPct: configData.techPct / 100,
+            rdPct: configData.rdPct / 100
+        };
+
+        // Method should save the app configuration
+        // Expected to update appConfig collection and handle policy changes
+        await updateAppConfig(newConfig, policyUpdates);
+
+        // Log audit event
+        // Method should create audit event: { type: 'SETUP_COMPLETED', ... }
+        await saveAuditEvent({
+            type: 'SETUP_COMPLETED',
+            details: 'Team setup and policies configured',
+            timezone: configData.teamTimezone,
+            policyChanges: policyUpdates
+        });
+
+        // Show success and redirect
+        window.showToast('Setup configuration saved successfully!', 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'planning_week_overview.html';
+        }, 1500);
+
+    } catch (error) {
+        console.error('Failed to save configuration:', error);
+        funShowError('Failed to save configuration. Please try again.');
+    }
+}
+
+// Show error message
+function funShowError(message) {
+    const errorBanner = document.getElementById('errorBanner');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    if (errorBanner && errorMessage) {
+        errorMessage.textContent = message;
+        errorBanner.classList.remove('hidden');
+        errorBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// Hide error message
+function funHideError() {
+    const errorBanner = document.getElementById('errorBanner');
+    if (errorBanner) {
+        errorBanner.classList.add('hidden');
+    }
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the wizard
+    funInitializeSetupWizard();
+
+    // Timezone selection handler
+    const timezoneSelect = document.getElementById('timezoneSelect');
+    if (timezoneSelect) {
+        timezoneSelect.addEventListener('change', function() {
+            configData.teamTimezone = this.value;
+            funUpdateWeekPreview();
+        });
+    }
+
+    // Policy selection handler
+    const policySelect = document.getElementById('policySelect');
+    if (policySelect) {
+        policySelect.addEventListener('change', async function() {
+            configData.policyId = this.value;
+            
+            if (this.value) {
+                try {
+                    // Load selected policy details and populate form
+                    const policies = await getPolicies();
+                    const selectedPolicy = policies.find(p => p.id === this.value);
+                    
+                    if (selectedPolicy) {
+                        configData.dailyBaselineHours = selectedPolicy.dailyBaselineHours;
+                        configData.segmentSizeHours = selectedPolicy.segmentSizeHours;
+                        configData.clientPct = Math.round(selectedPolicy.clientPct * 100);
+                        configData.techPct = Math.round(selectedPolicy.techPct * 100);
+                        configData.rdPct = Math.round(selectedPolicy.rdPct * 100);
+                        
+                        // Update form fields
+                        funPopulateFormFields();
+                        funUpdatePolicyPreview();
+                    }
+                } catch (error) {
+                    console.error('Failed to load policy details:', error);
+                }
+            }
+        });
+    }
+
+    // Policy configuration handlers
+    ['dailyBaselineHours', 'segmentSizeHours', 'clientPct', 'techPct', 'rdPct'].forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('input', function() {
+                configData[fieldId] = fieldId.includes('Pct') ? parseInt(this.value) || 0 : parseInt(this.value) || 1;
+                
+                // Reset policy selection when custom values are entered
+                if (fieldId !== 'dailyBaselineHours' && fieldId !== 'segmentSizeHours') {
+                    const policySelect = document.getElementById('policySelect');
+                    if (policySelect) policySelect.value = '';
+                    configData.policyId = '';
+                }
+                
+                funUpdatePolicyPreview();
+            });
+        }
+    });
+
+    // Holiday profile selection handler
+    const holidayProfileSelect = document.getElementById('holidayProfileSelect');
+    if (holidayProfileSelect) {
+        holidayProfileSelect.addEventListener('change', function() {
+            configData.holidayProfileId = this.value;
+            funUpdateHolidayPreview(this.value);
+        });
+    }
+
+    // Navigation button handlers
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const skipBtn = document.getElementById('skipBtn');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+            if (currentStep > 1) {
+                funNavigateToStep(currentStep - 1);
+            }
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+            if (funValidateCurrentStep() && currentStep < totalSteps) {
+                funNavigateToStep(currentStep + 1);
+            }
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', funSaveConfiguration);
+    }
+
+    if (skipBtn) {
+        skipBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to skip setup? You can complete it later from the Settings menu.')) {
+                window.location.href = 'planning_week_overview.html';
+            }
+        });
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            funHideError();
+        }
+    });
+});
+
+</script></body></html>

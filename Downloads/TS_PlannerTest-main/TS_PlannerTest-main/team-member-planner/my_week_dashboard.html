@@ -1,0 +1,1377 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+         <!-- Top nav -->
+
+             <!-- Top nav -->
+
+                 <!-- Top nav -->
+
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>My Week Dashboard - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<section class="max-w-7xl mx-auto space-y-6">
+  <!-- Week Header -->
+  <div class="bg-surface rounded-lg p-6 shadow-sm border">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h1 class="text-display-lg font-bold text-gray-900">My Week Dashboard</h1>
+          <div id="weekBadge" class="px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-700"></div>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span id="weekDateRange"></span>
+          <span class="text-gray-400">•</span>
+          <span>Planning: <span id="planningDate" class="font-medium"></span></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div id="statusChip" class="px-3 py-1 rounded-full text-sm font-semibold"></div>
+        <button id="weekSwitcherBtn" class="px-3 py-2 text-sm border rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+          <i data-lucide="calendar-days" class="w-4 h-4"></i>
+          Switch Week
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Banners -->
+  <div id="alertBanners" class="space-y-3"></div>
+
+  <!-- Main Cards Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    
+    <!-- Capacity Card -->
+    <div class="bg-surface rounded-lg p-6 shadow-sm border">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-display-md font-semibold text-gray-900">Weekly Capacity</h2>
+        <div class="flex items-center gap-2">
+          <button id="capacityTipBtn" class="p-1 text-gray-400 hover:text-gray-600 rounded" title="Capacity information">
+            <i data-lucide="help-circle" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <!-- Total Capacity -->
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <div class="text-3xl font-bold text-gray-900" id="totalCapacity">--</div>
+          <div class="text-sm text-gray-600">Total Available Hours</div>
+          <div id="zeroCapacityWarning" class="hidden mt-2 text-sm text-error">
+            <i data-lucide="alert-circle" class="w-4 h-4 inline mr-1"></i>
+            Zero capacity this week
+          </div>
+        </div>
+
+        <!-- Category Targets -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-gray-700">Category Targets (Minimums)</h3>
+          
+          <!-- Client-focused -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-700">Client-focused</span>
+              <span id="clientTarget" class="font-medium">-- hrs</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div id="clientProgress" class="bg-primary rounded-full h-2 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Tech Debt -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-700">Tech Debt</span>
+              <span id="techDebtTarget" class="font-medium">-- hrs</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div id="techDebtProgress" class="bg-secondary rounded-full h-2 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- R&D -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-700">R&amp;D</span>
+              <span id="rndTarget" class="font-medium">-- hrs</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div id="rndProgress" class="bg-accent rounded-full h-2 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Allocation Card -->
+    <div class="bg-surface rounded-lg p-6 shadow-sm border">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-display-md font-semibold text-gray-900">Weekly Allocation</h2>
+        <a href="assignments.html" class="text-sm text-primary hover:text-primary/80 transition-colors">
+          Manage Assignments →
+        </a>
+      </div>
+      
+      <div class="space-y-4">
+        <!-- Total Allocation -->
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-center justify-center gap-2">
+            <span class="text-2xl font-bold text-gray-900" id="totalAllocated">--</span>
+            <span class="text-gray-400">/</span>
+            <span class="text-xl text-gray-600" id="allocationCapacity">--</span>
+            <span class="text-sm text-gray-500">hrs</span>
+          </div>
+          <div class="text-sm text-gray-600 mt-1">Allocated vs Available</div>
+          <div id="overAllocationWarning" class="hidden mt-2 px-3 py-1 bg-amber-50 text-amber-700 rounded-lg text-sm flex items-center gap-1">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            <span>Over-allocated by <span id="overAllocationAmount">--</span> hours</span>
+          </div>
+        </div>
+
+        <!-- Allocation Progress -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-700">Overall Progress</span>
+            <span id="allocationPercentage" class="font-medium">--%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-3">
+            <div id="allocationProgress" class="bg-primary rounded-full h-3 transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Readiness Indicator -->
+        <div id="readinessIndicator" class="p-3 rounded-lg border text-center">
+          <div class="flex items-center justify-center gap-2">
+            <div id="readinessIcon" class="w-5 h-5"></div>
+            <span id="readinessText" class="font-semibold">--</span>
+          </div>
+          <div id="readinessSubtext" class="text-sm text-gray-600 mt-1">--</div>
+        </div>
+
+        <!-- Quick Action -->
+        <div id="noAssignmentsState" class="hidden text-center py-6">
+          <div class="text-gray-500 text-sm mb-4">You have no assignments yet</div>
+          <a href="assignments.html" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium">
+            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+            Allocate Hours
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assignments Section -->
+  <div class="bg-surface rounded-lg shadow-sm border">
+    <div class="px-6 py-4 border-b">
+      <div class="flex items-center justify-between">
+        <h2 class="text-display-md font-semibold text-gray-900">My Assignments</h2>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <label for="assignmentFilter" class="text-sm text-gray-600">Filter:</label>
+            <select id="assignmentFilter" class="text-sm border border-gray-300 rounded px-2 py-1">
+              <option value="all">All Status</option>
+              <option value="planned">Planned</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div class="text-sm text-gray-500" id="assignmentCount">-- assignments</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="assignmentsList" class="divide-y">
+      <!-- Assignment items will be populated here -->
+    </div>
+  </div>
+</section>
+
+<!-- Log Time Drawer -->
+<div id="logTimeDrawer" class="fixed inset-y-0 right-0 w-96 bg-surface shadow-lg transform translate-x-full transition-transform duration-300 z-50 border-l">
+  <div class="flex flex-col h-full">
+    <!-- Drawer Header -->
+    <div class="px-6 py-4 border-b flex items-center justify-between">
+      <h3 class="text-display-md font-semibold">Log Time</h3>
+      <button id="closeLogDrawer" class="p-2 text-gray-400 hover:text-gray-600 rounded">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Drawer Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <div id="logTimeContent">
+        <!-- Content will be populated when drawer opens -->
+      </div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="px-6 py-4 border-t bg-gray-50 flex items-center justify-between">
+      <button id="cancelLogTime" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+        Cancel
+      </button>
+      <button id="submitLogTime" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
+        Log 1 Hour
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer Overlay -->
+<div id="drawerOverlay" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
+
+<!-- Capacity Tip Tooltip -->
+<div id="capacityTooltip" class="fixed bg-gray-900 text-white px-3 py-2 rounded-lg text-sm z-50 hidden pointer-events-none">
+  <div class="max-w-xs">
+    <div class="font-medium mb-1">Capacity Targets</div>
+    <div class="text-xs opacity-90">Targets are minimums (50/25/25). Meet or exceed before Tuesday end to ensure readiness.</div>
+  </div>
+  <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-gray-900"></div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+// Import methods from page-logic.js for data handling
+import { 
+  getMyWeekDashboardData,
+  logProgressTime,
+  updateAssignmentStatus,
+  updateUIState 
+} from './page-logic.js';
+
+// Get current user
+const currentUser = window.UserUtils?.getCurrentUser();
+if (!currentUser) {
+  document.getElementById('pageContent').innerHTML = `
+    <div class="text-center py-12">
+      <div class="text-error mb-4">You do not have access to My Week.</div>
+      <a href="access_denied.html" class="text-primary hover:underline">Go to Access Denied Page</a>
+    </div>
+  `;
+  throw new Error('No authenticated user found');
+}
+
+// Get week ID from URL or use current
+const urlParams = new URLSearchParams(window.location.search);
+const weekId = urlParams.get('week_id') || (() => {
+  // Get from UI state or default to current week logic
+  try {
+    const uiStateData = localStorage.getItem('plc::uiState');
+    const uiStates = uiStateData ? JSON.parse(uiStateData) : [];
+    const userUIState = uiStates.find(ui => ui.userId === currentUser.id);
+    return userUIState?.currentWeekId || '2025-W47'; // fallback
+  } catch {
+    return '2025-W47';
+  }
+})();
+
+let currentAssignmentForLog = null;
+let dashboardData = null;
+
+// Initialize dashboard
+async function funInitializeDashboard() {
+  try {
+    // Call page-logic method to get all dashboard data
+    // Expected return: {
+    //   week: { id, startDate, endDate, planningDate, status },
+    //   capacity: { weeklyTotal, targets: { client, techDebt, rnd }, zeroCapacity },
+    //   assignments: [{ id, activityId, segments, status, activity: { title, classification } }],
+    //   planSnapshot: { status },
+    //   loggedHours: { [assignmentId]: number },
+    //   allocationStats: { totalAllocated, byCategory: { client, techDebt, rnd } }
+    // }
+    dashboardData = await getMyWeekDashboardData(currentUser.id, weekId);
+    
+    funRenderWeekHeader(dashboardData.week, dashboardData.planSnapshot);
+    funRenderCapacityCard(dashboardData.capacity, dashboardData.allocationStats);
+    funRenderAllocationCard(dashboardData.capacity, dashboardData.allocationStats);
+    funRenderAssignmentsList(dashboardData.assignments, dashboardData.loggedHours);
+    funCheckForAlerts(dashboardData);
+    
+    // Update UI state
+    updateUIState(currentUser.id, { 
+      currentWeekId: weekId, 
+      lastSelectedTab: 'my_week' 
+    });
+    
+  } catch (error) {
+    console.error('Failed to initialize dashboard:', error);
+    funShowError('Failed to load dashboard data. Please refresh and try again.');
+  }
+}
+
+function funRenderWeekHeader(week, planSnapshot) {
+  const weekBadge = document.getElementById('weekBadge');
+  const weekDateRange = document.getElementById('weekDateRange');
+  const planningDate = document.getElementById('planningDate');
+  const statusChip = document.getElementById('statusChip');
+  
+  weekBadge.textContent = week.id;
+  
+  // Format date range
+  const start = new Date(week.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  const end = new Date(week.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  weekDateRange.textContent = `${start} - ${end}`;
+  
+  const planningDateFormatted = new Date(week.planningDate).toLocaleDateString('en-GB', { 
+    weekday: 'short', day: '2-digit', month: 'short' 
+  });
+  planningDate.textContent = planningDateFormatted;
+  
+  // Status chip styling
+  const status = planSnapshot?.status || week.status || 'Draft';
+  statusChip.textContent = status;
+  
+  switch (status.toLowerCase()) {
+    case 'draft':
+      statusChip.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-700';
+      break;
+    case 'monitoring':
+      statusChip.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700';
+      break;
+    case 'published':
+      statusChip.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700';
+      break;
+    default:
+      statusChip.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-700';
+  }
+}
+
+function funRenderCapacityCard(capacity, allocationStats) {
+  const totalCapacityEl = document.getElementById('totalCapacity');
+  const zeroCapacityWarning = document.getElementById('zeroCapacityWarning');
+  const clientTarget = document.getElementById('clientTarget');
+  const techDebtTarget = document.getElementById('techDebtTarget');
+  const rndTarget = document.getElementById('rndTarget');
+  const clientProgress = document.getElementById('clientProgress');
+  const techDebtProgress = document.getElementById('techDebtProgress');
+  const rndProgress = document.getElementById('rndProgress');
+  
+  totalCapacityEl.textContent = `${capacity.weeklyTotal}`;
+  
+  if (capacity.zeroCapacity) {
+    zeroCapacityWarning.classList.remove('hidden');
+  }
+  
+  // Set targets
+  clientTarget.textContent = `${capacity.targets.client} hrs`;
+  techDebtTarget.textContent = `${capacity.targets.techDebt} hrs`;
+  rndTarget.textContent = `${capacity.targets.rnd} hrs`;
+  
+  // Calculate progress percentages
+  const clientAllocated = allocationStats.byCategory.client || 0;
+  const techDebtAllocated = allocationStats.byCategory.techDebt || 0;
+  const rndAllocated = allocationStats.byCategory.rnd || 0;
+  
+  const clientPercent = capacity.targets.client > 0 ? Math.min(100, (clientAllocated / capacity.targets.client) * 100) : 0;
+  const techDebtPercent = capacity.targets.techDebt > 0 ? Math.min(100, (techDebtAllocated / capacity.targets.techDebt) * 100) : 0;
+  const rndPercent = capacity.targets.rnd > 0 ? Math.min(100, (rndAllocated / capacity.targets.rnd) * 100) : 0;
+  
+  clientProgress.style.width = `${clientPercent}%`;
+  techDebtProgress.style.width = `${techDebtPercent}%`;
+  rndProgress.style.width = `${rndPercent}%`;
+}
+
+function funRenderAllocationCard(capacity, allocationStats) {
+  const totalAllocatedEl = document.getElementById('totalAllocated');
+  const allocationCapacityEl = document.getElementById('allocationCapacity');
+  const overAllocationWarning = document.getElementById('overAllocationWarning');
+  const overAllocationAmount = document.getElementById('overAllocationAmount');
+  const allocationPercentage = document.getElementById('allocationPercentage');
+  const allocationProgress = document.getElementById('allocationProgress');
+  const readinessIndicator = document.getElementById('readinessIndicator');
+  const readinessIcon = document.getElementById('readinessIcon');
+  const readinessText = document.getElementById('readinessText');
+  const readinessSubtext = document.getElementById('readinessSubtext');
+  const noAssignmentsState = document.getElementById('noAssignmentsState');
+  
+  const totalAllocated = allocationStats.totalAllocated || 0;
+  const availableCapacity = capacity.weeklyTotal;
+  
+  totalAllocatedEl.textContent = totalAllocated.toString();
+  allocationCapacityEl.textContent = availableCapacity.toString();
+  
+  // Over-allocation warning
+  if (totalAllocated > availableCapacity) {
+    overAllocationWarning.classList.remove('hidden');
+    overAllocationAmount.textContent = (totalAllocated - availableCapacity).toString();
+  } else {
+    overAllocationWarning.classList.add('hidden');
+  }
+  
+  // Allocation percentage
+  const percentage = availableCapacity > 0 ? Math.min(100, (totalAllocated / availableCapacity) * 100) : 0;
+  allocationPercentage.textContent = `${Math.round(percentage)}%`;
+  allocationProgress.style.width = `${Math.min(100, percentage)}%`;
+  
+  // Readiness calculation
+  const clientMet = (allocationStats.byCategory.client || 0) >= capacity.targets.client;
+  const techDebtMet = (allocationStats.byCategory.techDebt || 0) >= capacity.targets.techDebt;
+  const rndMet = (allocationStats.byCategory.rnd || 0) >= capacity.targets.rnd;
+  const allTargetsMet = clientMet && techDebtMet && rndMet;
+  
+  if (totalAllocated === 0) {
+    noAssignmentsState.classList.remove('hidden');
+    readinessIndicator.style.display = 'none';
+  } else {
+    noAssignmentsState.classList.add('hidden');
+    readinessIndicator.style.display = 'block';
+    
+    if (capacity.zeroCapacity) {
+      readinessIndicator.className = 'p-3 rounded-lg border border-gray-300 bg-gray-50 text-center';
+      readinessIcon.innerHTML = '<i data-lucide="minus-circle" class="w-5 h-5 text-gray-500"></i>';
+      readinessText.textContent = 'No Capacity';
+      readinessSubtext.textContent = 'Zero available hours this week';
+    } else if (allTargetsMet) {
+      readinessIndicator.className = 'p-3 rounded-lg border border-green-300 bg-green-50 text-center';
+      readinessIcon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>';
+      readinessText.textContent = 'Ready for Planning';
+      readinessText.className = 'font-semibold text-green-800';
+      readinessSubtext.textContent = 'All category targets met';
+    } else {
+      readinessIndicator.className = 'p-3 rounded-lg border border-amber-300 bg-amber-50 text-center';
+      readinessIcon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5 text-amber-600"></i>';
+      readinessText.textContent = 'Needs More Allocation';
+      readinessText.className = 'font-semibold text-amber-800';
+      readinessSubtext.textContent = 'Some targets not yet met';
+    }
+  }
+  
+  // Update icons
+  lucide.createIcons();
+}
+
+function funRenderAssignmentsList(assignments, loggedHours) {
+  const assignmentsList = document.getElementById('assignmentsList');
+  const assignmentCount = document.getElementById('assignmentCount');
+  
+  if (!assignments || assignments.length === 0) {
+    assignmentsList.innerHTML = `
+      <div class="p-8 text-center text-gray-500">
+        <i data-lucide="calendar-x" class="w-8 h-8 mx-auto mb-3 opacity-50"></i>
+        <div class="text-sm">No assignments for this week</div>
+      </div>
+    `;
+    assignmentCount.textContent = '0 assignments';
+    lucide.createIcons();
+    return;
+  }
+  
+  // Group by classification
+  const groupedAssignments = assignments.reduce((groups, assignment) => {
+    const classification = assignment.activity?.classification || 'other';
+    if (!groups[classification]) groups[classification] = [];
+    groups[classification].push(assignment);
+    return groups;
+  }, {});
+  
+  const classificationOrder = ['client-focused', 'tech-debt', 'R&D'];
+  const classificationLabels = {
+    'client-focused': 'Client-focused',
+    'tech-debt': 'Tech Debt', 
+    'R&D': 'R&D'
+  };
+  const classificationColors = {
+    'client-focused': 'bg-primary/10 text-primary border-primary/20',
+    'tech-debt': 'bg-secondary/10 text-secondary border-secondary/20',
+    'R&D': 'bg-accent/10 text-accent border-accent/20'
+  };
+  
+  let html = '';
+  
+  classificationOrder.forEach(classification => {
+    if (groupedAssignments[classification]) {
+      html += `
+        <div class="p-4">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="px-2 py-1 rounded text-xs font-semibold border ${classificationColors[classification]}">
+              ${classificationLabels[classification]}
+            </div>
+            <div class="text-sm text-gray-500">${groupedAssignments[classification].length} assignments</div>
+          </div>
+          <div class="space-y-3">
+      `;
+      
+      groupedAssignments[classification].forEach(assignment => {
+        const logged = loggedHours[assignment.id] || 0;
+        const remaining = Math.max(0, assignment.segments - logged);
+        const isPublished = dashboardData?.planSnapshot?.status === 'Published';
+        
+        html += funRenderAssignmentItem(assignment, logged, remaining, isPublished);
+      });
+      
+      html += `
+          </div>
+        </div>
+      `;
+    }
+  });
+  
+  assignmentsList.innerHTML = html;
+  assignmentCount.textContent = `${assignments.length} assignments`;
+  
+  lucide.createIcons();
+}
+
+function funRenderAssignmentItem(assignment, logged, remaining, isPublished) {
+  const statusColors = {
+    'planned': 'bg-gray-100 text-gray-700',
+    'in-progress': 'bg-blue-100 text-blue-700',
+    'completed': 'bg-green-100 text-green-700',
+    'cancelled': 'bg-red-100 text-red-700'
+  };
+  
+  const statusClass = statusColors[assignment.status?.toLowerCase()] || statusColors['planned'];
+  const progressPercent = assignment.segments > 0 ? (logged / assignment.segments) * 100 : 0;
+  
+  return `
+    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+      <div class="flex-1">
+        <div class="flex items-start justify-between mb-2">
+          <h4 class="font-medium text-gray-900 flex-1 mr-4">${assignment.activity?.title || 'Unknown Activity'}</h4>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="px-2 py-1 text-xs font-medium rounded ${statusClass}">
+              ${assignment.status || 'Planned'}
+            </span>
+            ${remaining > 0 && isPublished ? `
+              <button class="log-time-btn px-3 py-1 text-xs bg-primary text-white rounded hover:bg-primary/90 transition-colors" 
+                      data-assignment-id="${assignment.id}">
+                <i data-lucide="plus" class="w-3 h-3 mr-1"></i>
+                Log Time
+              </button>
+            ` : ''}
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-4 text-sm text-gray-600">
+          <div class="flex items-center gap-1">
+            <span class="font-medium">${assignment.segments}</span>
+            <span>segments assigned</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="font-medium text-green-600">${logged}</span>
+            <span>logged</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="font-medium text-blue-600">${remaining}</span>
+            <span>remaining</span>
+          </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="mt-3">
+          <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+            <span>Progress</span>
+            <span>${Math.round(progressPercent)}%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-1.5">
+            <div class="bg-primary rounded-full h-1.5 transition-all duration-300" style="width: ${Math.min(100, progressPercent)}%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function funCheckForAlerts(data) {
+  const alertBanners = document.getElementById('alertBanners');
+  let alerts = [];
+  
+  // Plan published alert
+  if (data.planSnapshot?.status === 'Published') {
+    alerts.push({
+      type: 'info',
+      message: 'Plan has been published for this week.',
+      action: {
+        text: 'View Snapshot',
+        href: `plan_snapshot.html?week_id=${weekId}`
+      }
+    });
+  }
+  
+  // Over-allocation alert
+  if (data.allocationStats.totalAllocated > data.capacity.weeklyTotal) {
+    const overAmount = data.allocationStats.totalAllocated - data.capacity.weeklyTotal;
+    alerts.push({
+      type: 'warning',
+      message: `You are over-allocated by ${overAmount} hours. Consider adjusting your assignments.`,
+      action: {
+        text: 'Manage Assignments',
+        href: `assignments.html?week_id=${weekId}`
+      }
+    });
+  }
+  
+  alertBanners.innerHTML = alerts.map(alert => `
+    <div class="p-4 rounded-lg border ${alert.type === 'info' ? 'bg-blue-50 border-blue-200' : 'bg-amber-50 border-amber-200'}">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="${alert.type === 'info' ? 'info' : 'alert-triangle'}" 
+             class="w-5 h-5 ${alert.type === 'info' ? 'text-blue-600' : 'text-amber-600'}"></i>
+          <span class="text-sm ${alert.type === 'info' ? 'text-blue-800' : 'text-amber-800'}">${alert.message}</span>
+        </div>
+        ${alert.action ? `
+          <a href="${alert.action.href}" 
+             class="text-sm font-medium ${alert.type === 'info' ? 'text-blue-600 hover:text-blue-800' : 'text-amber-600 hover:text-amber-800'} transition-colors">
+            ${alert.action.text}
+          </a>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
+  
+  lucide.createIcons();
+}
+
+// Log Time Drawer Functions
+function funOpenLogTimeDrawer(assignmentId) {
+  const assignment = dashboardData.assignments.find(a => a.id === assignmentId);
+  if (!assignment) return;
+  
+  currentAssignmentForLog = assignment;
+  const logged = dashboardData.loggedHours[assignmentId] || 0;
+  const remaining = Math.max(0, assignment.segments - logged);
+  
+  const logTimeContent = document.getElementById('logTimeContent');
+  logTimeContent.innerHTML = `
+    <div class="space-y-6">
+      <!-- Assignment Summary -->
+      <div class="p-4 bg-gray-50 rounded-lg">
+        <h4 class="font-medium text-gray-900 mb-2">${assignment.activity?.title}</h4>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div class="text-gray-600">Segments Assigned</div>
+            <div class="font-semibold">${assignment.segments}</div>
+          </div>
+          <div>
+            <div class="text-gray-600">Already Logged</div>
+            <div class="font-semibold text-green-600">${logged} hours</div>
+          </div>
+          <div>
+            <div class="text-gray-600">Remaining</div>
+            <div class="font-semibold text-blue-600">${remaining} hours</div>
+          </div>
+          <div>
+            <div class="text-gray-600">Classification</div>
+            <div class="font-semibold">${assignment.activity?.classification || 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Log Form -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Hours to Log</label>
+          <div class="p-3 bg-gray-50 rounded-lg text-center">
+            <span class="text-2xl font-bold text-primary">1 hour</span>
+            <div class="text-sm text-gray-600">Fixed increment</div>
+          </div>
+        </div>
+        
+        <div>
+          <label for="statusTransition" class="block text-sm font-medium text-gray-700 mb-2">Status Transition (Optional)</label>
+          <select id="statusTransition" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+            <option value="">No status change</option>
+            <option value="Not Started→In Progress">Not Started → In Progress</option>
+            <option value="In Progress→Completed">In Progress → Completed</option>
+            <option value="Planned→In Progress">Planned → In Progress</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="logNote" class="block text-sm font-medium text-gray-700 mb-2">Note (Optional)</label>
+          <textarea id="logNote" 
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    rows="3"
+                    placeholder="Add a note about your progress..."></textarea>
+        </div>
+      </div>
+      
+      ${remaining <= 0 ? `
+        <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div class="flex items-center gap-2 text-amber-800">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            <span class="text-sm font-medium">Cannot log more hours</span>
+          </div>
+          <div class="text-sm text-amber-700 mt-1">
+            You have already logged all assigned segments for this activity.
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+  
+  // Enable/disable submit button
+  const submitBtn = document.getElementById('submitLogTime');
+  submitBtn.disabled = remaining <= 0;
+  if (remaining <= 0) {
+    submitBtn.className = 'px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium';
+  } else {
+    submitBtn.className = 'px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium';
+  }
+  
+  // Show drawer
+  const drawer = document.getElementById('logTimeDrawer');
+  const overlay = document.getElementById('drawerOverlay');
+  
+  drawer.classList.remove('translate-x-full');
+  overlay.classList.remove('hidden');
+  
+  lucide.createIcons();
+  
+  // Focus first input
+  setTimeout(() => {
+    const statusSelect = document.getElementById('statusTransition');
+    if (statusSelect) statusSelect.focus();
+  }, 300);
+}
+
+function funCloseLogTimeDrawer() {
+  const drawer = document.getElementById('logTimeDrawer');
+  const overlay = document.getElementById('drawerOverlay');
+  
+  drawer.classList.add('translate-x-full');
+  overlay.classList.add('hidden');
+  
+  currentAssignmentForLog = null;
+}
+
+async function funSubmitLogTime() {
+  if (!currentAssignmentForLog) return;
+  
+  const statusTransition = document.getElementById('statusTransition').value;
+  const note = document.getElementById('logNote').value.trim();
+  const submitBtn = document.getElementById('submitLogTime');
+  
+  // Disable button and show loading
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Logging...';
+  
+  try {
+    // Call page-logic method to log progress
+    // Expected parameters: { assignmentId, weekId, userId, hours: 1, statusTransition, note }
+    // Expected return: { success: boolean, progressLog: object }
+    const result = await logProgressTime({
+      assignmentId: currentAssignmentForLog.id,
+      weekId: weekId,
+      userId: currentUser.id,
+      hours: 1,
+      statusTransition: statusTransition || null,
+      note: note || null
+    });
+    
+    if (result.success) {
+      // Update assignment status if transition was made
+      if (statusTransition) {
+        const newStatus = statusTransition.includes('→Completed') ? 'completed' : 'in-progress';
+        await updateAssignmentStatus(currentAssignmentForLog.id, newStatus);
+      }
+      
+      funShowSuccess('Time logged successfully!');
+      funCloseLogTimeDrawer();
+      
+      // Refresh dashboard
+      await funInitializeDashboard();
+    } else {
+      funShowError('Failed to log time. Please try again.');
+    }
+    
+  } catch (error) {
+    console.error('Error logging time:', error);
+    funShowError('An error occurred while logging time.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Log 1 Hour';
+  }
+}
+
+// Event Listeners
+document.addEventListener('click', (e) => {
+  // Log time button clicks
+  if (e.target.closest('.log-time-btn')) {
+    e.preventDefault();
+    const btn = e.target.closest('.log-time-btn');
+    const assignmentId = btn.getAttribute('data-assignment-id');
+    if (assignmentId) {
+      funOpenLogTimeDrawer(assignmentId);
+    }
+  }
+});
+
+// Drawer controls
+document.getElementById('closeLogDrawer')?.addEventListener('click', funCloseLogTimeDrawer);
+document.getElementById('cancelLogTime')?.addEventListener('click', funCloseLogTimeDrawer);
+document.getElementById('submitLogTime')?.addEventListener('click', funSubmitLogTime);
+document.getElementById('drawerOverlay')?.addEventListener('click', funCloseLogTimeDrawer);
+
+// Filter assignments
+document.getElementById('assignmentFilter')?.addEventListener('change', (e) => {
+  const filter = e.target.value;
+  const assignments = document.querySelectorAll('#assignmentsList [data-assignment-id]');
+  
+  assignments.forEach(assignment => {
+    const status = assignment.querySelector('.px-2').textContent.toLowerCase().replace(' ', '-');
+    if (filter === 'all' || status === filter) {
+      assignment.style.display = '';
+    } else {
+      assignment.style.display = 'none';
+    }
+  });
+});
+
+// Week switcher (placeholder - would integrate with week switcher component)
+document.getElementById('weekSwitcherBtn')?.addEventListener('click', () => {
+  // This would open a week switcher modal/dropdown
+  alert('Week switcher would open here');
+});
+
+// Capacity tooltip
+const capacityTipBtn = document.getElementById('capacityTipBtn');
+const capacityTooltip = document.getElementById('capacityTooltip');
+
+capacityTipBtn?.addEventListener('mouseenter', (e) => {
+  const rect = e.target.getBoundingClientRect();
+  capacityTooltip.style.left = rect.left - 150 + 'px';
+  capacityTooltip.style.top = rect.bottom + 10 + 'px';
+  capacityTooltip.classList.remove('hidden');
+});
+
+capacityTipBtn?.addEventListener('mouseleave', () => {
+  capacityTooltip.classList.add('hidden');
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!document.getElementById('logTimeDrawer').classList.contains('translate-x-full')) {
+      funCloseLogTimeDrawer();
+    }
+  }
+  
+  // Plus key to add hour to focused assignment (if published)
+  if (e.key === '+' && dashboardData?.planSnapshot?.status === 'Published') {
+    const focusedAssignment = document.activeElement.closest('[data-assignment-id]');
+    if (focusedAssignment) {
+      const assignmentId = focusedAssignment.getAttribute('data-assignment-id');
+      funOpenLogTimeDrawer(assignmentId);
+    }
+  }
+});
+
+// Utility functions
+function funShowSuccess(message) {
+  // Simple toast - in a real app this would be a proper toast component
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+function funShowError(message) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 5000);
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', funInitializeDashboard);
+
+// Re-initialize icons after dynamic content
+const observer = new MutationObserver(() => {
+  lucide.createIcons();
+});
+
+observer.observe(document.getElementById('assignmentsList'), {
+  childList: true,
+  subtree: true
+});
+</script></body></html>

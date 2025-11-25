@@ -1,0 +1,1467 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Planning Lead Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 1rem;
+            --text-display-sm--line-height: 1.5rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        .focus-visible:focus-visible {
+            outline: 2px solid theme('colors.primary');
+            outline-offset: 2px;
+        }
+
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: theme('colors.slate.500');
+            margin-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-group-header:first-child {
+            margin-top: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: theme('radius.md');
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: theme('colors.slate.700');
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: theme('colors.slate.100');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active {
+            background-color: theme('colors.primary/10');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: theme('colors.primary');
+            border-radius: 0 2px 2px 0;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: white;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-slate-800">
+
+    <!-- Skip to main content -->
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+
+    <!-- Top Header -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b border-slate-200 sticky top-0 z-30">
+        <div class="flex items-center gap-4">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 focus-visible" aria-label="Open navigation menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                        <!-- Palette: navy (#0B63A7) and teal (#00A99D) -->
+                        <!-- Rounded calendar outline -->
+                        <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                        <!-- Day cells (3x2 grid) -->
+                        <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                            <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        </g>
+                        <!-- Asynchronous loop (teal) wrapping the calendar -->
+                        <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22"></path>
+                            <circle cx="300" cy="245" r="8"></circle>
+                            <circle cx="280" cy="200" r="8"></circle>
+                            <circle cx="270" cy="150" r="8"></circle>
+                            <path d="M260 100 L246 116 L274 116 Z"></path>
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="text-display-md leading-display-md font-bold text-primary">Planning Lead Console</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <!-- User Profile Button -->
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors focus-visible" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-medium text-slate-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-slate-200 rounded-xl shadow-lg p-4 w-64 z-50 hidden" role="dialog" aria-labelledby="userProfileTitle">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-slate-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-slate-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors focus-visible">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Desktop Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r border-slate-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-6" role="navigation" aria-label="Main navigation" id="sideNav">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        
+        <!-- Mobile Sidebar -->
+        <aside id="mobileSidebar" class="mobile-sidebar md:hidden">
+            <nav class="p-6" role="navigation" aria-label="Main navigation">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Backlog Prioritization - Planning Lead Console</title>
+<style>
+.drag-handle {
+    cursor: grab;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+.drag-handle:hover {
+    opacity: 1;
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    z-index: 1000;
+}
+.drop-zone {
+    border: 2px dashed #D4AF37;
+    background-color: rgba(212, 175, 55, 0.05);
+}
+.priority-badge {
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+.save-bar {
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+.save-bar.visible {
+    transform: translateY(0);
+}
+</style>
+</head_content_code>
+
+<html_content_code>
+<div class="space-y-6">
+    <!-- Header with breadcrumb -->
+    <div class="flex items-center justify-between">
+        <nav aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2 text-sm text-slate-500">
+                <li>
+                    <a href="planning_week_overview.html" class="hover:text-primary">Overview</a>
+                </li>
+                <li>/</li>
+                <li class="text-slate-900 font-medium">Backlog Prioritization</li>
+            </ol>
+        </nav>
+        
+        <!-- Actions -->
+        <div class="flex items-center space-x-3">
+            <button id="showDeletedToggle" class="text-sm px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                <i data-lucide="eye-off" class="w-4 h-4 inline mr-2"></i>
+                Show Deleted
+            </button>
+            <div class="relative">
+                <button id="overflowMenuBtn" class="p-2 rounded-lg hover:bg-slate-100 transition-colors" aria-label="More actions" aria-expanded="false">
+                    <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                </button>
+                <div id="overflowMenu" class="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-50 hidden">
+                    <button id="importJsonBtn" class="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-50 rounded-lg text-sm">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        Import JSON
+                    </button>
+                    <button id="exportJsonBtn" class="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-50 rounded-lg text-sm">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Export JSON
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Title and Description -->
+    <div>
+        <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-slate-900 mb-2">Backlog Prioritization</h1>
+        <p class="text-sm leading-[1.375rem] text-slate-600">Drag and drop activities to set priority order within each classification. Changes are versioned and auditable.</p>
+    </div>
+
+    <!-- Empty State (hidden by default) -->
+    <div id="emptyState" class="hidden text-center py-16">
+        <div class="max-w-md mx-auto">
+            <i data-lucide="inbox" class="w-16 h-16 mx-auto text-slate-300 mb-4"></i>
+            <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900 mb-2">No Activities Yet</h3>
+            <p class="text-sm text-slate-600 mb-6">Get started by creating activities or importing existing data.</p>
+            <div class="flex justify-center space-x-3">
+                <a href="#" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                    Go to Team Member App
+                </a>
+                <button id="importJsonEmptyBtn" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+                    Import JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Classification Columns -->
+    <div id="columnsContainer" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Client-Focused Column -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Client-Focused</h2>
+                        <button class="text-slate-400 hover:text-slate-600" title="50% of capacity allocation" aria-label="Learn about client-focused classification">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <span id="clientCount" class="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded">0 items</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-2">~50% capacity allocation • Direct customer impact</p>
+            </div>
+            <div id="clientFocusedList" class="min-h-[400px] p-4 space-y-3" data-classification="client-focused">
+                <!-- Activity cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Tech-Debt Column -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Tech Debt</h2>
+                        <button class="text-slate-400 hover:text-slate-600" title="25% of capacity allocation" aria-label="Learn about tech debt classification">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <span id="techDebtCount" class="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded">0 items</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-2">~25% capacity allocation • System maintenance &amp; improvements</p>
+            </div>
+            <div id="techDebtList" class="min-h-[400px] p-4 space-y-3" data-classification="tech-debt">
+                <!-- Activity cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- R&D Column -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">R&amp;D</h2>
+                        <button class="text-slate-400 hover:text-slate-600" title="25% of capacity allocation" aria-label="Learn about R&amp;D classification">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <span id="rndCount" class="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded">0 items</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-2">~25% capacity allocation • Innovation &amp; experimentation</p>
+            </div>
+            <div id="rndList" class="min-h-[400px] p-4 space-y-3" data-classification="R&amp;D">
+                <!-- Activity cards will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Bar -->
+    <div id="saveBar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 save-bar shadow-lg">
+        <div class="max-w-screen-xl mx-auto flex items-center justify-between">
+            <div class="text-sm text-slate-600">
+                <span id="changesSummary">Unsaved changes detected</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="revertBtn" class="px-4 py-2 text-slate-600 hover:text-slate-800 text-sm">
+                    Revert to Previous Version
+                </button>
+                <button id="discardBtn" class="px-4 py-2 text-slate-600 hover:text-slate-800 text-sm">
+                    Discard
+                </button>
+                <button id="saveBtn" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Version Conflict Modal -->
+<div id="versionConflictModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden" role="dialog" aria-labelledby="conflictModalTitle" aria-describedby="conflictModalDesc">
+    <div class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+            <h3 id="conflictModalTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Version Conflict Detected</h3>
+            <button id="closeConflictModal" class="text-slate-400 hover:text-slate-600" aria-label="Close modal">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <p id="conflictModalDesc" class="text-sm text-slate-600 mb-6">
+            The priority list has been updated by another user. Review the differences below and refresh to see the latest version.
+        </p>
+        
+        <div id="conflictDetails" class="space-y-4 mb-6">
+            <!-- Conflict details will be inserted here -->
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <button id="cancelConflictBtn" class="px-4 py-2 text-slate-600 hover:text-slate-800 text-sm">
+                Cancel
+            </button>
+            <button id="refreshConflictBtn" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm">
+                Refresh &amp; Reload
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden file input for JSON import -->
+<input type="file" id="jsonImportInput" accept="application/json" class="hidden">
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'PLC__';
+
+        // Mobile navigation toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = sidebar.classList.contains('open');
+                
+                btn.setAttribute('aria-expanded', String(!isOpen));
+                
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.focus();
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // Navigation active state management
+        function updateActiveNavItem() {
+            const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                               window.location.pathname.split('/').pop() || 
+                               'planning_week_overview.html';
+            
+            // Update both desktop and mobile nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const itemPage = item.getAttribute('data-page') || item.getAttribute('href');
+                if (itemPage === currentPage) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'page');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Update active state on page load and when navigation changes
+        updateActiveNavItem();
+        window.addEventListener('popstate', updateActiveNavItem);
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-alice');
+                    currentUserId = 'u-alice';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users_' + currentUserId);
+                try { 
+                    if (userData) return JSON.parse(userData);
+                    
+                    // Fallback to dummy data from localStorage if available
+                    const usersData = localStorage.getItem('plc::users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        if (user) return user;
+                    }
+                    
+                    // Final fallback
+                    return {
+                        id: 'u-alice',
+                        firstName: 'Alice',
+                        lastName: 'Nguyen',
+                        role: 'PLANNING_LEAD',
+                        email: 'alice.nguyen@example.local'
+                    };
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            const initials = UserUtils.getUserInitials(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverUserAvatar) popoverUserAvatar.textContent = initials;
+            if (popoverUserName) popoverUserName.textContent = displayName;
+            if (popoverUserEmail) popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover management
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popoverVisible = !popoverVisible;
+                
+                if (popoverVisible) {
+                    popover.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first interactive element in popover
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                } else {
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Sign out handler
+            const signOutBtn = document.getElementById('signOutButton');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        UserUtils.signOut();
+                    }
+                });
+            }
+        }());
+
+        // Import/Export functionality (namespaced)
+        document.getElementById('exportAppData')?.addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith(APP_PREFIX) || key.startsWith('plc::'))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "planning_console_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData')?.addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile')?.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX) || key.startsWith('plc::')) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        alert(`✅ Successfully imported ${importedCount} data items. Please refresh the page to see changes.`);
+                    } else {
+                        alert('⚠️ No compatible data found in the file.');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    alert('❌ Failed to import: Invalid JSON format or corrupted file.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions handler
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (error) {
+                    console.error(`Error executing action ${action}:`, error);
+                    el.setAttribute('disabled', 'true');
+                    el.setAttribute('title', 'Action failed');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Action not available');
+                console.warn(`Action ${action} not found in window.AppActions`);
+            }
+        });
+
+        // Toast notification helper
+        window.showToast = function(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-opacity duration-300 ${
+                type === 'success' ? 'bg-secondary' : 
+                type === 'error' ? 'bg-error' : 
+                'bg-slate-600'
+            }`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        };
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+    // Import methods from page-logic.js for data handling
+    // Method: getBacklogData(weekId) 
+    // Returns: { activities: Activity[], priorities: { [classification]: ActivityPriority }, overrideRequests: OverrideRequest[], currentWeek: WeekCalendar }
+    // Collections used: activities, activityPriorities, overrideRequests, weekCalendar
+    
+    // Method: updatePriorityList(weekId, classification, priorityList, version)
+    // Parameters: weekId: string, classification: string, priorityList: {activityId: string, rank: number}[], version: number
+    // Returns: { success: boolean, newVersion?: number, error?: string }
+    // Collections used: activityPriorities, auditEvents
+    
+    // Method: revertPriorityList(weekId, classification, toVersion)
+    // Returns: { success: boolean, priorityList?: {activityId: string, rank: number}[], error?: string }
+    // Collections used: activityPriorities
+    
+    // Method: exportBacklogData(weekId)
+    // Returns: JSON string of complete backlog data for the week
+    // Collections used: activities, activityPriorities, overrideRequests
+    
+    // Method: importBacklogData(jsonData)
+    // Parameters: jsonData: parsed JSON object
+    // Returns: { success: boolean, imported?: number, errors?: string[] }
+    // Collections used: activities, activityPriorities
+
+    let currentWeekId = null;
+    let backlogData = null;
+    let hasUnsavedChanges = false;
+    let showDeleted = false;
+    let draggedElement = null;
+
+    // Initialize page
+    async function funInitializePage() {
+        try {
+            // Get current week and backlog data
+            currentWeekId = funGetCurrentWeekId();
+            await funLoadBacklogData();
+            funSetupEventListeners();
+            funRenderBacklog();
+        } catch (error) {
+            console.error('Failed to initialize backlog prioritization page:', error);
+            funShowError('Failed to load backlog data');
+        }
+    }
+
+    // Get current week ID (simplified for demo)
+    function funGetCurrentWeekId() {
+        // In real implementation, this would get the current week from weekService
+        return '2025-W47';
+    }
+
+    // Load backlog data via page-logic.js
+    async function funLoadBacklogData() {
+        try {
+            // This would call page-logic.js method to get backlog data
+            // For now, we'll read from localStorage directly
+            const activities = JSON.parse(localStorage.getItem('plc::activities') || '[]');
+            const activityPriorities = JSON.parse(localStorage.getItem('plc::activityPriorities') || '[]');
+            const overrideRequests = JSON.parse(localStorage.getItem('plc::overrideRequests') || '[]');
+            const weekCalendar = JSON.parse(localStorage.getItem('plc::weekCalendar') || '[]');
+            
+            const currentWeek = weekCalendar.find(w => w.id === currentWeekId);
+            const weekPriorities = activityPriorities.filter(ap => ap.weekId === currentWeekId);
+            const weekOverrides = overrideRequests.filter(or => 
+                activities.some(a => a.id === or.activityId) && or.status === 'PENDING'
+            );
+
+            backlogData = {
+                activities: activities.filter(a => !a.deletedAt || showDeleted),
+                priorities: {},
+                overrideRequests: weekOverrides,
+                currentWeek: currentWeek
+            };
+
+            // Organize priorities by classification
+            weekPriorities.forEach(wp => {
+                backlogData.priorities[wp.classification] = wp;
+            });
+
+        } catch (error) {
+            console.error('Error loading backlog data:', error);
+            throw error;
+        }
+    }
+
+    // Setup event listeners
+    function funSetupEventListeners() {
+        // Show deleted toggle
+        document.getElementById('showDeletedToggle').addEventListener('click', funToggleShowDeleted);
+
+        // Overflow menu
+        const overflowBtn = document.getElementById('overflowMenuBtn');
+        const overflowMenu = document.getElementById('overflowMenu');
+        
+        overflowBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = !overflowMenu.classList.contains('hidden');
+            overflowMenu.classList.toggle('hidden', isOpen);
+            overflowBtn.setAttribute('aria-expanded', String(!isOpen));
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!overflowMenu.contains(e.target) && !overflowBtn.contains(e.target)) {
+                overflowMenu.classList.add('hidden');
+                overflowBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Import/Export buttons
+        document.getElementById('importJsonBtn').addEventListener('click', funTriggerJsonImport);
+        document.getElementById('importJsonEmptyBtn')?.addEventListener('click', funTriggerJsonImport);
+        document.getElementById('exportJsonBtn').addEventListener('click', funExportBacklogJson);
+
+        // Save bar buttons
+        document.getElementById('saveBtn').addEventListener('click', funSaveChanges);
+        document.getElementById('discardBtn').addEventListener('click', funDiscardChanges);
+        document.getElementById('revertBtn').addEventListener('click', funShowRevertOptions);
+
+        // Version conflict modal
+        document.getElementById('closeConflictModal').addEventListener('click', funCloseConflictModal);
+        document.getElementById('cancelConflictBtn').addEventListener('click', funCloseConflictModal);
+        document.getElementById('refreshConflictBtn').addEventListener('click', funRefreshAndReload);
+
+        // JSON import file input
+        document.getElementById('jsonImportInput').addEventListener('change', funHandleJsonImport);
+    }
+
+    // Render backlog activities in columns
+    function funRenderBacklog() {
+        if (!backlogData || !backlogData.activities.length) {
+            funShowEmptyState();
+            return;
+        }
+
+        funHideEmptyState();
+
+        const classifications = ['client-focused', 'tech-debt', 'R&D'];
+        
+        classifications.forEach(classification => {
+            const container = document.getElementById(funGetContainerIdForClassification(classification));
+            const countSpan = document.getElementById(funGetCountIdForClassification(classification));
+            
+            if (!container || !countSpan) return;
+
+            // Get activities for this classification
+            const activitiesInClass = funGetActivitiesForClassification(classification);
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            // Update count
+            countSpan.textContent = `${activitiesInClass.length} item${activitiesInClass.length !== 1 ? 's' : ''}`;
+            
+            // Render activity cards
+            activitiesInClass.forEach((activity, index) => {
+                const card = funCreateActivityCard(activity, index + 1);
+                container.appendChild(card);
+            });
+
+            // Make sortable
+            funMakeSortable(container);
+        });
+    }
+
+    // Get activities for a specific classification in priority order
+    function funGetActivitiesForClassification(classification) {
+        const priorityData = backlogData.priorities[classification];
+        const activitiesInClass = backlogData.activities.filter(a => a.classification === classification);
+        
+        if (!priorityData || !priorityData.priorityList) {
+            return activitiesInClass.sort((a, b) => a.priorityRank - b.priorityRank);
+        }
+
+        // Sort by priority list order
+        const orderedActivities = [];
+        const priorityMap = new Map();
+        
+        priorityData.priorityList.forEach((p, index) => {
+            priorityMap.set(p.activityId, index);
+        });
+        
+        activitiesInClass.forEach(activity => {
+            const priorityIndex = priorityMap.get(activity.id);
+            activity._priorityIndex = priorityIndex !== undefined ? priorityIndex : 999;
+        });
+        
+        return activitiesInClass.sort((a, b) => a._priorityIndex - b._priorityIndex);
+    }
+
+    // Create activity card element
+    function funCreateActivityCard(activity, rank) {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 border border-slate-200 rounded-lg p-4 hover:border-slate-300 transition-colors';
+        card.draggable = true;
+        card.setAttribute('data-activity-id', activity.id);
+
+        const hasOverrideRequest = backlogData.overrideRequests.some(or => or.activityId === activity.id);
+        
+        card.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="drag-handle mt-1 cursor-grab" aria-label="Drag to reorder">
+                    <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-2">
+                        <h3 class="text-sm font-medium text-slate-900 truncate">${activity.title}</h3>
+                        <span class="priority-badge bg-primary text-white">P${rank}</span>
+                    </div>
+                    <p class="text-xs text-slate-600 line-clamp-2 mb-3">${activity.description}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-1 bg-slate-200 text-slate-700 rounded">${activity.status}</span>
+                            ${hasOverrideRequest ? '<span class="text-xs px-2 py-1 bg-accent text-white rounded cursor-pointer" onclick="funNavigateToApprovals()">Override Requested</span>' : ''}
+                        </div>
+                        <span class="text-xs text-slate-500">by ${funGetCreatorName(activity.createdBy)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add drag event listeners
+        card.addEventListener('dragstart', funHandleDragStart);
+        card.addEventListener('dragend', funHandleDragEnd);
+
+        return card;
+    }
+
+    // Get creator name from user ID
+    function funGetCreatorName(userId) {
+        try {
+            const users = JSON.parse(localStorage.getItem('plc::users') || '[]');
+            const user = users.find(u => u.id === userId);
+            return user ? `${user.firstName} ${user.lastName}` : 'Unknown';
+        } catch {
+            return 'Unknown';
+        }
+    }
+
+    // Get container ID for classification
+    function funGetContainerIdForClassification(classification) {
+        switch (classification) {
+            case 'client-focused': return 'clientFocusedList';
+            case 'tech-debt': return 'techDebtList';
+            case 'R&D': return 'rndList';
+            default: return null;
+        }
+    }
+
+    // Get count span ID for classification
+    function funGetCountIdForClassification(classification) {
+        switch (classification) {
+            case 'client-focused': return 'clientCount';
+            case 'tech-debt': return 'techDebtCount';
+            case 'R&D': return 'rndCount';
+            default: return null;
+        }
+    }
+
+    // Make container sortable
+    function funMakeSortable(container) {
+        container.addEventListener('dragover', funHandleDragOver);
+        container.addEventListener('drop', funHandleDrop);
+        container.addEventListener('dragenter', funHandleDragEnter);
+        container.addEventListener('dragleave', funHandleDragLeave);
+    }
+
+    // Drag and drop handlers
+    function funHandleDragStart(e) {
+        draggedElement = e.target;
+        e.target.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target.outerHTML);
+    }
+
+    function funHandleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.drop-zone').forEach(el => {
+            el.classList.remove('drop-zone');
+        });
+        draggedElement = null;
+    }
+
+    function funHandleDragOver(e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function funHandleDragEnter(e) {
+        e.target.classList.add('drop-zone');
+    }
+
+    function funHandleDragLeave(e) {
+        e.target.classList.remove('drop-zone');
+    }
+
+    function funHandleDrop(e) {
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        }
+
+        const container = e.currentTarget;
+        const classification = container.getAttribute('data-classification');
+        
+        if (draggedElement) {
+            const activityId = draggedElement.getAttribute('data-activity-id');
+            const newIndex = funCalculateDropIndex(container, e.clientY);
+            
+            // Move element in DOM
+            container.removeChild(draggedElement);
+            const children = Array.from(container.children);
+            
+            if (newIndex >= children.length) {
+                container.appendChild(draggedElement);
+            } else {
+                container.insertBefore(draggedElement, children[newIndex]);
+            }
+            
+            // Update priority order
+            funUpdatePriorityOrder(classification);
+            funMarkAsChanged();
+        }
+
+        container.classList.remove('drop-zone');
+        return false;
+    }
+
+    // Calculate drop index based on mouse position
+    function funCalculateDropIndex(container, clientY) {
+        const children = Array.from(container.children);
+        
+        for (let i = 0; i < children.length; i++) {
+            const rect = children[i].getBoundingClientRect();
+            if (clientY < rect.top + rect.height / 2) {
+                return i;
+            }
+        }
+        
+        return children.length;
+    }
+
+    // Update priority order after drag and drop
+    function funUpdatePriorityOrder(classification) {
+        const container = document.getElementById(funGetContainerIdForClassification(classification));
+        const activityElements = Array.from(container.children);
+        
+        const newPriorityList = activityElements.map((el, index) => ({
+            activityId: el.getAttribute('data-activity-id'),
+            rank: index + 1
+        }));
+
+        // Update local data
+        if (!backlogData.priorities[classification]) {
+            backlogData.priorities[classification] = {
+                id: `${currentWeekId}_${classification}`,
+                weekId: currentWeekId,
+                classification: classification,
+                version: 1,
+                priorityList: [],
+                createdBy: window.UserUtils?.getCurrentUser()?.id || 'u-alice',
+                updatedAt: new Date().toISOString()
+            };
+        }
+
+        backlogData.priorities[classification].priorityList = newPriorityList;
+        
+        // Update rank numbers in UI
+        activityElements.forEach((el, index) => {
+            const rankBadge = el.querySelector('.priority-badge');
+            if (rankBadge) {
+                rankBadge.textContent = `P${index + 1}`;
+            }
+        });
+    }
+
+    // Mark as having unsaved changes
+    function funMarkAsChanged() {
+        if (!hasUnsavedChanges) {
+            hasUnsavedChanges = true;
+            funShowSaveBar();
+        }
+    }
+
+    // Show save bar
+    function funShowSaveBar() {
+        const saveBar = document.getElementById('saveBar');
+        saveBar.classList.add('visible');
+    }
+
+    // Hide save bar
+    function funHideSaveBar() {
+        const saveBar = document.getElementById('saveBar');
+        saveBar.classList.remove('visible');
+        hasUnsavedChanges = false;
+    }
+
+    // Save changes
+    async function funSaveChanges() {
+        try {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            // Save each classification's priority list
+            const classifications = ['client-focused', 'tech-debt', 'R&D'];
+            let allSaved = true;
+
+            for (const classification of classifications) {
+                const priorityData = backlogData.priorities[classification];
+                if (!priorityData) continue;
+
+                // This would call page-logic.js method to update priority list
+                // For now, save directly to localStorage
+                const result = await funSavePriorityList(classification, priorityData);
+                if (!result.success) {
+                    if (result.error === 'VERSION_CONFLICT') {
+                        funShowVersionConflict(classification, result);
+                        allSaved = false;
+                        break;
+                    } else {
+                        throw new Error(result.error);
+                    }
+                }
+            }
+
+            if (allSaved) {
+                funHideSaveBar();
+                window.showToast('Priority changes saved successfully', 'success');
+                await funLoadBacklogData(); // Refresh data
+                funRenderBacklog();
+            }
+
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            funShowError('Failed to save changes');
+        } finally {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+        }
+    }
+
+    // Save priority list (mock implementation)
+    async function funSavePriorityList(classification, priorityData) {
+        try {
+            // This would be replaced by actual page-logic.js method call
+            const activityPriorities = JSON.parse(localStorage.getItem('plc::activityPriorities') || '[]');
+            
+            const existingIndex = activityPriorities.findIndex(ap => 
+                ap.weekId === priorityData.weekId && ap.classification === priorityData.classification
+            );
+
+            if (existingIndex >= 0) {
+                // Check version for conflict
+                if (activityPriorities[existingIndex].version > priorityData.version) {
+                    return { 
+                        success: false, 
+                        error: 'VERSION_CONFLICT',
+                        remoteVersion: activityPriorities[existingIndex].version,
+                        remoteOrder: activityPriorities[existingIndex].priorityList
+                    };
+                }
+                // Update existing
+                priorityData.version += 1;
+                priorityData.updatedAt = new Date().toISOString();
+                activityPriorities[existingIndex] = { ...priorityData };
+            } else {
+                // Create new
+                activityPriorities.push({ ...priorityData });
+            }
+
+            localStorage.setItem('plc::activityPriorities', JSON.stringify(activityPriorities));
+            
+            return { success: true, newVersion: priorityData.version };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Show version conflict modal
+    function funShowVersionConflict(classification, conflictData) {
+        const modal = document.getElementById('versionConflictModal');
+        const details = document.getElementById('conflictDetails');
+        
+        const localOrder = backlogData.priorities[classification].priorityList;
+        const remoteOrder = conflictData.remoteOrder;
+        
+        details.innerHTML = `
+            <div class="bg-slate-50 rounded-lg p-4">
+                <h4 class="font-medium text-slate-900 mb-2">Classification: ${classification}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h5 class="text-sm font-medium text-slate-700 mb-2">Your Changes:</h5>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            ${localOrder.map((item, index) => 
+                                `<li>${index + 1}. ${funGetActivityTitle(item.activityId)}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 class="text-sm font-medium text-slate-700 mb-2">Current Version (v${conflictData.remoteVersion}):</h5>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            ${remoteOrder.map((item, index) => 
+                                `<li>${index + 1}. ${funGetActivityTitle(item.activityId)}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        document.getElementById('refreshConflictBtn').focus();
+    }
+
+    // Get activity title by ID
+    function funGetActivityTitle(activityId) {
+        const activity = backlogData.activities.find(a => a.id === activityId);
+        return activity ? activity.title : 'Unknown Activity';
+    }
+
+    // Close version conflict modal
+    function funCloseConflictModal() {
+        document.getElementById('versionConflictModal').classList.add('hidden');
+    }
+
+    // Refresh and reload after conflict
+    function funRefreshAndReload() {
+        funCloseConflictModal();
+        window.location.reload();
+    }
+
+    // Discard changes
+    function funDiscardChanges() {
+        if (confirm('Are you sure you want to discard all unsaved changes?')) {
+            funHideSaveBar();
+            funRenderBacklog(); // Re-render from original data
+        }
+    }
+
+    // Show revert options
+    function funShowRevertOptions() {
+        // This would show a modal with previous versions
+        // For now, just show a simple confirm
+        if (confirm('Revert to the previous saved version? This will discard current changes.')) {
+            funRevertToPreviousVersion();
+        }
+    }
+
+    // Revert to previous version
+    async function funRevertToPreviousVersion() {
+        try {
+            // This would call page-logic.js method to revert
+            // For now, just reload the data
+            await funLoadBacklogData();
+            funRenderBacklog();
+            funHideSaveBar();
+            window.showToast('Reverted to previous version', 'success');
+        } catch (error) {
+            console.error('Error reverting:', error);
+            funShowError('Failed to revert changes');
+        }
+    }
+
+    // Toggle show deleted
+    async function funToggleShowDeleted() {
+        showDeleted = !showDeleted;
+        const btn = document.getElementById('showDeletedToggle');
+        const icon = btn.querySelector('i');
+        
+        if (showDeleted) {
+            btn.classList.add('bg-slate-200');
+            icon.setAttribute('data-lucide', 'eye');
+            btn.innerHTML = '<i data-lucide="eye" class="w-4 h-4 inline mr-2"></i>Hide Deleted';
+        } else {
+            btn.classList.remove('bg-slate-200');
+            icon.setAttribute('data-lucide', 'eye-off');
+            btn.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4 inline mr-2"></i>Show Deleted';
+        }
+        
+        lucide.createIcons();
+        await funLoadBacklogData();
+        funRenderBacklog();
+    }
+
+    // Export backlog as JSON
+    function funExportBacklogJson() {
+        try {
+            // This would call page-logic.js method to export
+            const exportData = {
+                weekId: currentWeekId,
+                activities: backlogData.activities,
+                priorities: backlogData.priorities,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `backlog-priorities-${currentWeekId}.json`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            
+            window.showToast('Backlog exported successfully', 'success');
+        } catch (error) {
+            console.error('Error exporting:', error);
+            funShowError('Failed to export backlog');
+        }
+    }
+
+    // Trigger JSON import
+    function funTriggerJsonImport() {
+        document.getElementById('jsonImportInput').click();
+    }
+
+    // Handle JSON import
+    function funHandleJsonImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const importData = JSON.parse(e.target.result);
+                
+                // This would call page-logic.js method to import
+                const result = await funImportBacklogData(importData);
+                
+                if (result.success) {
+                    window.showToast(`Successfully imported ${result.imported} items`, 'success');
+                    await funLoadBacklogData();
+                    funRenderBacklog();
+                } else {
+                    funShowError('Import failed: ' + (result.errors?.join(', ') || 'Unknown error'));
+                }
+                
+            } catch (error) {
+                console.error('Error importing:', error);
+                funShowError('Invalid JSON file');
+            }
+        };
+        
+        reader.readAsText(file);
+        event.target.value = ''; // Reset input
+    }
+
+    // Import backlog data (mock implementation)
+    async function funImportBacklogData(importData) {
+        try {
+            let imported = 0;
+            const errors = [];
+
+            // Import activities
+            if (importData.activities && Array.isArray(importData.activities)) {
+                const activities = JSON.parse(localStorage.getItem('plc::activities') || '[]');
+                
+                importData.activities.forEach(activity => {
+                    const existingIndex = activities.findIndex(a => a.id === activity.id);
+                    if (existingIndex >= 0) {
+                        activities[existingIndex] = activity;
+                    } else {
+                        activities.push(activity);
+                    }
+                    imported++;
+                });
+                
+                localStorage.setItem('plc::activities', JSON.stringify(activities));
+            }
+
+            // Import priorities
+            if (importData.priorities) {
+                const activityPriorities = JSON.parse(localStorage.getItem('plc::activityPriorities') || '[]');
+                
+                Object.values(importData.priorities).forEach(priority => {
+                    const existingIndex = activityPriorities.findIndex(ap => 
+                        ap.weekId === priority.weekId && ap.classification === priority.classification
+                    );
+                    
+                    if (existingIndex >= 0) {
+                        activityPriorities[existingIndex] = priority;
+                    } else {
+                        activityPriorities.push(priority);
+                    }
+                    imported++;
+                });
+                
+                localStorage.setItem('plc::activityPriorities', JSON.stringify(activityPriorities));
+            }
+
+            return { success: true, imported, errors };
+            
+        } catch (error) {
+            return { success: false, errors: [error.message] };
+        }
+    }
+
+    // Navigate to approvals page
+    function funNavigateToApprovals() {
+        window.location.href = 'approvals_queue.html?filter=classification_overrides';
+    }
+
+    // Show empty state
+    function funShowEmptyState() {
+        document.getElementById('emptyState').classList.remove('hidden');
+        document.getElementById('columnsContainer').classList.add('hidden');
+    }
+
+    // Hide empty state
+    function funHideEmptyState() {
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('columnsContainer').classList.remove('hidden');
+    }
+
+    // Show error message
+    function funShowError(message) {
+        window.showToast(message, 'error');
+    }
+
+    // Global function for override badge clicks
+    window.funNavigateToApprovals = funNavigateToApprovals;
+
+    // Initialize page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', funInitializePage);
+
+    // Initialize icons
+    lucide.createIcons();
+</script></body></html>

@@ -1,0 +1,957 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Notifications Center - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<section class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i data-lucide="bell" class="w-6 h-6 text-primary"></i>
+        <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900">Notifications</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="unreadCountDisplay" class="text-sm text-gray-600"></span>
+        <button id="markAllReadBtn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+          Mark All as Read
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-surface rounded-lg border p-4 mb-6">
+    <div class="flex flex-wrap items-center gap-4">
+      <div class="flex items-center gap-2">
+        <label for="typeFilter" class="text-sm font-medium text-gray-700">Filter by Type:</label>
+        <select id="typeFilter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+          <option value="">All Types</option>
+          <option value="PLAN_PUBLISHED">Plan Published</option>
+          <option value="INFO">Info</option>
+          <option value="WARNING">Warning</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-2">
+        <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+        <input type="text" id="searchInput" placeholder="Search notifications..." class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary w-64">
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications List -->
+  <div id="notificationsList" class="space-y-4" role="region" aria-live="polite" aria-label="Notifications list">
+    <!-- Notifications will be rendered here -->
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden text-center py-12">
+    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+      <i data-lucide="bell-off" class="w-8 h-8 text-gray-400"></i>
+    </div>
+    <h3 class="text-display-md font-semibold text-gray-900 mb-2">You're all caught up!</h3>
+    <p class="text-gray-600 mb-6">No notifications to show right now.</p>
+    <a href="my_week_dashboard.html" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+      <i data-lucide="calendar-check" class="w-4 h-4"></i>
+      Go to My Week
+    </a>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loadingState" class="hidden text-center py-12">
+    <div class="w-8 h-8 mx-auto mb-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-gray-600">Loading notifications...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="errorState" class="hidden text-center py-12">
+    <div class="w-16 h-16 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
+      <i data-lucide="alert-circle" class="w-8 h-8 text-red-500"></i>
+    </div>
+    <h3 class="text-display-md font-semibold text-gray-900 mb-2">Unable to load notifications</h3>
+    <p class="text-gray-600 mb-6">Something went wrong while loading your notifications.</p>
+    <button id="retryBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+      <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      Retry
+    </button>
+  </div>
+</section>
+
+<!-- Undo Toast -->
+<div id="undoToast" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+  <div class="flex items-center gap-3">
+    <span id="undoMessage">Notification marked as read</span>
+    <button id="undoBtn" class="text-accent hover:text-accent/90 font-medium">Undo</button>
+  </div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+  import { getNotifications, markNotificationAsRead, getUnreadNotificationsCount } from './page-logic.js';
+
+  // State management
+  let allNotifications = [];
+  let filteredNotifications = [];
+  let undoNotificationId = null;
+  let undoTimeout = null;
+
+  // Initialize page
+  async function funInitializePage() {
+    try {
+      funShowLoadingState();
+      await funLoadNotifications();
+      funSetupEventListeners();
+      funUpdateUnreadCount();
+      lucide.createIcons();
+    } catch (error) {
+      console.error('Failed to initialize notifications page:', error);
+      funShowErrorState();
+    }
+  }
+
+  // Load notifications from page-logic.js
+  // Expected return: Array of notifications with id, type, subject, body, createdAt, delivered fields
+  // Data source: notifications collection from localStorage with key 'plc::notifications'
+  async function funLoadNotifications() {
+    try {
+      const notifications = await getNotifications();
+      allNotifications = notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      funApplyFilters();
+      funRenderNotifications();
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      funShowErrorState();
+    }
+  }
+
+  // Apply current filters and search
+  function funApplyFilters() {
+    const typeFilter = document.getElementById('typeFilter').value;
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+    filteredNotifications = allNotifications.filter(notification => {
+      const matchesType = !typeFilter || notification.type === typeFilter;
+      const matchesSearch = !searchTerm || 
+        notification.subject.toLowerCase().includes(searchTerm) ||
+        notification.body.toLowerCase().includes(searchTerm);
+      return matchesType && matchesSearch;
+    });
+  }
+
+  // Render notifications list
+  function funRenderNotifications() {
+    const container = document.getElementById('notificationsList');
+    const emptyState = document.getElementById('emptyState');
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+
+    // Hide all states first
+    loadingState.classList.add('hidden');
+    errorState.classList.add('hidden');
+
+    if (filteredNotifications.length === 0) {
+      container.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      return;
+    }
+
+    emptyState.classList.add('hidden');
+    container.classList.remove('hidden');
+
+    container.innerHTML = filteredNotifications.map(notification => {
+      const isRead = notification.delivered;
+      const createdAt = new Date(notification.createdAt);
+      const timeAgo = funGetTimeAgo(createdAt);
+      
+      let typeIcon = 'bell';
+      let typeColor = 'text-gray-500';
+      let bgColor = 'bg-blue-50';
+      
+      switch (notification.type) {
+        case 'PLAN_PUBLISHED':
+          typeIcon = 'calendar-check';
+          typeColor = 'text-secondary';
+          bgColor = 'bg-secondary/10';
+          break;
+        case 'WARNING':
+          typeIcon = 'alert-triangle';
+          typeColor = 'text-accent';
+          bgColor = 'bg-accent/10';
+          break;
+        case 'INFO':
+          typeIcon = 'info';
+          typeColor = 'text-blue-500';
+          bgColor = 'bg-blue-50';
+          break;
+      }
+
+      return `
+        <div class="notification-item ${isRead ? 'opacity-75' : ''} bg-surface rounded-lg border p-4 hover:shadow-sm transition-shadow"
+             data-notification-id="${notification.id}">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-10 h-10 ${bgColor} rounded-full flex items-center justify-center mt-1">
+              <i data-lucide="${typeIcon}" class="w-5 h-5 ${typeColor}"></i>
+            </div>
+            
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <h3 class="font-semibold text-gray-900 ${isRead ? '' : 'font-bold'}">${funEscapeHtml(notification.subject)}</h3>
+                    ${!isRead ? '<div class="w-2 h-2 bg-primary rounded-full"></div>' : ''}
+                  </div>
+                  <p class="text-sm text-gray-600 mb-2">${funEscapeHtml(notification.body)}</p>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">${timeAgo}</span>
+                    <div class="flex items-center gap-2">
+                      ${funGetNotificationActions(notification)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex-shrink-0">
+              ${!isRead ? `
+                <button class="mark-read-btn p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        data-notification-id="${notification.id}"
+                        aria-label="Mark as read">
+                  <i data-lucide="check" class="w-4 h-4 text-gray-400"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    lucide.createIcons();
+  }
+
+  // Get notification-specific action buttons
+  function funGetNotificationActions(notification) {
+    if (notification.type === 'PLAN_PUBLISHED') {
+      let payload = {};
+      try {
+        payload = JSON.parse(notification.payload || '{}');
+      } catch (e) {
+        console.warn('Invalid notification payload:', notification.payload);
+      }
+
+      return `
+        <a href="plan_snapshot.html?week_id=${payload.weekId || ''}" 
+           class="inline-flex items-center gap-1 px-3 py-1 bg-secondary text-white text-xs rounded hover:bg-secondary/90 transition-colors">
+          <i data-lucide="eye" class="w-3 h-3"></i>
+          View Snapshot
+        </a>
+      `;
+    }
+
+    return `
+      <a href="my_week_dashboard.html" 
+         class="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition-colors">
+        <i data-lucide="calendar-check" class="w-3 h-3"></i>
+        Go to My Week
+      </a>
+    `;
+  }
+
+  // Mark notification as read
+  // Calls markNotificationAsRead(id) from page-logic.js
+  // Expected behavior: Updates notification.delivered = true in notifications collection
+  async function funMarkAsRead(notificationId, showUndo = true) {
+    try {
+      await markNotificationAsRead(notificationId);
+      
+      // Update local state
+      const notification = allNotifications.find(n => n.id === notificationId);
+      if (notification) {
+        notification.delivered = true;
+      }
+
+      funApplyFilters();
+      funRenderNotifications();
+      funUpdateUnreadCount();
+
+      if (showUndo) {
+        funShowUndoToast(notificationId);
+      }
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+      // Could show an error toast here
+    }
+  }
+
+  // Mark all notifications as read
+  async function funMarkAllAsRead() {
+    const unreadNotifications = allNotifications.filter(n => !n.delivered);
+    
+    try {
+      for (const notification of unreadNotifications) {
+        await markNotificationAsRead(notification.id);
+        notification.delivered = true;
+      }
+
+      funApplyFilters();
+      funRenderNotifications();
+      funUpdateUnreadCount();
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  }
+
+  // Update unread count display and button state
+  // Calls getUnreadNotificationsCount() from page-logic.js
+  // Expected return: Number representing count of notifications where delivered = false
+  async function funUpdateUnreadCount() {
+    try {
+      const unreadCount = await getUnreadNotificationsCount();
+      const display = document.getElementById('unreadCountDisplay');
+      const markAllBtn = document.getElementById('markAllReadBtn');
+
+      if (unreadCount > 0) {
+        display.textContent = `${unreadCount} unread`;
+        markAllBtn.disabled = false;
+      } else {
+        display.textContent = 'All caught up';
+        markAllBtn.disabled = true;
+      }
+    } catch (error) {
+      console.error('Failed to update unread count:', error);
+    }
+  }
+
+  // Show undo toast
+  function funShowUndoToast(notificationId) {
+    undoNotificationId = notificationId;
+    const toast = document.getElementById('undoToast');
+    toast.classList.remove('hidden');
+
+    // Clear existing timeout
+    if (undoTimeout) {
+      clearTimeout(undoTimeout);
+    }
+
+    // Auto-hide after 10 seconds
+    undoTimeout = setTimeout(() => {
+      funHideUndoToast();
+    }, 10000);
+  }
+
+  // Hide undo toast
+  function funHideUndoToast() {
+    const toast = document.getElementById('undoToast');
+    toast.classList.add('hidden');
+    undoNotificationId = null;
+    if (undoTimeout) {
+      clearTimeout(undoTimeout);
+      undoTimeout = null;
+    }
+  }
+
+  // Undo mark as read
+  async function funUndoMarkAsRead() {
+    if (!undoNotificationId) return;
+
+    try {
+      // Revert the notification state
+      const notification = allNotifications.find(n => n.id === undoNotificationId);
+      if (notification) {
+        notification.delivered = false;
+        
+        // We would need an "unmarkAsRead" method in page-logic.js
+        // For now, we'll update localStorage directly
+        const notifications = JSON.parse(localStorage.getItem('plc::notifications') || '[]');
+        const target = notifications.find(n => n.id === undoNotificationId);
+        if (target) {
+          target.delivered = false;
+          localStorage.setItem('plc::notifications', JSON.stringify(notifications));
+        }
+      }
+
+      funApplyFilters();
+      funRenderNotifications();
+      funUpdateUnreadCount();
+      funHideUndoToast();
+    } catch (error) {
+      console.error('Failed to undo mark as read:', error);
+    }
+  }
+
+  // Utility functions
+  function funGetTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+
+  function funEscapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function funShowLoadingState() {
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('notificationsList').classList.add('hidden');
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+  }
+
+  function funShowErrorState() {
+    document.getElementById('errorState').classList.remove('hidden');
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('notificationsList').classList.add('hidden');
+    document.getElementById('emptyState').classList.add('hidden');
+  }
+
+  // Setup event listeners
+  function funSetupEventListeners() {
+    // Filter and search
+    document.getElementById('typeFilter').addEventListener('change', () => {
+      funApplyFilters();
+      funRenderNotifications();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', funDebounce(() => {
+      funApplyFilters();
+      funRenderNotifications();
+    }, 300));
+
+    // Mark all as read button
+    document.getElementById('markAllReadBtn').addEventListener('click', funMarkAllAsRead);
+
+    // Retry button
+    document.getElementById('retryBtn').addEventListener('click', () => {
+      funLoadNotifications();
+    });
+
+    // Undo button
+    document.getElementById('undoBtn').addEventListener('click', funUndoMarkAsRead);
+
+    // Delegated event listener for mark as read buttons
+    document.getElementById('notificationsList').addEventListener('click', (e) => {
+      const markReadBtn = e.target.closest('.mark-read-btn');
+      if (markReadBtn) {
+        const notificationId = markReadBtn.getAttribute('data-notification-id');
+        funMarkAsRead(notificationId);
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !document.getElementById('undoToast').classList.contains('hidden')) {
+        funHideUndoToast();
+      }
+    });
+  }
+
+  // Debounce utility
+  function funDebounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', funInitializePage);
+  } else {
+    funInitializePage();
+  }
+</script></body></html>

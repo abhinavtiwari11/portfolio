@@ -1,0 +1,1125 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Planning Lead Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 1rem;
+            --text-display-sm--line-height: 1.5rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        .focus-visible:focus-visible {
+            outline: 2px solid theme('colors.primary');
+            outline-offset: 2px;
+        }
+
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: theme('colors.slate.500');
+            margin-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-group-header:first-child {
+            margin-top: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: theme('radius.md');
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: theme('colors.slate.700');
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: theme('colors.slate.100');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active {
+            background-color: theme('colors.primary/10');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: theme('colors.primary');
+            border-radius: 0 2px 2px 0;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: white;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-slate-800">
+
+    <!-- Skip to main content -->
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+
+    <!-- Top Header -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b border-slate-200 sticky top-0 z-30">
+        <div class="flex items-center gap-4">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 focus-visible" aria-label="Open navigation menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                        <!-- Palette: navy (#0B63A7) and teal (#00A99D) -->
+                        <!-- Rounded calendar outline -->
+                        <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                        <!-- Day cells (3x2 grid) -->
+                        <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                            <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        </g>
+                        <!-- Asynchronous loop (teal) wrapping the calendar -->
+                        <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22"></path>
+                            <circle cx="300" cy="245" r="8"></circle>
+                            <circle cx="280" cy="200" r="8"></circle>
+                            <circle cx="270" cy="150" r="8"></circle>
+                            <path d="M260 100 L246 116 L274 116 Z"></path>
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="text-display-md leading-display-md font-bold text-primary">Planning Lead Console</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <!-- User Profile Button -->
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors focus-visible" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-medium text-slate-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-slate-200 rounded-xl shadow-lg p-4 w-64 z-50 hidden" role="dialog" aria-labelledby="userProfileTitle">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-slate-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-slate-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors focus-visible">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Desktop Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r border-slate-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-6" role="navigation" aria-label="Main navigation" id="sideNav">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        
+        <!-- Mobile Sidebar -->
+        <aside id="mobileSidebar" class="mobile-sidebar md:hidden">
+            <nav class="p-6" role="navigation" aria-label="Main navigation">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Plan Snapshot Viewer - Planning Lead Console</title>
+</head_content_code>
+
+<html_content_code>
+<section class="max-w-7xl mx-auto">
+  <!-- Error State -->
+  <div id="errorState" class="hidden">
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+      <i data-lucide="alert-circle" class="w-8 h-8 text-red-500 mx-auto mb-4"></i>
+      <h2 class="text-display-md leading-display-md font-semibold text-red-800 mb-2">Snapshot Not Found</h2>
+      <p class="text-sm text-red-600 mb-4">The requested plan snapshot could not be found or you don't have permission to view it.</p>
+      <button onclick="window.location.href = 'plan_snapshots.html'" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors focus-visible">
+        Back to Snapshots
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="mainContent" class="hidden">
+    <!-- Header Section -->
+    <div class="bg-surface rounded-lg border border-slate-200 p-6 mb-6">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h1 id="snapshotTitle" class="text-display-lg leading-display-lg font-bold text-primary mb-2">
+            Plan Snapshot
+          </h1>
+          <div class="flex items-center gap-4 text-sm text-slate-600">
+            <div class="flex items-center gap-2">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+              <span id="weekLabel">Week</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+              <span id="publishedAt">Published</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span id="snapshotStatus" class="px-2 py-1 rounded text-xs font-medium">Status</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="exportJsonBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors focus-visible">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Export JSON
+          </button>
+          <button onclick="window.location.href = 'plan_snapshots.html'" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors focus-visible">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back to Snapshots
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-background p-4 rounded-lg border border-slate-100">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Total Capacity</div>
+          <div id="totalCapacity" class="text-display-md leading-display-md font-bold text-slate-900">0h</div>
+        </div>
+        <div class="bg-background p-4 rounded-lg border border-slate-100">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Total Allocated</div>
+          <div id="totalAllocated" class="text-display-md leading-display-md font-bold text-slate-900">0h</div>
+        </div>
+        <div class="bg-background p-4 rounded-lg border border-slate-100">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Utilization</div>
+          <div id="utilizationRate" class="text-display-md leading-display-md font-bold text-slate-900">0%</div>
+        </div>
+        <div class="bg-background p-4 rounded-lg border border-slate-100">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Version</div>
+          <div id="snapshotVersion" class="text-display-md leading-display-md font-bold text-slate-900">v1</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="bg-surface rounded-lg border border-slate-200 overflow-hidden">
+      <div class="border-b border-slate-200">
+        <nav class="flex" role="tablist" aria-label="Snapshot details">
+          <button id="tabActivities" role="tab" aria-selected="true" aria-controls="panelActivities" class="flex-1 px-6 py-3 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 hover:bg-primary/10 transition-colors focus-visible">
+            Activities
+          </button>
+          <button id="tabMembers" role="tab" aria-selected="false" aria-controls="panelMembers" class="flex-1 px-6 py-3 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-colors focus-visible">
+            Members
+          </button>
+          <button id="tabAudit" role="tab" aria-selected="false" aria-controls="panelAudit" class="flex-1 px-6 py-3 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-colors focus-visible">
+            Audit Trail
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="p-6">
+        <!-- Activities Panel -->
+        <div id="panelActivities" role="tabpanel" aria-labelledby="tabActivities">
+          <div class="space-y-6">
+            <!-- Client-Focused Activities -->
+            <div id="clientActivitiesSection">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-4 h-4 bg-primary rounded"></div>
+                <h3 class="text-display-sm leading-display-sm font-semibold text-slate-900">Client-Focused</h3>
+                <span id="clientHours" class="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded">0h</span>
+              </div>
+              <div id="clientActivitiesList" class="space-y-2">
+                <!-- Activities will be populated here -->
+              </div>
+            </div>
+
+            <!-- Tech Debt Activities -->
+            <div id="techActivitiesSection">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-4 h-4 bg-secondary rounded"></div>
+                <h3 class="text-display-sm leading-display-sm font-semibold text-slate-900">Tech Debt</h3>
+                <span id="techHours" class="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded">0h</span>
+              </div>
+              <div id="techActivitiesList" class="space-y-2">
+                <!-- Activities will be populated here -->
+              </div>
+            </div>
+
+            <!-- R&D Activities -->
+            <div id="rndActivitiesSection">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-4 h-4 bg-accent rounded"></div>
+                <h3 class="text-display-sm leading-display-sm font-semibold text-slate-900">R&amp;D</h3>
+                <span id="rndHours" class="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded">0h</span>
+              </div>
+              <div id="rndActivitiesList" class="space-y-2">
+                <!-- Activities will be populated here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Members Panel -->
+        <div id="panelMembers" role="tabpanel" aria-labelledby="tabMembers" class="hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full" caption="Member capacity and allocation summary">
+              <thead>
+                <tr class="border-b border-slate-200">
+                  <th class="text-left py-3 px-2 text-sm font-medium text-slate-700">Member</th>
+                  <th class="text-right py-3 px-2 text-sm font-medium text-slate-700">Capacity</th>
+                  <th class="text-right py-3 px-2 text-sm font-medium text-slate-700">Allocated</th>
+                  <th class="text-right py-3 px-2 text-sm font-medium text-slate-700">Utilization</th>
+                  <th class="text-center py-3 px-2 text-sm font-medium text-slate-700">Compliance</th>
+                </tr>
+              </thead>
+              <tbody id="membersTableBody">
+                <!-- Member rows will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Audit Panel -->
+        <div id="panelAudit" role="tabpanel" aria-labelledby="tabAudit" class="hidden">
+          <div class="space-y-4">
+            <div class="flex items-center gap-2 text-sm text-slate-600 mb-4">
+              <i data-lucide="info" class="w-4 h-4"></i>
+              <span>Showing audit events related to this plan snapshot</span>
+            </div>
+            <div id="auditEventsList" class="space-y-3">
+              <!-- Audit events will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contextual Tip -->
+  <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="flex items-start gap-3">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"></i>
+      <div class="text-sm text-blue-800">
+        <strong>Tip:</strong> Snapshots are immutable records of published plans. To propose changes to a published plan, use change requests through the monitoring interface.
+      </div>
+    </div>
+  </div>
+</section>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'PLC__';
+
+        // Mobile navigation toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = sidebar.classList.contains('open');
+                
+                btn.setAttribute('aria-expanded', String(!isOpen));
+                
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.focus();
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // Navigation active state management
+        function updateActiveNavItem() {
+            const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                               window.location.pathname.split('/').pop() || 
+                               'planning_week_overview.html';
+            
+            // Update both desktop and mobile nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const itemPage = item.getAttribute('data-page') || item.getAttribute('href');
+                if (itemPage === currentPage) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'page');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Update active state on page load and when navigation changes
+        updateActiveNavItem();
+        window.addEventListener('popstate', updateActiveNavItem);
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-alice');
+                    currentUserId = 'u-alice';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users_' + currentUserId);
+                try { 
+                    if (userData) return JSON.parse(userData);
+                    
+                    // Fallback to dummy data from localStorage if available
+                    const usersData = localStorage.getItem('plc::users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        if (user) return user;
+                    }
+                    
+                    // Final fallback
+                    return {
+                        id: 'u-alice',
+                        firstName: 'Alice',
+                        lastName: 'Nguyen',
+                        role: 'PLANNING_LEAD',
+                        email: 'alice.nguyen@example.local'
+                    };
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            const initials = UserUtils.getUserInitials(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverUserAvatar) popoverUserAvatar.textContent = initials;
+            if (popoverUserName) popoverUserName.textContent = displayName;
+            if (popoverUserEmail) popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover management
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popoverVisible = !popoverVisible;
+                
+                if (popoverVisible) {
+                    popover.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first interactive element in popover
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                } else {
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Sign out handler
+            const signOutBtn = document.getElementById('signOutButton');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        UserUtils.signOut();
+                    }
+                });
+            }
+        }());
+
+        // Import/Export functionality (namespaced)
+        document.getElementById('exportAppData')?.addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith(APP_PREFIX) || key.startsWith('plc::'))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "planning_console_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData')?.addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile')?.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX) || key.startsWith('plc::')) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        alert(`✅ Successfully imported ${importedCount} data items. Please refresh the page to see changes.`);
+                    } else {
+                        alert('⚠️ No compatible data found in the file.');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    alert('❌ Failed to import: Invalid JSON format or corrupted file.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions handler
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (error) {
+                    console.error(`Error executing action ${action}:`, error);
+                    el.setAttribute('disabled', 'true');
+                    el.setAttribute('title', 'Action failed');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Action not available');
+                console.warn(`Action ${action} not found in window.AppActions`);
+            }
+        });
+
+        // Toast notification helper
+        window.showToast = function(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-opacity duration-300 ${
+                type === 'success' ? 'bg-secondary' : 
+                type === 'error' ? 'bg-error' : 
+                'bg-slate-600'
+            }`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        };
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { getSnapshotById, getActivitiesByIds, getUsersByIds, getCapacitiesByUserIds, getAssignmentsByWeekId, getAuditEventsByWeekId } from './page-logic.js';
+
+// Get snapshot ID from URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+const snapshotId = urlParams.get('snapshotId');
+
+// UI State Management
+let currentSnapshot = null;
+let currentTab = 'activities';
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', async function() {
+    lucide.createIcons();
+    
+    if (!snapshotId) {
+        funShowError();
+        return;
+    }
+
+    try {
+        await funLoadSnapshot();
+        funInitializeTabs();
+        funSetupExportHandler();
+    } catch (error) {
+        console.error('Error loading snapshot:', error);
+        funShowError();
+    }
+});
+
+// Load snapshot data
+async function funLoadSnapshot() {
+    /* 
+    Expected return from getSnapshotById:
+    - Returns plan snapshot object with structure matching planSnapshots collection
+    - Includes: id, weekId, status, publishedAt, createdAt, createdBy, activities[], summary{}, version, immutable
+    - activities[] contains: activityId, title, classification, priorityRank
+    - summary contains: capacity, allocated, byCategoryClient, byCategoryTechDebt, byCategoryRnd
+    */
+    currentSnapshot = await getSnapshotById(snapshotId);
+    
+    if (!currentSnapshot) {
+        throw new Error('Snapshot not found');
+    }
+
+    await funPopulateHeader();
+    await funPopulateActivitiesTab();
+    await funPopulateMembersTab();
+    await funPopulateAuditTab();
+    
+    // Show main content
+    document.getElementById('mainContent').classList.remove('hidden');
+}
+
+// Populate header section
+async function funPopulateHeader() {
+    const title = document.getElementById('snapshotTitle');
+    const weekLabel = document.getElementById('weekLabel');
+    const publishedAt = document.getElementById('publishedAt');
+    const status = document.getElementById('snapshotStatus');
+    const totalCapacity = document.getElementById('totalCapacity');
+    const totalAllocated = document.getElementById('totalAllocated');
+    const utilizationRate = document.getElementById('utilizationRate');
+    const version = document.getElementById('snapshotVersion');
+
+    // Format week label
+    const weekDisplay = funFormatWeekLabel(currentSnapshot.weekId);
+    
+    title.textContent = `Plan Snapshot: ${weekDisplay}`;
+    weekLabel.textContent = weekDisplay;
+    
+    // Format published date
+    if (currentSnapshot.publishedAt) {
+        const publishDate = new Date(currentSnapshot.publishedAt);
+        publishedAt.textContent = `Published ${publishDate.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`;
+    } else {
+        publishedAt.textContent = 'Draft';
+    }
+
+    // Status badge styling
+    status.textContent = currentSnapshot.status;
+    status.className = `px-2 py-1 rounded text-xs font-medium ${funGetStatusBadgeClass(currentSnapshot.status)}`;
+
+    // Summary statistics
+    const summary = currentSnapshot.summary || {};
+    totalCapacity.textContent = `${summary.capacity || 0}h`;
+    totalAllocated.textContent = `${summary.allocated || 0}h`;
+    
+    const utilization = summary.capacity > 0 ? Math.round((summary.allocated / summary.capacity) * 100) : 0;
+    utilizationRate.textContent = `${utilization}%`;
+    
+    version.textContent = `v${currentSnapshot.version || 1}`;
+}
+
+// Populate activities tab
+async function funPopulateActivitiesTab() {
+    const activities = currentSnapshot.activities || [];
+    const summary = currentSnapshot.summary || {};
+
+    // Group activities by classification
+    const clientActivities = activities.filter(a => a.classification === 'client-focused').sort((a, b) => a.priorityRank - b.priorityRank);
+    const techActivities = activities.filter(a => a.classification === 'tech-debt').sort((a, b) => a.priorityRank - b.priorityRank);
+    const rndActivities = activities.filter(a => a.classification === 'R&D').sort((a, b) => a.priorityRank - b.priorityRank);
+
+    // Update hour badges
+    document.getElementById('clientHours').textContent = `${summary.byCategoryClient || 0}h`;
+    document.getElementById('techHours').textContent = `${summary.byCategoryTechDebt || 0}h`;
+    document.getElementById('rndHours').textContent = `${summary.byCategoryRnd || 0}h`;
+
+    // Populate activity lists
+    funRenderActivityList('clientActivitiesList', clientActivities);
+    funRenderActivityList('techActivitiesList', techActivities);
+    funRenderActivityList('rndActivitiesList', rndActivities);
+}
+
+// Populate members tab
+async function funPopulateMembersTab() {
+    /* 
+    Expected data flow:
+    1. Get unique user IDs from assignments for this week
+    2. Fetch user details using getUsersByIds
+    3. Fetch capacity data using getCapacitiesByUserIds for this week
+    4. Fetch assignments using getAssignmentsByWeekId
+    5. Calculate allocations and compliance per user
+    */
+    
+    const assignments = await getAssignmentsByWeekId(currentSnapshot.weekId);
+    const userIds = [...new Set(assignments.map(a => a.userId))];
+    
+    if (userIds.length === 0) {
+        document.getElementById('membersTableBody').innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-8 text-slate-500">
+                    No member data available for this snapshot
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const users = await getUsersByIds(userIds);
+    const capacities = await getCapacitiesByUserIds(userIds, currentSnapshot.weekId);
+
+    const memberData = funCalculateMemberData(users, capacities, assignments);
+    funRenderMembersTable(memberData);
+}
+
+// Populate audit tab
+async function funPopulateAuditTab() {
+    /*
+    Expected return from getAuditEventsByWeekId:
+    - Returns array of audit events for the specified week
+    - Includes: id, type, whoId, whoName, when, entityType, entityId, before, after, metadata
+    - Filter to show relevant events for plan publication and related activities
+    */
+    const auditEvents = await getAuditEventsByWeekId(currentSnapshot.weekId);
+    
+    // Filter relevant events for this snapshot
+    const relevantEvents = auditEvents.filter(event => 
+        event.type.includes('PLAN_') || 
+        event.type === 'ACTIVITY_CREATED' ||
+        event.type === 'PRIORITY_CHANGED' ||
+        event.type === 'ASSIGNMENT_CREATED'
+    ).sort((a, b) => new Date(b.when) - new Date(a.when));
+
+    funRenderAuditEvents(relevantEvents);
+}
+
+// Helper Functions
+function funFormatWeekLabel(weekId) {
+    // Convert 2025-W47 to "Week 47, 2025"
+    const [year, week] = weekId.split('-W');
+    return `Week ${week}, ${year}`;
+}
+
+function funGetStatusBadgeClass(status) {
+    switch (status) {
+        case 'Published':
+            return 'bg-secondary/10 text-secondary';
+        case 'Draft':
+            return 'bg-slate-100 text-slate-600';
+        case 'Monitoring':
+            return 'bg-accent/10 text-accent';
+        case 'Archived':
+            return 'bg-slate-200 text-slate-700';
+        default:
+            return 'bg-slate-100 text-slate-600';
+    }
+}
+
+function funRenderActivityList(containerId, activities) {
+    const container = document.getElementById(containerId);
+    
+    if (activities.length === 0) {
+        container.innerHTML = '<div class="text-sm text-slate-500 py-2">No activities in this category</div>';
+        return;
+    }
+
+    container.innerHTML = activities.map((activity, index) => `
+        <div class="flex items-center gap-3 p-3 bg-background rounded-lg border border-slate-100">
+            <div class="flex items-center justify-center w-6 h-6 bg-slate-200 text-slate-600 text-xs font-medium rounded">
+                ${index + 1}
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="font-medium text-slate-900 truncate">${activity.title}</div>
+                <div class="text-xs text-slate-500">Priority Rank: ${activity.priorityRank}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function funCalculateMemberData(users, capacities, assignments) {
+    return users.map(user => {
+        const userCapacity = capacities.find(c => c.userId === user.id);
+        const userAssignments = assignments.filter(a => a.userId === user.id);
+        
+        const capacity = userCapacity?.weeklyTotal || 0;
+        const allocated = userAssignments.reduce((sum, a) => sum + a.segments, 0);
+        const utilization = capacity > 0 ? Math.round((allocated / capacity) * 100) : 0;
+        
+        // Determine compliance based on targets vs actual allocation
+        const targets = userCapacity?.targets || { client: 0, techDebt: 0, rnd: 0 };
+        const actualClient = userAssignments.filter(a => a.classification === 'client-focused').reduce((sum, a) => sum + a.segments, 0);
+        const actualTechDebt = userAssignments.filter(a => a.classification === 'tech-debt').reduce((sum, a) => sum + a.segments, 0);
+        const actualRnd = userAssignments.filter(a => a.classification === 'R&D').reduce((sum, a) => sum + a.segments, 0);
+        
+        const compliance = funCalculateCompliance(targets, { client: actualClient, techDebt: actualTechDebt, rnd: actualRnd });
+
+        return {
+            user,
+            capacity,
+            allocated,
+            utilization,
+            compliance
+        };
+    });
+}
+
+function funCalculateCompliance(targets, actual) {
+    const targetTotal = targets.client + targets.techDebt + targets.rnd;
+    const actualTotal = actual.client + actual.techDebt + actual.rnd;
+    
+    if (targetTotal === 0) return 'N/A';
+    
+    const clientCompliance = targets.client === 0 || actual.client >= targets.client;
+    const techCompliance = targets.techDebt === 0 || actual.techDebt >= targets.techDebt;
+    const rndCompliance = targets.rnd === 0 || actual.rnd >= targets.rnd;
+    
+    if (clientCompliance && techCompliance && rndCompliance) {
+        return 'Compliant';
+    } else {
+        return 'Non-compliant';
+    }
+}
+
+function funRenderMembersTable(memberData) {
+    const tbody = document.getElementById('membersTableBody');
+    
+    tbody.innerHTML = memberData.map(data => `
+        <tr class="border-b border-slate-100">
+            <td class="py-3 px-2">
+                <div class="font-medium text-slate-900">${data.user.firstName} ${data.user.lastName}</div>
+                <div class="text-xs text-slate-500">${data.user.role}</div>
+            </td>
+            <td class="py-3 px-2 text-right font-medium">${data.capacity}h</td>
+            <td class="py-3 px-2 text-right font-medium">${data.allocated}h</td>
+            <td class="py-3 px-2 text-right">
+                <span class="font-medium ${data.utilization > 100 ? 'text-red-600' : data.utilization < 80 ? 'text-accent' : 'text-secondary'}"">
+                    ${data.utilization}%
+                </span>
+            </td>
+            <td class="py-3 px-2 text-center">
+                <span class="px-2 py-1 rounded text-xs font-medium ${
+                    data.compliance === 'Compliant' ? 'bg-secondary/10 text-secondary' :
+                    data.compliance === 'Non-compliant' ? 'bg-red-100 text-red-600' :
+                    'bg-slate-100 text-slate-600'
+                }">
+                    ${data.compliance}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function funRenderAuditEvents(events) {
+    const container = document.getElementById('auditEventsList');
+    
+    if (events.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-slate-500">
+                <i data-lucide="search" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                <div>No audit events found for this snapshot</div>
+            </div>
+        `;
+        lucide.createIcons();
+        return;
+    }
+
+    container.innerHTML = events.map(event => `
+        <div class="flex items-start gap-3 p-4 bg-background rounded-lg border border-slate-100">
+            <div class="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="font-medium text-slate-900">${funGetEventTypeLabel(event.type)}</span>
+                    <span class="text-xs text-slate-500">by ${event.whoName}</span>
+                </div>
+                <div class="text-sm text-slate-600 mb-1">${funFormatEventDetails(event)}</div>
+                <div class="text-xs text-slate-500">
+                    ${new Date(event.when).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function funGetEventTypeLabel(type) {
+    const labels = {
+        'PLAN_PUBLISHED': 'Plan Published',
+        'ACTIVITY_CREATED': 'Activity Created',
+        'PRIORITY_CHANGED': 'Priority Changed',
+        'ASSIGNMENT_CREATED': 'Assignment Created',
+        'CAPACITY_UPDATED': 'Capacity Updated'
+    };
+    return labels[type] || type.replace(/_/g, ' ');
+}
+
+function funFormatEventDetails(event) {
+    switch (event.type) {
+        case 'PLAN_PUBLISHED':
+            return 'Weekly plan was published and locked for execution';
+        case 'ACTIVITY_CREATED':
+            return `Created activity: ${event.entityId}`;
+        case 'PRIORITY_CHANGED':
+            return `Updated priority list for ${event.entityId.split('_')[1]} activities`;
+        case 'ASSIGNMENT_CREATED':
+            return `Created assignment for ${event.entityId}`;
+        default:
+            return `${event.entityType} ${event.entityId} was updated`;
+    }
+}
+
+// Tab management
+function funInitializeTabs() {
+    const tabs = document.querySelectorAll('[role="tab"]');
+    const panels = document.querySelectorAll('[role="tabpanel"]');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const targetPanel = e.target.getAttribute('aria-controls');
+            
+            // Update tab states
+            tabs.forEach(t => {
+                t.setAttribute('aria-selected', 'false');
+                t.className = t.className.replace(/text-primary|border-primary|bg-primary\/\d+/, 'text-slate-600');
+                t.classList.add('hover:text-slate-800', 'hover:bg-slate-50');
+            });
+            
+            // Update clicked tab
+            tab.setAttribute('aria-selected', 'true');
+            tab.className = 'flex-1 px-6 py-3 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 hover:bg-primary/10 transition-colors focus-visible';
+            
+            // Update panels
+            panels.forEach(panel => panel.classList.add('hidden'));
+            document.getElementById(targetPanel).classList.remove('hidden');
+            
+            currentTab = targetPanel.replace('panel', '').toLowerCase();
+        });
+    });
+}
+
+// Export functionality
+function funSetupExportHandler() {
+    document.getElementById('exportJsonBtn').addEventListener('click', () => {
+        /*
+        Expected functionality:
+        - Export the current snapshot as a JSON file
+        - Include all snapshot data in a downloadable format
+        */
+        const exportData = {
+            snapshot: currentSnapshot,
+            exportedAt: new Date().toISOString(),
+            exportedBy: window.UserUtils?.getCurrentUser()?.id || 'unknown'
+        };
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.href = url;
+        link.download = `plan-snapshot-${currentSnapshot.weekId}-${currentSnapshot.id}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        window.showToast('Snapshot exported successfully', 'success');
+    });
+}
+
+// Error handling
+function funShowError() {
+    document.getElementById('errorState').classList.remove('hidden');
+    document.getElementById('mainContent').classList.add('hidden');
+}
+
+</script></body></html>

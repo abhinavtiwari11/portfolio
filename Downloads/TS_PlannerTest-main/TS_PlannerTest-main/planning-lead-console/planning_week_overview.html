@@ -1,0 +1,1206 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Planning Lead Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 1rem;
+            --text-display-sm--line-height: 1.5rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        .focus-visible:focus-visible {
+            outline: 2px solid theme('colors.primary');
+            outline-offset: 2px;
+        }
+
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: theme('colors.slate.500');
+            margin-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-group-header:first-child {
+            margin-top: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: theme('radius.md');
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: theme('colors.slate.700');
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: theme('colors.slate.100');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active {
+            background-color: theme('colors.primary/10');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: theme('colors.primary');
+            border-radius: 0 2px 2px 0;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: white;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-slate-800">
+
+    <!-- Skip to main content -->
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+
+    <!-- Top Header -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b border-slate-200 sticky top-0 z-30">
+        <div class="flex items-center gap-4">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 focus-visible" aria-label="Open navigation menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                        <!-- Palette: navy (#0B63A7) and teal (#00A99D) -->
+                        <!-- Rounded calendar outline -->
+                        <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                        <!-- Day cells (3x2 grid) -->
+                        <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                            <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        </g>
+                        <!-- Asynchronous loop (teal) wrapping the calendar -->
+                        <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22"></path>
+                            <circle cx="300" cy="245" r="8"></circle>
+                            <circle cx="280" cy="200" r="8"></circle>
+                            <circle cx="270" cy="150" r="8"></circle>
+                            <path d="M260 100 L246 116 L274 116 Z"></path>
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="text-display-md leading-display-md font-bold text-primary">Planning Lead Console</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <!-- User Profile Button -->
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors focus-visible" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-medium text-slate-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-slate-200 rounded-xl shadow-lg p-4 w-64 z-50 hidden" role="dialog" aria-labelledby="userProfileTitle">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-slate-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-slate-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors focus-visible">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Desktop Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r border-slate-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-6" role="navigation" aria-label="Main navigation" id="sideNav">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        
+        <!-- Mobile Sidebar -->
+        <aside id="mobileSidebar" class="mobile-sidebar md:hidden">
+            <nav class="p-6" role="navigation" aria-label="Main navigation">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Planning Week Overview - Planning Lead Console</title>
+</head_content_code>
+
+<html_content_code>
+<section class="space-y-6">
+  <!-- Header Section with Week Selector -->
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <h2 class="text-[1.75rem] leading-[2.25rem] font-bold text-slate-900">Planning Week Overview</h2>
+      <div id="weekStatus" class="px-3 py-1 rounded-lg text-sm font-medium bg-slate-100 text-slate-700">
+        Loading...
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <!-- Week Selector -->
+      <select id="weekSelector" class="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+        <option value="">Loading weeks...</option>
+      </select>
+      
+      <!-- Timezone Display -->
+      <div class="text-sm text-slate-600 hidden sm:block">
+        <i data-lucide="clock" class="w-4 h-4 inline mr-1"></i>
+        <span id="timezoneDisplay">UTC</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lead Claim Card -->
+  <div class="bg-surface border border-slate-200 rounded-xl p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900 mb-2">Planning Lead</h3>
+        <div id="leadStatus" class="text-sm text-slate-600">
+          Checking lead status...
+        </div>
+      </div>
+      <div id="leadActions" class="flex gap-3">
+        <!-- Actions will be populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Readiness Banner -->
+  <div id="readinessBanner" class="bg-secondary/10 border border-secondary/20 rounded-xl p-4" role="status" aria-live="polite">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-secondary text-white rounded-full flex items-center justify-center">
+        <i data-lucide="users" class="w-4 h-4"></i>
+      </div>
+      <div>
+        <div id="readinessText" class="font-medium text-secondary">
+          Checking team readiness...
+        </div>
+        <div class="text-sm text-slate-600 mt-1">
+          <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+          Auto-publish requires 100% capacity allocated across all categories
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Prioritize Backlog -->
+    <div class="bg-surface border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer group" onclick="window.location.href='backlog_prioritization.html'">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+          <i data-lucide="list-ordered" class="w-6 h-6 text-primary"></i>
+        </div>
+        <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Prioritize Backlog</h3>
+      </div>
+      <p class="text-sm text-slate-600 mb-4">Order activities by classification and set weekly priorities</p>
+      <div class="flex items-center text-primary text-sm font-medium">
+        Go to Backlog
+        <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"></i>
+      </div>
+    </div>
+
+    <!-- Monitor Allocations -->
+    <div class="bg-surface border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer group" onclick="window.location.href='allocation_monitor.html'">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+          <i data-lucide="bar-chart-3" class="w-6 h-6 text-secondary"></i>
+        </div>
+        <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Monitor Allocations</h3>
+      </div>
+      <p class="text-sm text-slate-600 mb-4">Track team capacity and assignment progress</p>
+      <div class="flex items-center text-secondary text-sm font-medium">
+        View Monitor
+        <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"></i>
+      </div>
+    </div>
+
+    <!-- Approvals -->
+    <div class="bg-surface border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer group" onclick="window.location.href='approvals_queue.html'">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+          <i data-lucide="check-circle-2" class="w-6 h-6 text-accent"></i>
+        </div>
+        <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Approvals</h3>
+      </div>
+      <p class="text-sm text-slate-600 mb-4">Review override requests and change requests</p>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center text-accent text-sm font-medium">
+          Review Queue
+          <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+        <div id="pendingApprovals" class="px-2 py-1 bg-accent/20 text-accent text-xs font-medium rounded-lg">
+          0
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan Snapshots -->
+    <div class="bg-surface border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer group" onclick="funNavigateToLatestSnapshot()">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+          <i data-lucide="camera" class="w-6 h-6 text-slate-600"></i>
+        </div>
+        <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Plan Snapshots</h3>
+      </div>
+      <p class="text-sm text-slate-600 mb-4">View published plans and historical snapshots</p>
+      <div class="flex items-center text-slate-600 text-sm font-medium">
+        Latest Snapshot
+        <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Preview Panel -->
+  <div id="notificationPreview" class="bg-surface border border-slate-200 rounded-xl p-6 hidden">
+    <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900 mb-4">
+      <i data-lucide="bell" class="w-5 h-5 inline mr-2"></i>
+      Notification Preview
+    </h3>
+    <div class="bg-slate-50 rounded-lg p-4">
+      <div class="font-medium text-slate-900 mb-2" id="notificationSubject">
+        Plan published: Week 2025-W47
+      </div>
+      <div class="text-sm text-slate-600" id="notificationBody">
+        The plan for week 2025-W47 was published. Summary: capacity 114h, allocated 110h.
+      </div>
+    </div>
+  </div>
+
+  <!-- Contextual Tips -->
+  <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+    <div class="flex items-start gap-3">
+      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i data-lucide="lightbulb" class="w-4 h-4 text-blue-600"></i>
+      </div>
+      <div class="text-sm text-blue-800">
+        <div class="font-medium mb-2">Planning Week Context</div>
+        <ul class="space-y-1 text-blue-700">
+          <li>• Tuesday is planning day - claim lead role and set priorities</li>
+          <li>• Wednesday to Monday is execution window</li>
+          <li>• Plans auto-publish when all members meet capacity targets</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Claim Lead Drawer -->
+<div id="claimLeadDrawer" class="fixed inset-0 bg-black/50 z-50 hidden" aria-modal="true" role="dialog" aria-labelledby="claimLeadTitle">
+  <div class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-surface shadow-lg">
+    <div class="flex flex-col h-full">
+      <div class="flex items-center justify-between p-6 border-b border-slate-200">
+        <h3 id="claimLeadTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Claim Planning Lead</h3>
+        <button onclick="funCloseClaimDrawer()" class="p-2 rounded-lg hover:bg-slate-100" aria-label="Close drawer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div class="flex-1 p-6">
+        <div class="mb-6">
+          <p class="text-sm text-slate-600 mb-4">
+            You're about to claim the Planning Lead role for <span id="claimWeekId" class="font-medium"></span>.
+          </p>
+          
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="font-medium text-blue-900 mb-2">Responsibilities:</div>
+            <ul class="text-sm text-blue-800 space-y-1">
+              <li>• Prioritize weekly backlog activities</li>
+              <li>• Monitor team allocation progress</li>
+              <li>• Review approval requests</li>
+              <li>• Ensure plan readiness for publication</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="flex gap-3">
+          <button onclick="funClaimLead()" class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors font-medium">
+            Claim Lead Role
+          </button>
+          <button onclick="funCloseClaimDrawer()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'PLC__';
+
+        // Mobile navigation toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = sidebar.classList.contains('open');
+                
+                btn.setAttribute('aria-expanded', String(!isOpen));
+                
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.focus();
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // Navigation active state management
+        function updateActiveNavItem() {
+            const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                               window.location.pathname.split('/').pop() || 
+                               'planning_week_overview.html';
+            
+            // Update both desktop and mobile nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const itemPage = item.getAttribute('data-page') || item.getAttribute('href');
+                if (itemPage === currentPage) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'page');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Update active state on page load and when navigation changes
+        updateActiveNavItem();
+        window.addEventListener('popstate', updateActiveNavItem);
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-alice');
+                    currentUserId = 'u-alice';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users_' + currentUserId);
+                try { 
+                    if (userData) return JSON.parse(userData);
+                    
+                    // Fallback to dummy data from localStorage if available
+                    const usersData = localStorage.getItem('plc::users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        if (user) return user;
+                    }
+                    
+                    // Final fallback
+                    return {
+                        id: 'u-alice',
+                        firstName: 'Alice',
+                        lastName: 'Nguyen',
+                        role: 'PLANNING_LEAD',
+                        email: 'alice.nguyen@example.local'
+                    };
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            const initials = UserUtils.getUserInitials(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverUserAvatar) popoverUserAvatar.textContent = initials;
+            if (popoverUserName) popoverUserName.textContent = displayName;
+            if (popoverUserEmail) popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover management
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popoverVisible = !popoverVisible;
+                
+                if (popoverVisible) {
+                    popover.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first interactive element in popover
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                } else {
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Sign out handler
+            const signOutBtn = document.getElementById('signOutButton');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        UserUtils.signOut();
+                    }
+                });
+            }
+        }());
+
+        // Import/Export functionality (namespaced)
+        document.getElementById('exportAppData')?.addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith(APP_PREFIX) || key.startsWith('plc::'))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "planning_console_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData')?.addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile')?.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX) || key.startsWith('plc::')) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        alert(`✅ Successfully imported ${importedCount} data items. Please refresh the page to see changes.`);
+                    } else {
+                        alert('⚠️ No compatible data found in the file.');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    alert('❌ Failed to import: Invalid JSON format or corrupted file.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions handler
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (error) {
+                    console.error(`Error executing action ${action}:`, error);
+                    el.setAttribute('disabled', 'true');
+                    el.setAttribute('title', 'Action failed');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Action not available');
+                console.warn(`Action ${action} not found in window.AppActions`);
+            }
+        });
+
+        // Toast notification helper
+        window.showToast = function(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-opacity duration-300 ${
+                type === 'success' ? 'bg-secondary' : 
+                type === 'error' ? 'bg-error' : 
+                'bg-slate-600'
+            }`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        };
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+// Import methods from page-logic.js for data operations
+// These methods should handle all local storage operations and return formatted data
+
+// funGetCurrentWeekData() -> returns current week info with status, timezone, planning dates
+// Expected return: { weekId, startDate, endDate, planningDate, timezone, status }
+// Collections used: weekCalendar, appConfig
+
+// funGetAvailableWeeks() -> returns list of recent weeks for selector
+// Expected return: [{ weekId, displayName, status }]
+// Collections used: weekCalendar
+
+// funGetLeadClaimStatus(weekId) -> returns current lead claim info
+// Expected return: { hasLead: boolean, leadUser: user_object, canClaim: boolean, isCurrentUser: boolean }
+// Collections used: leadClaims, users
+
+// funGetTeamReadinessStatus(weekId) -> returns team allocation readiness
+// Expected return: { waitingCount: number, isReady: boolean, totalMembers: number }
+// Collections used: capacities, assignments, users
+
+// funGetPendingApprovalsCount() -> returns count of pending approvals
+// Expected return: { count: number }
+// Collections used: overrideRequests, changeRequests
+
+// funClaimLeadRole(weekId, userId) -> claims lead role for current user
+// Expected return: { success: boolean, error?: string }
+// Collections used: leadClaims, auditEvents
+
+// funGetLatestSnapshotId(weekId) -> returns latest snapshot ID for navigation
+// Expected return: { snapshotId: string | null }
+// Collections used: planSnapshots
+
+let currentWeekData = null;
+let currentUser = null;
+
+// Initialize page data
+async function funInitializePage() {
+  try {
+    // Get current user (using container's UserUtils)
+    currentUser = window.UserUtils.getCurrentUser();
+    
+    if (!currentUser || !['PLANNING_LEAD', 'ADMIN'].includes(currentUser.role)) {
+      window.location.href = 'access_denied.html';
+      return;
+    }
+
+    // Load current week data
+    await funLoadWeekData();
+    
+    // Load available weeks for selector
+    await funPopulateWeekSelector();
+    
+    // Load lead status
+    await funUpdateLeadStatus();
+    
+    // Load readiness status
+    await funUpdateReadinessStatus();
+    
+    // Load pending approvals count
+    await funUpdatePendingApprovals();
+
+    // Initialize event listeners
+    funInitializeEventListeners();
+    
+  } catch (error) {
+    console.error('Error initializing page:', error);
+    funShowError('Failed to load page data. Please refresh and try again.');
+  }
+}
+
+async function funLoadWeekData() {
+  // Get current week data from localStorage via page-logic.js pattern
+  const weekCalendar = JSON.parse(localStorage.getItem('plc::weekCalendar') || '[]');
+  const appConfig = JSON.parse(localStorage.getItem('plc::appConfig') || '[]');
+  
+  const config = appConfig.find(c => c.id === 'current') || {};
+  const timezone = config.teamTimezone || 'UTC';
+  
+  // Find current week (most recent non-archived)
+  const currentDate = new Date();
+  currentWeekData = weekCalendar.find(w => {
+    const startDate = new Date(w.startDate);
+    const endDate = new Date(w.endDate);
+    return currentDate >= startDate && currentDate <= endDate;
+  }) || weekCalendar.find(w => w.status === 'Monitoring') || weekCalendar[0];
+  
+  if (!currentWeekData) {
+    throw new Error('No week data available');
+  }
+  
+  // Update UI
+  document.getElementById('weekStatus').textContent = currentWeekData.status || 'Draft';
+  document.getElementById('weekStatus').className = `px-3 py-1 rounded-lg text-sm font-medium ${getStatusClass(currentWeekData.status)}`;
+  document.getElementById('timezoneDisplay').textContent = timezone;
+  
+  return { ...currentWeekData, timezone };
+}
+
+async function funPopulateWeekSelector() {
+  const weekCalendar = JSON.parse(localStorage.getItem('plc::weekCalendar') || '[]');
+  const selector = document.getElementById('weekSelector');
+  
+  // Sort weeks by start date, most recent first
+  const sortedWeeks = weekCalendar.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  
+  selector.innerHTML = '';
+  sortedWeeks.slice(0, 8).forEach(week => {
+    const option = document.createElement('option');
+    option.value = week.id;
+    option.textContent = `${week.id} (${week.status})`;
+    if (week.id === currentWeekData?.id) {
+      option.selected = true;
+    }
+    selector.appendChild(option);
+  });
+}
+
+async function funUpdateLeadStatus() {
+  if (!currentWeekData) return;
+  
+  const leadClaims = JSON.parse(localStorage.getItem('plc::leadClaims') || '[]');
+  const users = JSON.parse(localStorage.getItem('plc::users') || '[]');
+  
+  const leadClaim = leadClaims.find(l => l.weekId === currentWeekData.id && l.status === 'CLAIMED');
+  const leadUser = leadClaim ? users.find(u => u.id === leadClaim.userId) : null;
+  
+  const statusEl = document.getElementById('leadStatus');
+  const actionsEl = document.getElementById('leadActions');
+  
+  if (leadUser) {
+    const isCurrentUser = leadUser.id === currentUser.id;
+    statusEl.innerHTML = `
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs font-medium">
+          ${leadUser.firstName?.charAt(0)}${leadUser.lastName?.charAt(0)}
+        </div>
+        <span><strong>${leadUser.firstName} ${leadUser.lastName}</strong> claimed lead</span>
+        ${isCurrentUser ? '<span class="px-2 py-1 bg-primary/20 text-primary text-xs font-medium rounded-lg ml-2">You</span>' : ''}
+      </div>
+      <div class="text-xs text-slate-500 mt-1">
+        Claimed ${new Date(leadClaim.claimedAt).toLocaleDateString('en-GB')} at ${new Date(leadClaim.claimedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+      </div>
+    `;
+    
+    if (isCurrentUser) {
+      actionsEl.innerHTML = `
+        <button onclick="window.location.href='approvals_queue.html'" class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors text-sm font-medium">
+          View Approvals
+        </button>
+      `;
+    } else {
+      actionsEl.innerHTML = '';
+    }
+  } else {
+    statusEl.textContent = 'No lead claimed for this week';
+    
+    // Check if it's Tuesday and user can claim
+    const now = new Date();
+    const planningDate = new Date(currentWeekData.planningDate);
+    const isTuesday = now.toDateString() === planningDate.toDateString();
+    
+    if (isTuesday && ['PLANNING_LEAD', 'ADMIN'].includes(currentUser.role)) {
+      actionsEl.innerHTML = `
+        <button onclick="funOpenClaimDrawer()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
+          Claim Lead
+        </button>
+      `;
+    } else {
+      actionsEl.innerHTML = `
+        <button disabled class="px-6 py-2 bg-slate-200 text-slate-500 rounded-lg cursor-not-allowed font-medium">
+          ${isTuesday ? 'Not Authorized' : 'Not Planning Day'}
+        </button>
+      `;
+    }
+  }
+}
+
+async function funUpdateReadinessStatus() {
+  if (!currentWeekData) return;
+  
+  const capacities = JSON.parse(localStorage.getItem('plc::capacities') || '[]');
+  const assignments = JSON.parse(localStorage.getItem('plc::assignments') || '[]');
+  const users = JSON.parse(localStorage.getItem('plc::users') || '[]');
+  
+  const weekCapacities = capacities.filter(c => c.weekId === currentWeekData.id);
+  const weekAssignments = assignments.filter(a => a.weekId === currentWeekData.id && !a.deletedAt);
+  
+  let waitingCount = 0;
+  let totalMembers = 0;
+  
+  weekCapacities.forEach(capacity => {
+    const user = users.find(u => u.id === capacity.userId);
+    if (!user || !user.isActive || capacity.zeroCapacity) return;
+    
+    totalMembers++;
+    
+    const userAssignments = weekAssignments.filter(a => a.userId === capacity.userId);
+    const totalAllocated = userAssignments.reduce((sum, a) => sum + a.segments, 0);
+    
+    // Check if user meets minimum targets for all categories
+    const clientAllocated = userAssignments.filter(a => a.classification === 'client-focused').reduce((sum, a) => sum + a.segments, 0);
+    const techAllocated = userAssignments.filter(a => a.classification === 'tech-debt').reduce((sum, a) => sum + a.segments, 0);
+    const rndAllocated = userAssignments.filter(a => a.classification === 'R&D').reduce((sum, a) => sum + a.segments, 0);
+    
+    const meetsTargets = clientAllocated >= capacity.targets.client && 
+                        techAllocated >= capacity.targets.techDebt && 
+                        rndAllocated >= capacity.targets.rnd &&
+                        totalAllocated >= capacity.weeklyTotal;
+    
+    if (!meetsTargets) {
+      waitingCount++;
+    }
+  });
+  
+  const isReady = waitingCount === 0 && totalMembers > 0;
+  const readinessText = document.getElementById('readinessText');
+  const banner = document.getElementById('readinessBanner');
+  
+  if (isReady) {
+    readinessText.textContent = 'All members ready — publishing...';
+    banner.className = 'bg-secondary/10 border border-secondary/20 rounded-xl p-4';
+    
+    // Show notification preview
+    funShowNotificationPreview();
+  } else {
+    readinessText.textContent = `Waiting for ${waitingCount} member${waitingCount === 1 ? '' : 's'}`;
+    banner.className = 'bg-blue-50 border border-blue-200 rounded-xl p-4';
+  }
+}
+
+async function funUpdatePendingApprovals() {
+  const overrideRequests = JSON.parse(localStorage.getItem('plc::overrideRequests') || '[]');
+  const changeRequests = JSON.parse(localStorage.getItem('plc::changeRequests') || '[]');
+  
+  const pendingOverrides = overrideRequests.filter(r => r.status === 'PENDING').length;
+  const pendingChanges = changeRequests.filter(r => r.status === 'PENDING').length;
+  const total = pendingOverrides + pendingChanges;
+  
+  const badge = document.getElementById('pendingApprovals');
+  badge.textContent = total.toString();
+  
+  if (total > 0) {
+    badge.className = 'px-2 py-1 bg-accent text-white text-xs font-medium rounded-lg';
+  } else {
+    badge.className = 'px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg';
+  }
+}
+
+function funShowNotificationPreview() {
+  const preview = document.getElementById('notificationPreview');
+  const subject = document.getElementById('notificationSubject');
+  const body = document.getElementById('notificationBody');
+  
+  if (currentWeekData) {
+    subject.textContent = `Plan published: ${currentWeekData.id}`;
+    body.textContent = `The plan for week ${currentWeekData.id} was published by ${currentUser.firstName} ${currentUser.lastName}. All team members have met their capacity targets.`;
+    preview.classList.remove('hidden');
+  }
+}
+
+function funOpenClaimDrawer() {
+  const drawer = document.getElementById('claimLeadDrawer');
+  const weekIdEl = document.getElementById('claimWeekId');
+  
+  if (currentWeekData) {
+    weekIdEl.textContent = currentWeekData.id;
+  }
+  
+  drawer.classList.remove('hidden');
+  
+  // Focus management
+  const closeBtn = drawer.querySelector('button[onclick="funCloseClaimDrawer()"]');
+  if (closeBtn) closeBtn.focus();
+}
+
+function funCloseClaimDrawer() {
+  const drawer = document.getElementById('claimLeadDrawer');
+  drawer.classList.add('hidden');
+}
+
+async function funClaimLead() {
+  if (!currentWeekData || !currentUser) {
+    window.showToast('Unable to claim lead role', 'error');
+    return;
+  }
+  
+  try {
+    // Create lead claim record
+    const leadClaims = JSON.parse(localStorage.getItem('plc::leadClaims') || '[]');
+    const auditEvents = JSON.parse(localStorage.getItem('plc::auditEvents') || '[]');
+    
+    // Check for existing claim
+    const existingClaim = leadClaims.find(l => l.weekId === currentWeekData.id && l.status === 'CLAIMED');
+    if (existingClaim) {
+      window.showToast('Lead role already claimed for this week', 'error');
+      funCloseClaimDrawer();
+      return;
+    }
+    
+    const newClaim = {
+      id: `lead-${currentWeekData.id}`,
+      weekId: currentWeekData.id,
+      teamId: 'team-alpha',
+      userId: currentUser.id,
+      claimedAt: new Date().toISOString(),
+      claimedByName: `${currentUser.firstName} ${currentUser.lastName}`,
+      overriddenByAdminId: null,
+      overrideReason: null,
+      status: 'CLAIMED'
+    };
+    
+    // Add to claims
+    leadClaims.push(newClaim);
+    localStorage.setItem('plc::leadClaims', JSON.stringify(leadClaims));
+    
+    // Add audit event
+    const auditEvent = {
+      id: `ae-${Date.now()}`,
+      type: 'LEAD_CLAIMED',
+      whoId: currentUser.id,
+      whoName: `${currentUser.firstName} ${currentUser.lastName}`,
+      when: new Date().toISOString(),
+      weekId: currentWeekData.id,
+      entityType: 'LeadClaim',
+      entityId: newClaim.id,
+      before: '{}',
+      after: JSON.stringify(newClaim),
+      metadata: 'claimed via overview page'
+    };
+    
+    auditEvents.push(auditEvent);
+    localStorage.setItem('plc::auditEvents', JSON.stringify(auditEvents));
+    
+    // Update UI state
+    const uiState = JSON.parse(localStorage.getItem('plc::uiState') || '[]');
+    const userUiState = uiState.find(s => s.userId === currentUser.id) || {
+      id: `ui-${currentUser.id}`,
+      userId: currentUser.id,
+      currentWeekId: currentWeekData.id,
+      lastSelectedTab: 'overview',
+      filters: '{}',
+      columnWidths: '{}',
+      updatedAt: new Date().toISOString()
+    };
+    
+    userUiState.lastSelectedTab = 'overview';
+    userUiState.updatedAt = new Date().toISOString();
+    
+    if (!uiState.find(s => s.userId === currentUser.id)) {
+      uiState.push(userUiState);
+    }
+    localStorage.setItem('plc::uiState', JSON.stringify(uiState));
+    
+    window.showToast('Successfully claimed lead role!', 'success');
+    funCloseClaimDrawer();
+    
+    // Refresh lead status
+    await funUpdateLeadStatus();
+    
+  } catch (error) {
+    console.error('Error claiming lead role:', error);
+    window.showToast('Failed to claim lead role', 'error');
+  }
+}
+
+function funNavigateToLatestSnapshot() {
+  if (!currentWeekData) return;
+  
+  const snapshots = JSON.parse(localStorage.getItem('plc::planSnapshots') || '[]');
+  const weekSnapshots = snapshots.filter(s => s.weekId === currentWeekData.id);
+  const latest = weekSnapshots.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+  
+  if (latest) {
+    window.location.href = `plan_snapshot_viewer.html?snapshotId=${latest.id}`;
+  } else {
+    window.showToast('No snapshots available for this week', 'info');
+  }
+}
+
+function funInitializeEventListeners() {
+  // Week selector change
+  const weekSelector = document.getElementById('weekSelector');
+  if (weekSelector) {
+    weekSelector.addEventListener('change', async (e) => {
+      const selectedWeekId = e.target.value;
+      if (selectedWeekId && selectedWeekId !== currentWeekData?.id) {
+        // Update current week data
+        const weekCalendar = JSON.parse(localStorage.getItem('plc::weekCalendar') || '[]');
+        const selectedWeek = weekCalendar.find(w => w.id === selectedWeekId);
+        
+        if (selectedWeek) {
+          currentWeekData = selectedWeek;
+          await funUpdateLeadStatus();
+          await funUpdateReadinessStatus();
+          await funUpdatePendingApprovals();
+          
+          // Update status display
+          document.getElementById('weekStatus').textContent = selectedWeek.status || 'Draft';
+          document.getElementById('weekStatus').className = `px-3 py-1 rounded-lg text-sm font-medium ${getStatusClass(selectedWeek.status)}`;
+        }
+      }
+    });
+  }
+  
+  // Drawer escape key handling
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const drawer = document.getElementById('claimLeadDrawer');
+      if (!drawer.classList.contains('hidden')) {
+        funCloseClaimDrawer();
+      }
+    }
+  });
+  
+  // Drawer backdrop click
+  const drawer = document.getElementById('claimLeadDrawer');
+  if (drawer) {
+    drawer.addEventListener('click', (e) => {
+      if (e.target === drawer) {
+        funCloseClaimDrawer();
+      }
+    });
+  }
+}
+
+function getStatusClass(status) {
+  switch (status) {
+    case 'Published':
+      return 'bg-secondary text-white';
+    case 'Monitoring':
+      return 'bg-accent text-white';
+    case 'Draft':
+      return 'bg-slate-100 text-slate-700';
+    case 'Archived':
+      return 'bg-slate-200 text-slate-600';
+    default:
+      return 'bg-slate-100 text-slate-700';
+  }
+}
+
+function funShowError(message) {
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'bg-red-50 border border-red-200 rounded-xl p-4 mb-6';
+  errorDiv.innerHTML = `
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+        <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600"></i>
+      </div>
+      <div class="text-sm text-red-800">
+        <div class="font-medium mb-1">Error</div>
+        <div>${message}</div>
+        <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded text-xs font-medium transition-colors">
+          Retry
+        </button>
+      </div>
+    </div>
+  `;
+  
+  const main = document.querySelector('main section');
+  if (main) {
+    main.insertBefore(errorDiv, main.firstChild);
+    // Re-create icons after DOM manipulation
+    lucide.createIcons();
+  }
+}
+
+// Global functions for inline event handlers
+window.funOpenClaimDrawer = funOpenClaimDrawer;
+window.funCloseClaimDrawer = funCloseClaimDrawer;
+window.funClaimLead = funClaimLead;
+window.funNavigateToLatestSnapshot = funNavigateToLatestSnapshot;
+
+// Initialize page when DOM is loaded
+document.addEventListener('DOMContentLoaded', funInitializePage);
+</script></body></html>

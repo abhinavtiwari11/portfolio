@@ -1,0 +1,1592 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Planning Lead Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 1rem;
+            --text-display-sm--line-height: 1.5rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        .focus-visible:focus-visible {
+            outline: 2px solid theme('colors.primary');
+            outline-offset: 2px;
+        }
+
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: theme('colors.slate.500');
+            margin-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-group-header:first-child {
+            margin-top: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: theme('radius.md');
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: theme('colors.slate.700');
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: theme('colors.slate.100');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active {
+            background-color: theme('colors.primary/10');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: theme('colors.primary');
+            border-radius: 0 2px 2px 0;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: white;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-slate-800">
+
+    <!-- Skip to main content -->
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+
+    <!-- Top Header -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b border-slate-200 sticky top-0 z-30">
+        <div class="flex items-center gap-4">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 focus-visible" aria-label="Open navigation menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                        <!-- Palette: navy (#0B63A7) and teal (#00A99D) -->
+                        <!-- Rounded calendar outline -->
+                        <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                        <!-- Day cells (3x2 grid) -->
+                        <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                            <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        </g>
+                        <!-- Asynchronous loop (teal) wrapping the calendar -->
+                        <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22"></path>
+                            <circle cx="300" cy="245" r="8"></circle>
+                            <circle cx="280" cy="200" r="8"></circle>
+                            <circle cx="270" cy="150" r="8"></circle>
+                            <path d="M260 100 L246 116 L274 116 Z"></path>
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="text-display-md leading-display-md font-bold text-primary">Planning Lead Console</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <!-- User Profile Button -->
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors focus-visible" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-medium text-slate-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-slate-200 rounded-xl shadow-lg p-4 w-64 z-50 hidden" role="dialog" aria-labelledby="userProfileTitle">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-slate-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-slate-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors focus-visible">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Desktop Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r border-slate-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-6" role="navigation" aria-label="Main navigation" id="sideNav">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        
+        <!-- Mobile Sidebar -->
+        <aside id="mobileSidebar" class="mobile-sidebar md:hidden">
+            <nav class="p-6" role="navigation" aria-label="Main navigation">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Approvals Queue - Planning Lead Console</title>
+</head_content_code>
+
+<html_content_code>
+<!-- Breadcrumb -->
+<nav class="mb-6" aria-label="Breadcrumb">
+    <ol class="flex items-center space-x-2 text-sm text-slate-600">
+        <li><a href="planning_week_overview.html" class="hover:text-primary">Overview</a></li>
+        <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+        <li class="text-slate-900 font-medium">Approvals</li>
+    </ol>
+</nav>
+
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-slate-900">Approvals Queue</h1>
+        <p class="text-sm leading-[1.375rem] text-slate-600 mt-1">Review pending requests and make decisions</p>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="border-b border-slate-200 mb-6">
+    <nav class="-mb-px flex space-x-8" aria-label="Approval tabs">
+        <button id="tabClassificationOverrides" class="tab-button active whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-tab="classification-overrides" role="tab" aria-selected="true" aria-controls="classification-overrides-panel">
+            Classification Overrides
+            <span id="overridesCount" class="ml-2 bg-accent text-primary text-xs px-2 py-1 rounded-full">0</span>
+        </button>
+        <button id="tabChangeRequests" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-tab="change-requests" role="tab" aria-selected="false" aria-controls="change-requests-panel">
+            Change Requests
+            <span id="changeRequestsCount" class="ml-2 bg-accent text-primary text-xs px-2 py-1 rounded-full">0</span>
+        </button>
+    </nav>
+</div>
+
+<!-- Empty State (initially hidden) -->
+<div id="emptyState" class="text-center py-12 hidden">
+    <div class="w-24 h-24 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+        <i data-lucide="clipboard-check" class="w-10 h-10 text-slate-400"></i>
+    </div>
+    <h3 class="text-lg font-semibold text-slate-900 mb-2">No approvals pending</h3>
+    <p class="text-slate-600 mb-6">All requests have been processed</p>
+    <a href="planning_week_overview.html" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+        Back to Overview
+    </a>
+</div>
+
+<!-- Tab Panels -->
+<div id="tabContent">
+    <!-- Classification Overrides Panel -->
+    <div id="classification-overrides-panel" class="tab-panel" role="tabpanel" aria-labelledby="tabClassificationOverrides">
+        
+        <!-- Search and Filters -->
+        <div class="mb-4 flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <label for="overridesSearch" class="sr-only">Search overrides</label>
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                    <input type="text" id="overridesSearch" placeholder="Search by requester or justification..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="bulkApproveOverrides" class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+                    Approve Selected (<span id="selectedOverridesCount">0</span>)
+                </button>
+                <button id="bulkRejectOverrides" class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+                    Reject Selected
+                </button>
+            </div>
+        </div>
+
+        <!-- Overrides Table -->
+        <div class="bg-surface border border-slate-200 rounded-lg overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left">
+                            <input type="checkbox" id="selectAllOverrides" class="rounded border-slate-300 text-primary focus:ring-primary/20" aria-label="Select all overrides">
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Activity</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Requester</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Current → Requested</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Requested</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="overridesTableBody" class="divide-y divide-slate-200">
+                    <!-- Dynamic content populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Change Requests Panel -->
+    <div id="change-requests-panel" class="tab-panel hidden" role="tabpanel" aria-labelledby="tabChangeRequests">
+        
+        <!-- Search and Filters -->
+        <div class="mb-4 flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <label for="changeRequestsSearch" class="sr-only">Search change requests</label>
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                    <input type="text" id="changeRequestsSearch" placeholder="Search by requester or reason..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="bulkApproveRequests" class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+                    Approve Selected (<span id="selectedRequestsCount">0</span>)
+                </button>
+                <button id="bulkRejectRequests" class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+                    Reject Selected
+                </button>
+            </div>
+        </div>
+
+        <!-- Change Requests Table -->
+        <div class="bg-surface border border-slate-200 rounded-lg overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left">
+                            <input type="checkbox" id="selectAllRequests" class="rounded border-slate-300 text-primary focus:ring-primary/20" aria-label="Select all change requests">
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Type</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Requester</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Target</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Requested</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="changeRequestsTableBody" class="divide-y divide-slate-200">
+                    <!-- Dynamic content populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Review Drawer -->
+<div id="reviewDrawer" class="fixed inset-y-0 right-0 w-96 bg-surface shadow-lg transform translate-x-full transition-transform duration-300 z-40 border-l border-slate-200" role="dialog" aria-labelledby="drawerTitle" aria-hidden="true">
+    
+    <div class="flex items-center justify-between p-6 border-b border-slate-200">
+        <h2 id="drawerTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Review Request</h2>
+        <button id="closeDrawer" class="p-2 rounded-lg hover:bg-slate-100 transition-colors focus-visible" aria-label="Close drawer">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+    </div>
+
+    <div id="drawerContent" class="p-6 overflow-y-auto h-full">
+        <!-- Content populated by JS -->
+    </div>
+</div>
+
+<!-- Drawer Overlay -->
+<div id="drawerOverlay" class="fixed inset-0 bg-black/50 z-30 hidden"></div>
+
+<!-- Bulk Confirmation Modal -->
+<div id="bulkConfirmModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" role="dialog" aria-labelledby="bulkConfirmTitle" aria-hidden="true">
+    
+    <div class="fixed inset-0 bg-black/50" aria-hidden="true"></div>
+    
+    <div class="relative bg-surface rounded-xl shadow-lg p-6 w-full max-w-md">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-accent"></i>
+            </div>
+            <h3 id="bulkConfirmTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Confirm Bulk Decision</h3>
+        </div>
+        
+        <p id="bulkConfirmMessage" class="text-sm text-slate-600 mb-4">
+            <!-- Dynamic message -->
+        </p>
+        
+        <form id="bulkDecisionForm" class="space-y-4">
+            <div>
+                <label for="bulkReason" class="block text-sm font-medium text-slate-700 mb-2">
+                    Reason <span class="text-error">*</span>
+                </label>
+                <textarea id="bulkReason" rows="3" required="" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Provide a reason for this decision..."></textarea>
+            </div>
+            
+            <div class="flex gap-3 pt-2">
+                <button type="button" id="cancelBulkDecision" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" id="confirmBulkDecision" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                    Confirm
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'PLC__';
+
+        // Mobile navigation toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = sidebar.classList.contains('open');
+                
+                btn.setAttribute('aria-expanded', String(!isOpen));
+                
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.focus();
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // Navigation active state management
+        function updateActiveNavItem() {
+            const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                               window.location.pathname.split('/').pop() || 
+                               'planning_week_overview.html';
+            
+            // Update both desktop and mobile nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const itemPage = item.getAttribute('data-page') || item.getAttribute('href');
+                if (itemPage === currentPage) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'page');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Update active state on page load and when navigation changes
+        updateActiveNavItem();
+        window.addEventListener('popstate', updateActiveNavItem);
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-alice');
+                    currentUserId = 'u-alice';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users_' + currentUserId);
+                try { 
+                    if (userData) return JSON.parse(userData);
+                    
+                    // Fallback to dummy data from localStorage if available
+                    const usersData = localStorage.getItem('plc::users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        if (user) return user;
+                    }
+                    
+                    // Final fallback
+                    return {
+                        id: 'u-alice',
+                        firstName: 'Alice',
+                        lastName: 'Nguyen',
+                        role: 'PLANNING_LEAD',
+                        email: 'alice.nguyen@example.local'
+                    };
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            const initials = UserUtils.getUserInitials(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverUserAvatar) popoverUserAvatar.textContent = initials;
+            if (popoverUserName) popoverUserName.textContent = displayName;
+            if (popoverUserEmail) popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover management
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popoverVisible = !popoverVisible;
+                
+                if (popoverVisible) {
+                    popover.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first interactive element in popover
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                } else {
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Sign out handler
+            const signOutBtn = document.getElementById('signOutButton');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        UserUtils.signOut();
+                    }
+                });
+            }
+        }());
+
+        // Import/Export functionality (namespaced)
+        document.getElementById('exportAppData')?.addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith(APP_PREFIX) || key.startsWith('plc::'))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "planning_console_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData')?.addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile')?.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX) || key.startsWith('plc::')) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        alert(`✅ Successfully imported ${importedCount} data items. Please refresh the page to see changes.`);
+                    } else {
+                        alert('⚠️ No compatible data found in the file.');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    alert('❌ Failed to import: Invalid JSON format or corrupted file.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions handler
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (error) {
+                    console.error(`Error executing action ${action}:`, error);
+                    el.setAttribute('disabled', 'true');
+                    el.setAttribute('title', 'Action failed');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Action not available');
+                console.warn(`Action ${action} not found in window.AppActions`);
+            }
+        });
+
+        // Toast notification helper
+        window.showToast = function(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-opacity duration-300 ${
+                type === 'success' ? 'bg-secondary' : 
+                type === 'error' ? 'bg-error' : 
+                'bg-slate-600'
+            }`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        };
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+    import { 
+        getOverrideRequests, 
+        getChangeRequests, 
+        getUsers, 
+        getActivities,
+        approveOverrideRequest,
+        rejectOverrideRequest,
+        approveChangeRequest,
+        rejectChangeRequest,
+        getCurrentUser,
+        getCurrentWeekId
+    } from './page-logic.js';
+
+    // Get DOM elements
+    const elements = {
+        // Tabs
+        tabClassificationOverrides: document.getElementById('tabClassificationOverrides'),
+        tabChangeRequests: document.getElementById('tabChangeRequests'),
+        overridesPanel: document.getElementById('classification-overrides-panel'),
+        changeRequestsPanel: document.getElementById('change-requests-panel'),
+        tabContent: document.getElementById('tabContent'),
+        emptyState: document.getElementById('emptyState'),
+        
+        // Counts
+        overridesCount: document.getElementById('overridesCount'),
+        changeRequestsCount: document.getElementById('changeRequestsCount'),
+        selectedOverridesCount: document.getElementById('selectedOverridesCount'),
+        selectedRequestsCount: document.getElementById('selectedRequestsCount'),
+        
+        // Search
+        overridesSearch: document.getElementById('overridesSearch'),
+        changeRequestsSearch: document.getElementById('changeRequestsSearch'),
+        
+        // Tables
+        overridesTableBody: document.getElementById('overridesTableBody'),
+        changeRequestsTableBody: document.getElementById('changeRequestsTableBody'),
+        
+        // Bulk actions
+        selectAllOverrides: document.getElementById('selectAllOverrides'),
+        selectAllRequests: document.getElementById('selectAllRequests'),
+        bulkApproveOverrides: document.getElementById('bulkApproveOverrides'),
+        bulkRejectOverrides: document.getElementById('bulkRejectOverrides'),
+        bulkApproveRequests: document.getElementById('bulkApproveRequests'),
+        bulkRejectRequests: document.getElementById('bulkRejectRequests'),
+        
+        // Drawer
+        reviewDrawer: document.getElementById('reviewDrawer'),
+        drawerOverlay: document.getElementById('drawerOverlay'),
+        drawerTitle: document.getElementById('drawerTitle'),
+        drawerContent: document.getElementById('drawerContent'),
+        closeDrawer: document.getElementById('closeDrawer'),
+        
+        // Modal
+        bulkConfirmModal: document.getElementById('bulkConfirmModal'),
+        bulkConfirmTitle: document.getElementById('bulkConfirmTitle'),
+        bulkConfirmMessage: document.getElementById('bulkConfirmMessage'),
+        bulkDecisionForm: document.getElementById('bulkDecisionForm'),
+        bulkReason: document.getElementById('bulkReason'),
+        cancelBulkDecision: document.getElementById('cancelBulkDecision'),
+        confirmBulkDecision: document.getElementById('confirmBulkDecision')
+    };
+
+    // Global state
+    let currentUser = null;
+    let currentWeekId = null;
+    let overrideRequests = [];
+    let changeRequests = [];
+    let users = [];
+    let activities = [];
+    let filteredOverrides = [];
+    let filteredRequests = [];
+    let selectedOverrides = new Set();
+    let selectedRequests = new Set();
+    let activeTab = 'classification-overrides';
+    let currentReviewId = null;
+    let currentReviewType = null;
+
+    // Initialize page
+    async function funInitializePage() {
+        try {
+            // Load user and current week data
+            currentUser = await getCurrentUser();
+            currentWeekId = await getCurrentWeekId();
+            
+            // Load data collections
+            // Expected return type: Array of override request objects with status 'PENDING'
+            // Collections used: overrideRequests filtered by status and weekId
+            overrideRequests = await getOverrideRequests(currentWeekId, 'PENDING');
+            
+            // Expected return type: Array of change request objects with status 'PENDING' 
+            // Collections used: changeRequests filtered by status and weekId
+            changeRequests = await getChangeRequests(currentWeekId, 'PENDING');
+            
+            // Expected return type: Array of user objects for display names
+            // Collections used: users
+            users = await getUsers();
+            
+            // Expected return type: Array of activity objects for titles and details
+            // Collections used: activities
+            activities = await getActivities();
+
+            // Check permissions
+            if (!funHasPermission(currentUser, 'view')) {
+                window.location.href = 'access_denied.html';
+                return;
+            }
+
+            // Initialize UI
+            funUpdateCounts();
+            funFilterAndRenderOverrides();
+            funFilterAndRenderChangeRequests();
+            funSetupEventListeners();
+            funCheckEmptyState();
+            
+        } catch (error) {
+            console.error('Failed to initialize page:', error);
+            window.showToast('Failed to load approval data', 'error');
+        }
+    }
+
+    // Check user permissions
+    function funHasPermission(user, action) {
+        if (!user) return false;
+        const allowedRoles = {
+            view: ['PLANNING_LEAD', 'ADMIN'],
+            edit: ['PLANNING_LEAD', 'ADMIN']
+        };
+        return allowedRoles[action]?.includes(user.role) || false;
+    }
+
+    // Update counts in tab buttons
+    function funUpdateCounts() {
+        elements.overridesCount.textContent = overrideRequests.length;
+        elements.changeRequestsCount.textContent = changeRequests.length;
+    }
+
+    // Check if all panels are empty and show empty state
+    function funCheckEmptyState() {
+        const hasData = overrideRequests.length > 0 || changeRequests.length > 0;
+        
+        if (!hasData) {
+            elements.tabContent.classList.add('hidden');
+            elements.emptyState.classList.remove('hidden');
+        } else {
+            elements.tabContent.classList.remove('hidden');
+            elements.emptyState.classList.add('hidden');
+        }
+    }
+
+    // Tab management
+    function funSwitchTab(tabId) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-700');
+            btn.classList.remove('border-primary', 'text-primary');
+            btn.setAttribute('aria-selected', 'false');
+        });
+
+        // Update panels
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.classList.add('hidden');
+        });
+
+        // Activate selected tab
+        const activeButton = document.querySelector(`[data-tab="${tabId}"]`);
+        const activePanel = document.getElementById(`${tabId}-panel`);
+
+        if (activeButton && activePanel) {
+            activeButton.classList.add('active', 'border-primary', 'text-primary');
+            activeButton.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-700');
+            activeButton.setAttribute('aria-selected', 'true');
+            activePanel.classList.remove('hidden');
+            activeTab = tabId;
+        }
+    }
+
+    // Filter and render override requests
+    function funFilterAndRenderOverrides() {
+        const searchTerm = elements.overridesSearch.value.toLowerCase();
+        
+        filteredOverrides = overrideRequests.filter(request => {
+            const requester = funGetUserName(request.requesterId);
+            const activity = funGetActivityTitle(request.activityId);
+            
+            return !searchTerm || 
+                   requester.toLowerCase().includes(searchTerm) ||
+                   request.justification.toLowerCase().includes(searchTerm) ||
+                   activity.toLowerCase().includes(searchTerm);
+        });
+
+        funRenderOverridesTable();
+    }
+
+    // Filter and render change requests
+    function funFilterAndRenderChangeRequests() {
+        const searchTerm = elements.changeRequestsSearch.value.toLowerCase();
+        
+        filteredRequests = changeRequests.filter(request => {
+            const requester = funGetUserName(request.requesterId);
+            
+            return !searchTerm || 
+                   requester.toLowerCase().includes(searchTerm) ||
+                   request.reason.toLowerCase().includes(searchTerm) ||
+                   request.type.toLowerCase().includes(searchTerm);
+        });
+
+        funRenderChangeRequestsTable();
+    }
+
+    // Render overrides table
+    function funRenderOverridesTable() {
+        if (filteredOverrides.length === 0) {
+            elements.overridesTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-slate-500">
+                        No classification overrides found
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        elements.overridesTableBody.innerHTML = filteredOverrides.map(request => {
+            const requester = funGetUserName(request.requesterId);
+            const activity = funGetActivityTitle(request.activityId);
+            const createdDate = new Date(request.createdAt).toLocaleDateString('en-GB');
+            
+            return `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3">
+                        <input type="checkbox" 
+                               class="override-checkbox rounded border-slate-300 text-primary focus:ring-primary/20"
+                               data-request-id="${request.id}"
+                               ${selectedOverrides.has(request.id) ? 'checked' : ''}>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="font-medium text-slate-900">${funEscapeHtml(activity)}</div>
+                        <div class="text-sm text-slate-500">${funEscapeHtml(request.activityId)}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="font-medium text-slate-900">${funEscapeHtml(requester)}</div>
+                        <div class="text-sm text-slate-500">${createdDate}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-700">
+                                ${funFormatClassification(request.currentClassification)}
+                            </span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400"></i>
+                            <span class="px-2 py-1 text-xs rounded-full bg-accent/20 text-primary">
+                                ${funFormatClassification(request.requestedClassification)}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="text-sm text-slate-900 max-w-xs truncate" title="${funEscapeHtml(request.justification)}">
+                            ${funEscapeHtml(request.justification)}
+                        </div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <button class="review-btn text-sm px-3 py-1 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+                                data-request-id="${request.id}" 
+                                data-request-type="override">
+                            Review
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Re-initialize Lucide icons for the new content
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
+    // Render change requests table
+    function funRenderChangeRequestsTable() {
+        if (filteredRequests.length === 0) {
+            elements.changeRequestsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-slate-500">
+                        No change requests found
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        elements.changeRequestsTableBody.innerHTML = filteredRequests.map(request => {
+            const requester = funGetUserName(request.requesterId);
+            const createdDate = new Date(request.createdAt).toLocaleDateString('en-GB');
+            
+            return `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3">
+                        <input type="checkbox" 
+                               class="request-checkbox rounded border-slate-300 text-primary focus:ring-primary/20"
+                               data-request-id="${request.id}"
+                               ${selectedRequests.has(request.id) ? 'checked' : ''}>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-700">
+                            ${funFormatRequestType(request.type)}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="font-medium text-slate-900">${funEscapeHtml(requester)}</div>
+                        <div class="text-sm text-slate-500">${createdDate}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="text-sm text-slate-900">${funFormatTargetEntity(request.targetEntity)}</div>
+                        <div class="text-sm text-slate-500">${funEscapeHtml(request.targetEntityId)}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="text-sm text-slate-900 max-w-xs truncate" title="${funEscapeHtml(request.reason)}">
+                            ${funEscapeHtml(request.reason)}
+                        </div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <button class="review-btn text-sm px-3 py-1 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+                                data-request-id="${request.id}" 
+                                data-request-type="change">
+                            Review
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Re-initialize Lucide icons for the new content
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
+    // Utility functions
+    function funGetUserName(userId) {
+        const user = users.find(u => u.id === userId);
+        return user ? `${user.firstName} ${user.lastName}` : 'Unknown User';
+    }
+
+    function funGetActivityTitle(activityId) {
+        const activity = activities.find(a => a.id === activityId);
+        return activity ? activity.title : 'Unknown Activity';
+    }
+
+    function funFormatClassification(classification) {
+        const formatMap = {
+            'client-focused': 'Client Focused',
+            'tech-debt': 'Tech Debt',
+            'R&D': 'R&D'
+        };
+        return formatMap[classification] || classification;
+    }
+
+    function funFormatRequestType(type) {
+        const formatMap = {
+            'FORCE_PUBLISH': 'Force Publish',
+            'POST_PUBLICATION_EDIT': 'Post-Publication Edit'
+        };
+        return formatMap[type] || type;
+    }
+
+    function funFormatTargetEntity(entity) {
+        const formatMap = {
+            'Plan': 'Plan',
+            'Activity': 'Activity',
+            'Assignment': 'Assignment',
+            'PlanSnapshot': 'Plan Snapshot'
+        };
+        return formatMap[entity] || entity;
+    }
+
+    function funEscapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Open review drawer
+    async function funOpenReviewDrawer(requestId, type) {
+        currentReviewId = requestId;
+        currentReviewType = type;
+        
+        const request = type === 'override' 
+            ? overrideRequests.find(r => r.id === requestId)
+            : changeRequests.find(r => r.id === requestId);
+
+        if (!request) {
+            window.showToast('Request not found', 'error');
+            return;
+        }
+
+        // Update drawer title
+        elements.drawerTitle.textContent = type === 'override' 
+            ? 'Review Classification Override'
+            : 'Review Change Request';
+
+        // Populate drawer content
+        elements.drawerContent.innerHTML = funBuildDrawerContent(request, type);
+
+        // Show drawer
+        elements.drawerOverlay.classList.remove('hidden');
+        elements.reviewDrawer.classList.remove('translate-x-full');
+        elements.reviewDrawer.setAttribute('aria-hidden', 'false');
+        
+        // Focus first interactive element
+        const firstInput = elements.drawerContent.querySelector('input[type="radio"]');
+        if (firstInput) firstInput.focus();
+
+        // Re-initialize Lucide icons
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
+    // Build drawer content
+    function funBuildDrawerContent(request, type) {
+        const requester = funGetUserName(request.requesterId);
+        const createdDate = new Date(request.createdAt).toLocaleString('en-GB');
+
+        if (type === 'override') {
+            const activity = funGetActivityTitle(request.activityId);
+            
+            return `
+                <div class="space-y-6">
+                    <div class="bg-slate-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-slate-900 mb-2">Request Details</h3>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="font-medium">Activity:</span> ${funEscapeHtml(activity)}</div>
+                            <div><span class="font-medium">Requester:</span> ${funEscapeHtml(requester)}</div>
+                            <div><span class="font-medium">Requested:</span> ${createdDate}</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-slate-900 mb-2">Classification Change</h3>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 text-sm rounded-full bg-slate-200 text-slate-700">
+                                ${funFormatClassification(request.currentClassification)}
+                            </span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400"></i>
+                            <span class="px-3 py-1 text-sm rounded-full bg-accent/20 text-primary">
+                                ${funFormatClassification(request.requestedClassification)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-slate-900 mb-2">Justification</h3>
+                        <p class="text-sm text-slate-700 bg-slate-50 rounded-lg p-3">
+                            ${funEscapeHtml(request.justification)}
+                        </p>
+                    </div>
+
+                    <form id="reviewForm" class="space-y-4">
+                        <div>
+                            <label class="block font-semibold text-slate-900 mb-3">Decision</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="decision" value="approve" 
+                                           class="text-secondary focus:ring-secondary/20">
+                                    <span class="text-sm">Approve this override</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="decision" value="reject" 
+                                           class="text-error focus:ring-error/20">
+                                    <span class="text-sm">Reject this override</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="decisionReason" class="block font-semibold text-slate-900 mb-2">
+                                Reason <span class="text-error">*</span>
+                            </label>
+                            <textarea id="decisionReason" 
+                                      rows="3" 
+                                      required
+                                      class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                                      placeholder="Provide your reasoning for this decision..."></textarea>
+                        </div>
+
+                        <div class="flex gap-3 pt-4">
+                            <button type="button" 
+                                    id="cancelReview"
+                                    class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                Submit Decision
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="space-y-6">
+                    <div class="bg-slate-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-slate-900 mb-2">Request Details</h3>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="font-medium">Type:</span> ${funFormatRequestType(request.type)}</div>
+                            <div><span class="font-medium">Requester:</span> ${funEscapeHtml(requester)}</div>
+                            <div><span class="font-medium">Target:</span> ${funFormatTargetEntity(request.targetEntity)}</div>
+                            <div><span class="font-medium">Requested:</span> ${createdDate}</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-slate-900 mb-2">Reason</h3>
+                        <p class="text-sm text-slate-700 bg-slate-50 rounded-lg p-3">
+                            ${funEscapeHtml(request.reason)}
+                        </p>
+                    </div>
+
+                    <form id="reviewForm" class="space-y-4">
+                        <div>
+                            <label class="block font-semibold text-slate-900 mb-3">Decision</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="decision" value="approve" 
+                                           class="text-secondary focus:ring-secondary/20">
+                                    <span class="text-sm">Approve this request</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="decision" value="reject" 
+                                           class="text-error focus:ring-error/20">
+                                    <span class="text-sm">Reject this request</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="decisionReason" class="block font-semibold text-slate-900 mb-2">
+                                Reason <span class="text-error">*</span>
+                            </label>
+                            <textarea id="decisionReason" 
+                                      rows="3" 
+                                      required
+                                      class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                                      placeholder="Provide your reasoning for this decision..."></textarea>
+                        </div>
+
+                        <div class="flex gap-3 pt-4">
+                            <button type="button" 
+                                    id="cancelReview"
+                                    class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                Submit Decision
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+    }
+
+    // Close review drawer
+    function funCloseDrawer() {
+        elements.reviewDrawer.classList.add('translate-x-full');
+        elements.drawerOverlay.classList.add('hidden');
+        elements.reviewDrawer.setAttribute('aria-hidden', 'true');
+        currentReviewId = null;
+        currentReviewType = null;
+    }
+
+    // Update bulk action buttons
+    function funUpdateBulkButtons() {
+        const selectedOverrideCount = selectedOverrides.size;
+        const selectedRequestCount = selectedRequests.size;
+        
+        elements.selectedOverridesCount.textContent = selectedOverrideCount;
+        elements.selectedRequestsCount.textContent = selectedRequestCount;
+        
+        elements.bulkApproveOverrides.disabled = selectedOverrideCount === 0;
+        elements.bulkRejectOverrides.disabled = selectedOverrideCount === 0;
+        elements.bulkApproveRequests.disabled = selectedRequestCount === 0;
+        elements.bulkRejectRequests.disabled = selectedRequestCount === 0;
+    }
+
+    // Show bulk confirmation modal
+    function funShowBulkConfirmation(decision, type, count) {
+        const actionText = decision === 'approve' ? 'approve' : 'reject';
+        const itemType = type === 'overrides' ? 'override request' : 'change request';
+        const itemText = count === 1 ? itemType : `${itemType}s`;
+        
+        elements.bulkConfirmTitle.textContent = `Confirm Bulk ${decision.charAt(0).toUpperCase() + decision.slice(1)}`;
+        elements.bulkConfirmMessage.textContent = `Are you sure you want to ${actionText} ${count} ${itemText}? This action cannot be undone.`;
+        
+        elements.bulkConfirmModal.classList.remove('hidden');
+        elements.bulkConfirmModal.setAttribute('aria-hidden', 'false');
+        elements.bulkReason.focus();
+        
+        // Store decision context
+        elements.bulkConfirmModal.dataset.decision = decision;
+        elements.bulkConfirmModal.dataset.type = type;
+    }
+
+    // Hide bulk confirmation modal
+    function funHideBulkConfirmation() {
+        elements.bulkConfirmModal.classList.add('hidden');
+        elements.bulkConfirmModal.setAttribute('aria-hidden', 'true');
+        elements.bulkReason.value = '';
+    }
+
+    // Process bulk decision
+    async function funProcessBulkDecision(decision, type, reason) {
+        const selectedIds = type === 'overrides' ? Array.from(selectedOverrides) : Array.from(selectedRequests);
+        const results = [];
+        
+        try {
+            for (const id of selectedIds) {
+                if (type === 'overrides') {
+                    if (decision === 'approve') {
+                        // Expected: Updates overrideRequest status to APPROVED, creates auditEvent
+                        // Collections used: overrideRequests, approvalDecisions, auditEvents
+                        await approveOverrideRequest(id, currentUser.id, reason);
+                    } else {
+                        // Expected: Updates overrideRequest status to REJECTED, creates auditEvent
+                        // Collections used: overrideRequests, approvalDecisions, auditEvents
+                        await rejectOverrideRequest(id, currentUser.id, reason);
+                    }
+                } else {
+                    if (decision === 'approve') {
+                        // Expected: Updates changeRequest status to APPROVED, creates auditEvent
+                        // Collections used: changeRequests, approvalDecisions, auditEvents
+                        await approveChangeRequest(id, currentUser.id, reason);
+                    } else {
+                        // Expected: Updates changeRequest status to REJECTED, creates auditEvent
+                        // Collections used: changeRequests, approvalDecisions, auditEvents  
+                        await rejectChangeRequest(id, currentUser.id, reason);
+                    }
+                }
+                results.push({ id, success: true });
+            }
+            
+            // Show success message
+            const actionText = decision === 'approve' ? 'approved' : 'rejected';
+            window.showToast(`Successfully ${actionText} ${results.length} request(s)`, 'success');
+            
+            // Refresh data and UI
+            await funRefreshData();
+            
+        } catch (error) {
+            console.error('Bulk decision error:', error);
+            window.showToast('Failed to process bulk decision', 'error');
+        }
+    }
+
+    // Submit individual review
+    async function funSubmitReview(decision, reason) {
+        if (!currentReviewId || !currentReviewType) {
+            window.showToast('Invalid review context', 'error');
+            return;
+        }
+
+        try {
+            if (currentReviewType === 'override') {
+                if (decision === 'approve') {
+                    // Expected: Updates overrideRequest status to APPROVED, creates auditEvent
+                    // Collections used: overrideRequests, approvalDecisions, auditEvents
+                    await approveOverrideRequest(currentReviewId, currentUser.id, reason);
+                } else {
+                    // Expected: Updates overrideRequest status to REJECTED, creates auditEvent
+                    // Collections used: overrideRequests, approvalDecisions, auditEvents
+                    await rejectOverrideRequest(currentReviewId, currentUser.id, reason);
+                }
+            } else {
+                if (decision === 'approve') {
+                    // Expected: Updates changeRequest status to APPROVED, creates auditEvent
+                    // Collections used: changeRequests, approvalDecisions, auditEvents
+                    await approveChangeRequest(currentReviewId, currentUser.id, reason);
+                } else {
+                    // Expected: Updates changeRequest status to REJECTED, creates auditEvent
+                    // Collections used: changeRequests, approvalDecisions, auditEvents
+                    await rejectChangeRequest(currentReviewId, currentUser.id, reason);
+                }
+            }
+
+            const actionText = decision === 'approve' ? 'approved' : 'rejected';
+            window.showToast(`Request ${actionText} successfully`, 'success');
+            
+            funCloseDrawer();
+            await funRefreshData();
+            
+        } catch (error) {
+            console.error('Review submission error:', error);
+            if (error.message?.includes('already resolved')) {
+                window.showToast('Request already resolved by another user', 'error');
+                funCloseDrawer();
+                await funRefreshData();
+            } else {
+                window.showToast('Failed to submit decision', 'error');
+            }
+        }
+    }
+
+    // Refresh data after changes
+    async function funRefreshData() {
+        try {
+            // Reload requests data
+            overrideRequests = await getOverrideRequests(currentWeekId, 'PENDING');
+            changeRequests = await getChangeRequests(currentWeekId, 'PENDING');
+            
+            // Clear selections
+            selectedOverrides.clear();
+            selectedRequests.clear();
+            
+            // Update UI
+            funUpdateCounts();
+            funFilterAndRenderOverrides();
+            funFilterAndRenderChangeRequests();
+            funUpdateBulkButtons();
+            funCheckEmptyState();
+            
+        } catch (error) {
+            console.error('Failed to refresh data:', error);
+        }
+    }
+
+    // Set up event listeners
+    function funSetupEventListeners() {
+        // Tab switching
+        elements.tabClassificationOverrides.addEventListener('click', () => funSwitchTab('classification-overrides'));
+        elements.tabChangeRequests.addEventListener('click', () => funSwitchTab('change-requests'));
+
+        // Search functionality
+        elements.overridesSearch.addEventListener('input', funFilterAndRenderOverrides);
+        elements.changeRequestsSearch.addEventListener('input', funFilterAndRenderChangeRequests);
+
+        // Select all checkboxes
+        elements.selectAllOverrides.addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.override-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = e.target.checked;
+                const requestId = cb.dataset.requestId;
+                if (e.target.checked) {
+                    selectedOverrides.add(requestId);
+                } else {
+                    selectedOverrides.delete(requestId);
+                }
+            });
+            funUpdateBulkButtons();
+        });
+
+        elements.selectAllRequests.addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.request-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = e.target.checked;
+                const requestId = cb.dataset.requestId;
+                if (e.target.checked) {
+                    selectedRequests.add(requestId);
+                } else {
+                    selectedRequests.delete(requestId);
+                }
+            });
+            funUpdateBulkButtons();
+        });
+
+        // Individual checkboxes (delegated)
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('override-checkbox')) {
+                const requestId = e.target.dataset.requestId;
+                if (e.target.checked) {
+                    selectedOverrides.add(requestId);
+                } else {
+                    selectedOverrides.delete(requestId);
+                }
+                funUpdateBulkButtons();
+            } else if (e.target.classList.contains('request-checkbox')) {
+                const requestId = e.target.dataset.requestId;
+                if (e.target.checked) {
+                    selectedRequests.add(requestId);
+                } else {
+                    selectedRequests.delete(requestId);
+                }
+                funUpdateBulkButtons();
+            }
+        });
+
+        // Review buttons (delegated)
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('review-btn')) {
+                const requestId = e.target.dataset.requestId;
+                const requestType = e.target.dataset.requestType;
+                funOpenReviewDrawer(requestId, requestType);
+            }
+        });
+
+        // Bulk action buttons
+        elements.bulkApproveOverrides.addEventListener('click', () => 
+            funShowBulkConfirmation('approve', 'overrides', selectedOverrides.size));
+        elements.bulkRejectOverrides.addEventListener('click', () => 
+            funShowBulkConfirmation('reject', 'overrides', selectedOverrides.size));
+        elements.bulkApproveRequests.addEventListener('click', () => 
+            funShowBulkConfirmation('approve', 'requests', selectedRequests.size));
+        elements.bulkRejectRequests.addEventListener('click', () => 
+            funShowBulkConfirmation('reject', 'requests', selectedRequests.size));
+
+        // Drawer controls
+        elements.closeDrawer.addEventListener('click', funCloseDrawer);
+        elements.drawerOverlay.addEventListener('click', funCloseDrawer);
+
+        // Modal controls
+        elements.cancelBulkDecision.addEventListener('click', funHideBulkConfirmation);
+        elements.bulkDecisionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const reason = elements.bulkReason.value.trim();
+            const decision = elements.bulkConfirmModal.dataset.decision;
+            const type = elements.bulkConfirmModal.dataset.type;
+            
+            if (!reason) {
+                window.showToast('Please provide a reason', 'error');
+                return;
+            }
+            
+            funHideBulkConfirmation();
+            await funProcessBulkDecision(decision, type, reason);
+        });
+
+        // Review form submission (delegated)
+        document.addEventListener('submit', async (e) => {
+            if (e.target.id === 'reviewForm') {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const decision = formData.get('decision');
+                const reason = formData.get('decisionReason')?.trim();
+                
+                if (!decision) {
+                    window.showToast('Please select a decision', 'error');
+                    return;
+                }
+                
+                if (!reason) {
+                    window.showToast('Please provide a reason', 'error');
+                    return;
+                }
+                
+                await funSubmitReview(decision, reason);
+            }
+        });
+
+        // Review form cancel (delegated)
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'cancelReview') {
+                funCloseDrawer();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!elements.reviewDrawer.classList.contains('translate-x-full')) {
+                    funCloseDrawer();
+                } else if (!elements.bulkConfirmModal.classList.contains('hidden')) {
+                    funHideBulkConfirmation();
+                }
+            }
+        });
+    }
+
+    // Initialize page on load
+    funInitializePage();
+</script></body></html>

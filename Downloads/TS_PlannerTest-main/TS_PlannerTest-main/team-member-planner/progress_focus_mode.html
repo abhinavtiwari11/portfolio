@@ -1,0 +1,1215 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Progress Capture (Focus) - Team Member Planner</title>
+<style type="text/tailwindcss">
+  .progress-item {
+    transition: all 0.15s ease;
+  }
+  
+  .progress-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .plus-one-btn {
+    transition: all 0.15s ease;
+    min-width: 3.5rem;
+  }
+  
+  .plus-one-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    background-color: var(--color-secondary);
+  }
+  
+  .plus-one-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+  
+  .status-not-started {
+    background-color: #F3F4F6;
+    color: #6B7280;
+  }
+  
+  .status-in-progress {
+    background-color: #FEF3C7;
+    color: #D97706;
+  }
+  
+  .status-completed {
+    background-color: #D1FAE5;
+    color: #065F46;
+  }
+  
+  .undo-toast {
+    animation: slideInUp 0.3s ease-out;
+  }
+  
+  @keyframes slideInUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .classification-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+  }
+  
+  .classification-client {
+    background-color: #EFF6FF;
+    color: var(--color-primary);
+  }
+  
+  .classification-tech {
+    background-color: #F0FDF4;
+    color: var(--color-secondary);
+  }
+  
+  .classification-rnd {
+    background-color: #FFFBEB;
+    color: var(--color-accent);
+  }
+</style>
+</head_content_code>
+
+<html_content_code>
+<!-- Focus Mode Header -->
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-display-lg font-bold text-primary">Progress Capture (Focus)</h1>
+    <p class="text-display-sm text-gray-600 mt-1">Log hours quickly with one-click actions</p>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="my_week_dashboard.html" class="flex items-center gap-2 px-4 py-2 text-display-sm text-gray-600 hover:text-primary border border-gray-200 rounded-lg hover:border-primary transition-colors">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      Back to My Week
+    </a>
+  </div>
+</div>
+
+<!-- Week Info & Status -->
+<div id="weekInfoCard" class="bg-surface border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-display-md font-semibold text-gray-900" id="weekTitle">Week Loading...</h2>
+      <p class="text-display-sm text-gray-600" id="weekDates">Calculating dates...</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="weekStatus" class="status-badge">Loading...</div>
+      <div class="text-right">
+        <div class="text-display-sm font-semibold text-gray-900" id="totalLoggedHours">0h logged</div>
+        <div class="text-display-sm text-gray-600" id="totalAssignedHours">of 0h assigned</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Search & Filters -->
+<div class="flex flex-col sm:flex-row gap-3 mb-6">
+  <div class="flex-1">
+    <div class="relative">
+      <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+      <input type="text" id="searchInput" placeholder="Search activities..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+    </div>
+  </div>
+  <select id="classificationFilter" class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+    <option value="">All Classifications</option>
+    <option value="client-focused">Client Focused</option>
+    <option value="tech-debt">Tech Debt</option>
+    <option value="R&amp;D">R&amp;D</option>
+  </select>
+  <select id="statusFilter" class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+    <option value="">All Status</option>
+    <option value="Planned">Planned</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Completed">Completed</option>
+  </select>
+</div>
+
+<!-- Progress List -->
+<div id="progressList" class="space-y-3">
+  <!-- Progress items will be dynamically populated -->
+</div>
+
+<!-- Empty State -->
+<div id="emptyState" class="text-center py-12 hidden">
+  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+    <i data-lucide="calendar-x" class="w-8 h-8 text-gray-400"></i>
+  </div>
+  <h3 class="text-display-md font-semibold text-gray-900 mb-2">No assignments to log</h3>
+  <p class="text-display-sm text-gray-600 mb-4">You don't have any assignments for this week yet.</p>
+  <a href="my_week_dashboard.html" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+    <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+    Go to Assignments
+  </a>
+</div>
+
+<!-- Inactive Week State -->
+<div id="inactiveWeekState" class="text-center py-12 hidden">
+  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+    <i data-lucide="clock" class="w-8 h-8 text-gray-400"></i>
+  </div>
+  <h3 class="text-display-md font-semibold text-gray-900 mb-2">Week not active for logging</h3>
+  <p class="text-display-sm text-gray-600 mb-4">Progress logging is only available during active weeks (Wed–Mon execution days).</p>
+  <a href="my_week_dashboard.html" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+    Back to My Week
+  </a>
+</div>
+
+<!-- Undo Toast -->
+<div id="undoToast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg z-50 hidden undo-toast">
+  <div class="flex items-center gap-3">
+    <span id="undoMessage">+1h logged for Activity</span>
+    <button id="undoButton" class="text-accent hover:text-accent/80 font-semibold">Undo</button>
+  </div>
+</div>
+
+<!-- Progress Item Template -->
+<template id="progressItemTemplate">
+  <div class="progress-item bg-surface border border-gray-200 rounded-lg p-4 shadow-sm">
+    <div class="flex items-start justify-between gap-4">
+      <!-- Activity Info -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start gap-3">
+          <div class="flex-1">
+            <h3 class="text-display-md font-semibold text-gray-900 mb-1 activity-title">Activity Title</h3>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="classification-badge classification-client">Client Focused</span>
+              <span class="status-badge status-planned">Planned</span>
+            </div>
+            <div class="text-display-sm text-gray-600">
+              <span class="hours-logged font-semibold">0</span> of <span class="hours-assigned">8</span> hours logged
+              <span class="text-gray-400">•</span>
+              <span class="hours-remaining font-semibold text-primary">8 remaining</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Actions -->
+      <div class="flex items-center gap-2">
+        <button class="plus-one-btn flex items-center gap-1 px-3 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors focus:ring-2 focus:ring-secondary focus:ring-offset-2" data-action="logHour" aria-label="Log 1 hour">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>1h</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="mt-3">
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="progress-bar bg-secondary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+</template>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { 
+  getAssignmentsByUserWeek, 
+  getProgressLogsByUserWeek, 
+  createProgressLog, 
+  updateAssignmentStatus,
+  getCurrentWeek,
+  getWeekById,
+  getPlanSnapshotByWeek
+} from './page-logic.js';
+
+// Current user and week tracking
+let currentUser = null;
+let currentWeekId = null;
+let assignments = [];
+let progressLogs = [];
+let weekData = null;
+let lastLoggedAction = null;
+let undoTimeout = null;
+
+// Initialize the page
+function funInitializePage() {
+  currentUser = window.UserUtils?.getCurrentUser();
+  if (!currentUser) {
+    window.location.href = 'access_denied.html';
+    return;
+  }
+
+  // Get week from URL params or use current week
+  const urlParams = new URLSearchParams(window.location.search);
+  currentWeekId = urlParams.get('week_id') || funGetCurrentWeekId();
+  
+  funLoadPageData();
+  funSetupEventListeners();
+}
+
+// Get current week ID from UI state or system
+function funGetCurrentWeekId() {
+  /**
+   * Method call: getCurrentWeek()
+   * Purpose: Get the current active week for the system
+   * Returns: { id: string, startDate: string, endDate: string, status: string }
+   * Collections used: weekCalendar, uiState
+   */
+  try {
+    const weekData = getCurrentWeek();
+    return weekData ? weekData.id : null;
+  } catch (error) {
+    console.error('Failed to get current week:', error);
+    return null;
+  }
+}
+
+// Load all page data
+async function funLoadPageData() {
+  try {
+    // Load week data
+    /**
+     * Method call: getWeekById(weekId)
+     * Purpose: Get week calendar information including status and dates
+     * Params: weekId - string
+     * Returns: { id, startDate, endDate, planningDate, status, timezone }
+     * Collections used: weekCalendar
+     */
+    weekData = getWeekById(currentWeekId);
+    
+    if (!weekData) {
+      funShowError('Week not found');
+      return;
+    }
+
+    // Load assignments for current user and week
+    /**
+     * Method call: getAssignmentsByUserWeek(userId, weekId)
+     * Purpose: Get all assignments for a specific user in a specific week
+     * Params: userId - string, weekId - string
+     * Returns: Array of { id, activityId, segments, status, classification, activity: { title, description } }
+     * Collections used: assignments, activities
+     */
+    assignments = getAssignmentsByUserWeek(currentUser.id, currentWeekId);
+
+    // Load progress logs for current user and week
+    /**
+     * Method call: getProgressLogsByUserWeek(userId, weekId)
+     * Purpose: Get all progress logs for a specific user in a specific week
+     * Params: userId - string, weekId - string
+     * Returns: Array of { id, assignmentId, hours, timestamp, statusTransition, note }
+     * Collections used: progressLogs
+     */
+    progressLogs = getProgressLogsByUserWeek(currentUser.id, currentWeekId);
+
+    // Check if week is active for logging
+    const isActiveWeek = funIsWeekActiveForLogging(weekData);
+    
+    if (!isActiveWeek) {
+      document.getElementById('inactiveWeekState').classList.remove('hidden');
+      document.getElementById('progressList').classList.add('hidden');
+      document.getElementById('weekInfoCard').classList.add('hidden');
+      return;
+    }
+
+    funUpdateWeekInfo();
+    funRenderAssignments();
+
+  } catch (error) {
+    console.error('Failed to load page data:', error);
+    funShowError('Failed to load progress data');
+  }
+}
+
+// Check if week is active for progress logging
+function funIsWeekActiveForLogging(week) {
+  if (!week) return false;
+  
+  // For this demo, we'll allow logging if week status is not 'Draft' or 'Archived'
+  const allowedStatuses = ['Published', 'Monitoring', 'Reopened'];
+  return allowedStatuses.includes(week.status);
+}
+
+// Update week information display
+function funUpdateWeekInfo() {
+  const weekTitle = document.getElementById('weekTitle');
+  const weekDates = document.getElementById('weekDates');
+  const weekStatus = document.getElementById('weekStatus');
+  const totalLoggedHours = document.getElementById('totalLoggedHours');
+  const totalAssignedHours = document.getElementById('totalAssignedHours');
+
+  if (weekData) {
+    weekTitle.textContent = `${weekData.id}`;
+    
+    const startDate = new Date(weekData.startDate).toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'short' 
+    });
+    const endDate = new Date(weekData.endDate).toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'short',
+      year: 'numeric'
+    });
+    weekDates.textContent = `${startDate} – ${endDate}`;
+
+    // Update status badge
+    weekStatus.textContent = weekData.status;
+    weekStatus.className = `status-badge ${funGetStatusClass(weekData.status)}`;
+  }
+
+  // Calculate totals
+  const totalAssigned = assignments.reduce((sum, assignment) => sum + assignment.segments, 0);
+  const totalLogged = progressLogs.reduce((sum, log) => sum + log.hours, 0);
+
+  totalLoggedHours.textContent = `${totalLogged}h logged`;
+  totalAssignedHours.textContent = `of ${totalAssigned}h assigned`;
+}
+
+// Get CSS class for status
+function funGetStatusClass(status) {
+  switch (status) {
+    case 'Draft': return 'status-not-started';
+    case 'Published': return 'status-in-progress';
+    case 'Monitoring': return 'status-in-progress';
+    case 'Archived': return 'status-completed';
+    case 'Reopened': return 'status-in-progress';
+    default: return 'status-not-started';
+  }
+}
+
+// Render assignments list
+function funRenderAssignments() {
+  const progressList = document.getElementById('progressList');
+  const emptyState = document.getElementById('emptyState');
+  
+  // Filter assignments based on current filters
+  const filteredAssignments = funFilterAssignments(assignments);
+  
+  if (filteredAssignments.length === 0) {
+    progressList.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    return;
+  }
+
+  progressList.classList.remove('hidden');
+  emptyState.classList.add('hidden');
+  
+  // Clear current list
+  progressList.innerHTML = '';
+  
+  // Sort assignments by classification and then by activity title
+  const sortedAssignments = filteredAssignments.sort((a, b) => {
+    const classOrder = { 'client-focused': 1, 'tech-debt': 2, 'R&D': 3 };
+    const aOrder = classOrder[a.classification] || 4;
+    const bOrder = classOrder[b.classification] || 4;
+    
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return (a.activity.title || '').localeCompare(b.activity.title || '');
+  });
+
+  // Render each assignment
+  sortedAssignments.forEach(assignment => {
+    const assignmentElement = funCreateAssignmentElement(assignment);
+    progressList.appendChild(assignmentElement);
+  });
+
+  // Initialize Lucide icons
+  lucide.createIcons();
+}
+
+// Filter assignments based on search and filters
+function funFilterAssignments(allAssignments) {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const classificationFilter = document.getElementById('classificationFilter').value;
+  const statusFilter = document.getElementById('statusFilter').value;
+
+  return allAssignments.filter(assignment => {
+    // Search filter
+    if (searchTerm && !assignment.activity.title.toLowerCase().includes(searchTerm)) {
+      return false;
+    }
+    
+    // Classification filter
+    if (classificationFilter && assignment.classification !== classificationFilter) {
+      return false;
+    }
+    
+    // Status filter
+    if (statusFilter && assignment.status !== statusFilter) {
+      return false;
+    }
+    
+    return true;
+  });
+}
+
+// Create assignment element from template
+function funCreateAssignmentElement(assignment) {
+  const template = document.getElementById('progressItemTemplate');
+  const element = template.content.cloneNode(true);
+  
+  // Get logged hours for this assignment
+  const assignmentLogs = progressLogs.filter(log => log.assignmentId === assignment.id);
+  const loggedHours = assignmentLogs.reduce((sum, log) => sum + log.hours, 0);
+  const remainingHours = Math.max(0, assignment.segments - loggedHours);
+  const progressPercent = assignment.segments > 0 ? (loggedHours / assignment.segments) * 100 : 0;
+  
+  // Update content
+  element.querySelector('.activity-title').textContent = assignment.activity.title;
+  element.querySelector('.hours-logged').textContent = loggedHours.toString();
+  element.querySelector('.hours-assigned').textContent = assignment.segments.toString();
+  element.querySelector('.hours-remaining').textContent = remainingHours.toString();
+  element.querySelector('.progress-bar').style.width = `${Math.min(100, progressPercent)}%`;
+  
+  // Update classification badge
+  const classificationBadge = element.querySelector('.classification-badge');
+  classificationBadge.textContent = funGetClassificationLabel(assignment.classification);
+  classificationBadge.className = `classification-badge ${funGetClassificationClass(assignment.classification)}`;
+  
+  // Update status badge
+  const statusBadge = element.querySelector('.status-badge');
+  statusBadge.textContent = assignment.status;
+  statusBadge.className = `status-badge ${funGetAssignmentStatusClass(assignment.status)}`;
+  
+  // Set up the +1h button
+  const plusOneBtn = element.querySelector('[data-action="logHour"]');
+  plusOneBtn.dataset.assignmentId = assignment.id;
+  plusOneBtn.setAttribute('aria-label', `Log 1 hour for ${assignment.activity.title} (${remainingHours} hours remaining)`);
+  
+  // Disable button if no hours remaining
+  if (remainingHours <= 0) {
+    plusOneBtn.disabled = true;
+    plusOneBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    plusOneBtn.setAttribute('aria-label', `${assignment.activity.title} - All hours logged`);
+  }
+  
+  return element;
+}
+
+// Get classification label
+function funGetClassificationLabel(classification) {
+  switch (classification) {
+    case 'client-focused': return 'Client Focused';
+    case 'tech-debt': return 'Tech Debt';
+    case 'R&D': return 'R&D';
+    default: return classification;
+  }
+}
+
+// Get classification CSS class
+function funGetClassificationClass(classification) {
+  switch (classification) {
+    case 'client-focused': return 'classification-client';
+    case 'tech-debt': return 'classification-tech';
+    case 'R&D': return 'classification-rnd';
+    default: return 'classification-client';
+  }
+}
+
+// Get assignment status CSS class
+function funGetAssignmentStatusClass(status) {
+  switch (status) {
+    case 'Planned': return 'status-not-started';
+    case 'In Progress': return 'status-in-progress';
+    case 'Completed': return 'status-completed';
+    default: return 'status-not-started';
+  }
+}
+
+// Log one hour for an assignment
+function funLogHour(assignmentId) {
+  try {
+    const assignment = assignments.find(a => a.id === assignmentId);
+    if (!assignment) {
+      funShowError('Assignment not found');
+      return;
+    }
+
+    // Check if we can log more hours
+    const assignmentLogs = progressLogs.filter(log => log.assignmentId === assignmentId);
+    const loggedHours = assignmentLogs.reduce((sum, log) => sum + log.hours, 0);
+    
+    if (loggedHours >= assignment.segments) {
+      funShowError('Cannot exceed assigned hours');
+      return;
+    }
+
+    // Determine status transition
+    let statusTransition = '';
+    let newStatus = assignment.status;
+
+    if (assignment.status === 'Planned') {
+      statusTransition = 'Planned→In Progress';
+      newStatus = 'In Progress';
+    } else if (loggedHours + 1 >= assignment.segments) {
+      statusTransition = 'In Progress→Completed';
+      newStatus = 'Completed';
+    } else {
+      statusTransition = 'Progress update';
+    }
+
+    // Create progress log
+    /**
+     * Method call: createProgressLog(progressLogData)
+     * Purpose: Create a new progress log entry for an assignment
+     * Params: progressLogData - { assignmentId, userId, weekId, hours, statusTransition, timestamp, note }
+     * Returns: { id, assignmentId, userId, weekId, hours, statusTransition, timestamp, note }
+     * Collections used: progressLogs
+     */
+    const newProgressLog = createProgressLog({
+      assignmentId: assignmentId,
+      userId: currentUser.id,
+      weekId: currentWeekId,
+      hours: 1,
+      statusTransition: statusTransition,
+      timestamp: new Date().toISOString(),
+      note: 'Focus mode +1h'
+    });
+
+    // Update assignment status if needed
+    if (newStatus !== assignment.status) {
+      /**
+       * Method call: updateAssignmentStatus(assignmentId, newStatus)
+       * Purpose: Update the status of an assignment
+       * Params: assignmentId - string, newStatus - string
+       * Returns: Updated assignment object
+       * Collections used: assignments
+       */
+      updateAssignmentStatus(assignmentId, newStatus);
+      assignment.status = newStatus;
+    }
+
+    // Add to local progress logs array
+    progressLogs.push(newProgressLog);
+
+    // Store undo information
+    lastLoggedAction = {
+      progressLogId: newProgressLog.id,
+      assignmentId: assignmentId,
+      previousStatus: assignment.status === newStatus ? null : assignment.status,
+      newStatus: newStatus,
+      timestamp: Date.now()
+    };
+
+    // Update UI
+    funUpdateWeekInfo();
+    funRenderAssignments();
+
+    // Show undo toast
+    funShowUndoToast(assignment.activity.title);
+
+  } catch (error) {
+    console.error('Failed to log hour:', error);
+    funShowError('Failed to log hour');
+  }
+}
+
+// Show undo toast with timeout
+function funShowUndoToast(activityTitle) {
+  const undoToast = document.getElementById('undoToast');
+  const undoMessage = document.getElementById('undoMessage');
+  
+  undoMessage.textContent = `+1h logged for ${activityTitle}`;
+  undoToast.classList.remove('hidden');
+  
+  // Clear existing timeout
+  if (undoTimeout) {
+    clearTimeout(undoTimeout);
+  }
+  
+  // Hide toast after 10 seconds
+  undoTimeout = setTimeout(() => {
+    undoToast.classList.add('hidden');
+    lastLoggedAction = null;
+  }, 10000);
+}
+
+// Undo last logged hour
+function funUndoLastLog() {
+  if (!lastLoggedAction) return;
+  
+  try {
+    // TODO: Implement undo functionality in page-logic.js
+    // This would involve:
+    // - Removing the progress log
+    // - Reverting assignment status if it was changed
+    // - Updating the UI
+    
+    // For now, show message that undo is not implemented
+    funShowError('Undo functionality not yet implemented');
+    
+    // Hide toast
+    document.getElementById('undoToast').classList.add('hidden');
+    if (undoTimeout) {
+      clearTimeout(undoTimeout);
+    }
+    
+  } catch (error) {
+    console.error('Failed to undo:', error);
+    funShowError('Failed to undo action');
+  }
+}
+
+// Setup event listeners
+function funSetupEventListeners() {
+  // Search input
+  const searchInput = document.getElementById('searchInput');
+  let searchTimeout;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      funRenderAssignments();
+    }, 300);
+  });
+
+  // Filter dropdowns
+  document.getElementById('classificationFilter').addEventListener('change', funRenderAssignments);
+  document.getElementById('statusFilter').addEventListener('change', funRenderAssignments);
+
+  // Undo button
+  document.getElementById('undoButton').addEventListener('click', funUndoLastLog);
+
+  // Close undo toast on click outside
+  document.addEventListener('click', (e) => {
+    const undoToast = document.getElementById('undoToast');
+    if (!undoToast.contains(e.target)) {
+      undoToast.classList.add('hidden');
+      if (undoTimeout) {
+        clearTimeout(undoTimeout);
+      }
+    }
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Plus key to log hour on focused assignment
+    if (e.key === '+' || e.key === '=') {
+      const focusedElement = document.activeElement;
+      if (focusedElement && focusedElement.dataset.action === 'logHour') {
+        e.preventDefault();
+        funLogHour(focusedElement.dataset.assignmentId);
+      }
+    }
+    
+    // Escape to hide undo toast
+    if (e.key === 'Escape') {
+      document.getElementById('undoToast').classList.add('hidden');
+      if (undoTimeout) {
+        clearTimeout(undoTimeout);
+      }
+    }
+  });
+}
+
+// Show error message
+function funShowError(message) {
+  // Simple error display - in a real app this might use a toast library
+  alert(`Error: ${message}`);
+}
+
+// Global action handler for data-action attributes
+window.AppActions = window.AppActions || {};
+window.AppActions.logHour = function(element) {
+  const assignmentId = element.dataset.assignmentId;
+  if (assignmentId) {
+    funLogHour(assignmentId);
+  }
+};
+
+// Initialize page when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', funInitializePage);
+} else {
+  funInitializePage();
+}
+</script></body></html>

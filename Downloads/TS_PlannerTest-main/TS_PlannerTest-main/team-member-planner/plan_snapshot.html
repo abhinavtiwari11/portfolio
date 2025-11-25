@@ -1,0 +1,1036 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Plan Snapshot - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<section class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-display-lg font-bold text-primary mb-2">Plan Snapshot</h1>
+      <p class="text-display-sm text-gray-600">Immutable view of the published weekly plan with allocations and summaries</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <label for="weekSelect" class="text-sm font-medium text-gray-700">Week:</label>
+        <select id="weekSelect" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+      <a href="my_week_dashboard.html" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back to My Week
+      </a>
+    </div>
+  </div>
+
+  <!-- Snapshot Status Card -->
+  <div id="snapshotStatusCard" class="bg-surface border border-gray-200 rounded-lg p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-display-md font-semibold text-gray-900">Snapshot Status</h2>
+      <div id="statusBadge" class="px-3 py-1 rounded-full text-sm font-medium">
+        <!-- Status populated by JS -->
+      </div>
+    </div>
+    <div id="snapshotDetails" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Details populated by JS -->
+    </div>
+  </div>
+
+  <!-- Capacity Summary -->
+  <div id="capacitySummaryCard" class="bg-surface border border-gray-200 rounded-lg p-6 shadow-sm">
+    <h2 class="text-display-md font-semibold text-gray-900 mb-4">Capacity Summary</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="text-center">
+        <div id="totalCapacity" class="text-2xl font-bold text-primary mb-1">--</div>
+        <div class="text-sm text-gray-600">Total Capacity</div>
+      </div>
+      <div class="text-center">
+        <div id="totalAllocated" class="text-2xl font-bold text-secondary mb-1">--</div>
+        <div class="text-sm text-gray-600">Total Allocated</div>
+      </div>
+      <div class="text-center">
+        <div id="utilizationPercentage" class="text-2xl font-bold text-accent mb-1">--%</div>
+        <div class="text-sm text-gray-600">Utilization</div>
+      </div>
+      <div class="text-center">
+        <div id="remainingCapacity" class="text-2xl font-bold text-gray-700 mb-1">--</div>
+        <div class="text-sm text-gray-600">Remaining</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Classification Breakdown -->
+  <div id="classificationBreakdown" class="bg-surface border border-gray-200 rounded-lg p-6 shadow-sm">
+    <h2 class="text-display-md font-semibold text-gray-900 mb-4">Allocation by Classification</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="text-center p-4 bg-blue-50 rounded-lg">
+        <div id="clientHours" class="text-xl font-bold text-blue-600 mb-1">--</div>
+        <div class="text-sm text-blue-700 font-medium">Client-Focused</div>
+        <div id="clientPercentage" class="text-xs text-blue-600">--%</div>
+      </div>
+      <div class="text-center p-4 bg-orange-50 rounded-lg">
+        <div id="techDebtHours" class="text-xl font-bold text-orange-600 mb-1">--</div>
+        <div class="text-sm text-orange-700 font-medium">Tech Debt</div>
+        <div id="techDebtPercentage" class="text-xs text-orange-600">--%</div>
+      </div>
+      <div class="text-center p-4 bg-purple-50 rounded-lg">
+        <div id="rndHours" class="text-xl font-bold text-purple-600 mb-1">--</div>
+        <div class="text-sm text-purple-700 font-medium">R&amp;D</div>
+        <div id="rndPercentage" class="text-xs text-purple-600">--%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activities Table -->
+  <div id="activitiesSection" class="bg-surface border border-gray-200 rounded-lg shadow-sm">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h2 class="text-display-md font-semibold text-gray-900">Activities</h2>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <input type="text" id="activitySearch" placeholder="Search activities..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+          </div>
+          <select id="classificationFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+            <option value="">All Classifications</option>
+            <option value="client-focused">Client-Focused</option>
+            <option value="tech-debt">Tech Debt</option>
+            <option value="R&amp;D">R&amp;D</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table id="activitiesTable" class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classification</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Your Allocation</th>
+          </tr>
+        </thead>
+        <tbody id="activitiesTableBody" class="bg-white divide-y divide-gray-200">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden text-center py-12 bg-surface border border-gray-200 rounded-lg">
+    <div class="flex flex-col items-center gap-4">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+        <i data-lucide="file-x" class="w-8 h-8 text-gray-400"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No Published Plan</h3>
+        <p class="text-gray-600 mb-4">The plan for this week hasn't been published yet.</p>
+        <a href="assignments.html" class="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors text-sm font-medium">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          Allocate Hours
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contextual Tip -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="flex items-start gap-3">
+      <div class="flex-shrink-0">
+        <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm text-blue-800">
+          <strong>Note:</strong> Snapshots are immutable. To change post-publication, submit a change request (if enabled).
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { 
+  funGetSnapshotByWeek, 
+  funGetUserAssignmentsByWeek, 
+  funGetActivitiesByIds, 
+  funGetWeekCalendarOptions,
+  funGetCurrentWeekId,
+  funUpdateUIState 
+} from './page-logic.js';
+
+// Global state
+let currentWeekId = null;
+let currentSnapshot = null;
+let userAssignments = [];
+let activities = [];
+let filteredActivities = [];
+
+// Initialize page
+async function funInitializePage() {
+  try {
+    // Get current week or from URL param
+    const urlParams = new URLSearchParams(window.location.search);
+    const weekParam = urlParams.get('week_id');
+    currentWeekId = weekParam || funGetCurrentWeekId();
+    
+    // Load week options for selector
+    const weekOptions = funGetWeekCalendarOptions();
+    funPopulateWeekSelector(weekOptions);
+    
+    // Load snapshot data
+    await funLoadSnapshotData();
+    
+    // Set up event listeners
+    funSetupEventListeners();
+    
+    // Update UI state
+    funUpdateUIState({ currentWeekId, lastSelectedTab: 'snapshot' });
+    
+  } catch (error) {
+    console.error('Failed to initialize plan snapshot page:', error);
+    funShowError('Failed to load snapshot data');
+  }
+}
+
+// Load snapshot data from page-logic.js
+// Expected method: funGetSnapshotByWeek(weekId)
+// Returns: snapshot object with { id, status, publishedAt, summary: { capacity, allocated, byCategoryClient, byCategoryTechDebt, byCategoryRnd }, activities: [{ activityId, title, classification, priorityRank }] } or null
+// Collections used: planSnapshots filtered by weekId
+async function funLoadSnapshotData() {
+  try {
+    // Get snapshot for current week
+    currentSnapshot = await funGetSnapshotByWeek(currentWeekId);
+    
+    if (!currentSnapshot) {
+      funShowEmptyState();
+      return;
+    }
+    
+    // Get user assignments for this week
+    // Expected method: funGetUserAssignmentsByWeek(userId, weekId) 
+    // Returns: array of assignment objects { id, activityId, segments, status }
+    // Collections used: assignments filtered by userId and weekId where deletedAt is null
+    const currentUser = window.UserUtils?.getCurrentUser();
+    if (currentUser) {
+      userAssignments = await funGetUserAssignmentsByWeek(currentUser.id, currentWeekId);
+    }
+    
+    // Get activity details for activities in snapshot
+    // Expected method: funGetActivitiesByIds(activityIds)
+    // Returns: array of activity objects { id, title, description, classification, status }
+    // Collections used: activities filtered by id array where deletedAt is null
+    const activityIds = currentSnapshot.activities.map(a => a.activityId);
+    activities = await funGetActivitiesByIds(activityIds);
+    
+    // Render the snapshot
+    funRenderSnapshot();
+    
+  } catch (error) {
+    console.error('Failed to load snapshot data:', error);
+    funShowError('Failed to load snapshot data');
+  }
+}
+
+// Populate week selector dropdown
+function funPopulateWeekSelector(weekOptions) {
+  const weekSelect = document.getElementById('weekSelect');
+  weekSelect.innerHTML = '';
+  
+  weekOptions.forEach(week => {
+    const option = document.createElement('option');
+    option.value = week.id;
+    option.textContent = `${week.id} (${funFormatDate(week.startDate)} - ${funFormatDate(week.endDate)})`;
+    if (week.id === currentWeekId) {
+      option.selected = true;
+    }
+    weekSelect.appendChild(option);
+  });
+}
+
+// Render snapshot data
+function funRenderSnapshot() {
+  if (!currentSnapshot) {
+    funShowEmptyState();
+    return;
+  }
+  
+  // Hide empty state and show content
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('snapshotStatusCard').classList.remove('hidden');
+  document.getElementById('capacitySummaryCard').classList.remove('hidden');
+  document.getElementById('classificationBreakdown').classList.remove('hidden');
+  document.getElementById('activitiesSection').classList.remove('hidden');
+  
+  // Render status
+  funRenderSnapshotStatus();
+  
+  // Render capacity summary
+  funRenderCapacitySummary();
+  
+  // Render classification breakdown
+  funRenderClassificationBreakdown();
+  
+  // Render activities table
+  funRenderActivitiesTable();
+}
+
+// Render snapshot status
+function funRenderSnapshotStatus() {
+  const statusBadge = document.getElementById('statusBadge');
+  const snapshotDetails = document.getElementById('snapshotDetails');
+  
+  // Status badge
+  const statusConfig = {
+    'Published': { class: 'bg-green-100 text-green-800', text: 'Published' },
+    'Draft': { class: 'bg-gray-100 text-gray-800', text: 'Draft' },
+    'Monitoring': { class: 'bg-blue-100 text-blue-800', text: 'Monitoring' },
+    'Archived': { class: 'bg-gray-100 text-gray-600', text: 'Archived' }
+  };
+  
+  const config = statusConfig[currentSnapshot.status] || statusConfig['Draft'];
+  statusBadge.className = `px-3 py-1 rounded-full text-sm font-medium ${config.class}`;
+  statusBadge.textContent = config.text;
+  
+  // Snapshot details
+  snapshotDetails.innerHTML = `
+    <div class="text-center">
+      <div class="text-lg font-semibold text-gray-900">${currentWeekId}</div>
+      <div class="text-sm text-gray-600">Week</div>
+    </div>
+    <div class="text-center">
+      <div class="text-lg font-semibold text-gray-900">${currentSnapshot.publishedAt ? funFormatDateTime(currentSnapshot.publishedAt) : 'Not Published'}</div>
+      <div class="text-sm text-gray-600">Published At</div>
+    </div>
+    <div class="text-center">
+      <div class="text-lg font-semibold text-gray-900">v${currentSnapshot.version}</div>
+      <div class="text-sm text-gray-600">Version</div>
+    </div>
+    <div class="text-center">
+      <div class="text-lg font-semibold text-gray-900">${currentSnapshot.immutable ? 'Yes' : 'No'}</div>
+      <div class="text-sm text-gray-600">Immutable</div>
+    </div>
+  `;
+}
+
+// Render capacity summary
+function funRenderCapacitySummary() {
+  const summary = currentSnapshot.summary;
+  const utilization = summary.capacity > 0 ? Math.round((summary.allocated / summary.capacity) * 100) : 0;
+  const remaining = summary.capacity - summary.allocated;
+  
+  document.getElementById('totalCapacity').textContent = `${summary.capacity}h`;
+  document.getElementById('totalAllocated').textContent = `${summary.allocated}h`;
+  document.getElementById('utilizationPercentage').textContent = `${utilization}%`;
+  document.getElementById('remainingCapacity').textContent = `${remaining}h`;
+}
+
+// Render classification breakdown
+function funRenderClassificationBreakdown() {
+  const summary = currentSnapshot.summary;
+  const total = summary.allocated;
+  
+  const clientPercentage = total > 0 ? Math.round((summary.byCategoryClient / total) * 100) : 0;
+  const techDebtPercentage = total > 0 ? Math.round((summary.byCategoryTechDebt / total) * 100) : 0;
+  const rndPercentage = total > 0 ? Math.round((summary.byCategoryRnd / total) * 100) : 0;
+  
+  document.getElementById('clientHours').textContent = `${summary.byCategoryClient}h`;
+  document.getElementById('clientPercentage').textContent = `${clientPercentage}%`;
+  
+  document.getElementById('techDebtHours').textContent = `${summary.byCategoryTechDebt}h`;
+  document.getElementById('techDebtPercentage').textContent = `${techDebtPercentage}%`;
+  
+  document.getElementById('rndHours').textContent = `${summary.byCategoryRnd}h`;
+  document.getElementById('rndPercentage').textContent = `${rndPercentage}%`;
+}
+
+// Render activities table
+function funRenderActivitiesTable() {
+  // Combine snapshot activities with actual activity data
+  const combinedActivities = currentSnapshot.activities.map(snapshotActivity => {
+    const activityData = activities.find(a => a.id === snapshotActivity.activityId);
+    const userAssignment = userAssignments.find(a => a.activityId === snapshotActivity.activityId);
+    
+    return {
+      ...snapshotActivity,
+      activityData,
+      userAllocation: userAssignment ? userAssignment.segments : 0
+    };
+  }).filter(activity => activity.activityData); // Only show activities we have data for
+  
+  // Sort by priority rank
+  combinedActivities.sort((a, b) => a.priorityRank - b.priorityRank);
+  
+  filteredActivities = combinedActivities;
+  funRenderFilteredActivities();
+}
+
+// Render filtered activities
+function funRenderFilteredActivities() {
+  const tbody = document.getElementById('activitiesTableBody');
+  
+  if (filteredActivities.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+          No activities match the current filter criteria
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  tbody.innerHTML = filteredActivities.map(activity => {
+    const classificationBadge = funGetClassificationBadge(activity.classification);
+    
+    return `
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center">
+            <span class="inline-flex items-center justify-center w-6 h-6 bg-primary text-white text-xs font-semibold rounded-full">
+              ${activity.priorityRank}
+            </span>
+          </div>
+        </td>
+        <td class="px-6 py-4">
+          <div class="text-sm font-medium text-gray-900">${funEscapeHtml(activity.activityData.title)}</div>
+          <div class="text-sm text-gray-500 mt-1 line-clamp-2">${funEscapeHtml(activity.activityData.description || '')}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          ${classificationBadge}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-semibold text-gray-900">${activity.userAllocation}h</div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Get classification badge HTML
+function funGetClassificationBadge(classification) {
+  const badgeConfig = {
+    'client-focused': 'bg-blue-100 text-blue-800',
+    'tech-debt': 'bg-orange-100 text-orange-800',
+    'R&D': 'bg-purple-100 text-purple-800'
+  };
+  
+  const badgeClass = badgeConfig[classification] || 'bg-gray-100 text-gray-800';
+  return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">${classification}</span>`;
+}
+
+// Show empty state
+function funShowEmptyState() {
+  document.getElementById('emptyState').classList.remove('hidden');
+  document.getElementById('snapshotStatusCard').classList.add('hidden');
+  document.getElementById('capacitySummaryCard').classList.add('hidden');
+  document.getElementById('classificationBreakdown').classList.add('hidden');
+  document.getElementById('activitiesSection').classList.add('hidden');
+}
+
+// Show error message
+function funShowError(message) {
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'bg-red-50 border border-red-200 rounded-lg p-4 mb-6';
+  errorDiv.innerHTML = `
+    <div class="flex items-center gap-3">
+      <div class="flex-shrink-0">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm text-red-800">${funEscapeHtml(message)}</p>
+      </div>
+    </div>
+  `;
+  
+  const container = document.querySelector('section');
+  container.insertBefore(errorDiv, container.firstChild);
+}
+
+// Set up event listeners
+function funSetupEventListeners() {
+  // Week selector change
+  document.getElementById('weekSelect').addEventListener('change', async (e) => {
+    const newWeekId = e.target.value;
+    if (newWeekId !== currentWeekId) {
+      currentWeekId = newWeekId;
+      
+      // Update URL without page reload
+      const url = new URL(window.location);
+      if (newWeekId) {
+        url.searchParams.set('week_id', newWeekId);
+      } else {
+        url.searchParams.delete('week_id');
+      }
+      window.history.pushState({}, '', url);
+      
+      await funLoadSnapshotData();
+    }
+  });
+  
+  // Search functionality
+  document.getElementById('activitySearch').addEventListener('input', funFilterActivities);
+  
+  // Classification filter
+  document.getElementById('classificationFilter').addEventListener('change', funFilterActivities);
+}
+
+// Filter activities based on search and classification
+function funFilterActivities() {
+  const searchTerm = document.getElementById('activitySearch').value.toLowerCase();
+  const classificationFilter = document.getElementById('classificationFilter').value;
+  
+  const allActivities = currentSnapshot?.activities.map(snapshotActivity => {
+    const activityData = activities.find(a => a.id === snapshotActivity.activityId);
+    const userAssignment = userAssignments.find(a => a.activityId === snapshotActivity.activityId);
+    
+    return {
+      ...snapshotActivity,
+      activityData,
+      userAllocation: userAssignment ? userAssignment.segments : 0
+    };
+  }).filter(activity => activity.activityData) || [];
+  
+  filteredActivities = allActivities.filter(activity => {
+    const matchesSearch = !searchTerm || 
+      activity.activityData.title.toLowerCase().includes(searchTerm) ||
+      (activity.activityData.description && activity.activityData.description.toLowerCase().includes(searchTerm));
+    
+    const matchesClassification = !classificationFilter || activity.classification === classificationFilter;
+    
+    return matchesSearch && matchesClassification;
+  });
+  
+  funRenderFilteredActivities();
+}
+
+// Utility functions
+function funFormatDate(dateString) {
+  try {
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch {
+    return dateString;
+  }
+}
+
+function funFormatDateTime(dateString) {
+  try {
+    return new Date(dateString).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return dateString;
+  }
+}
+
+function funEscapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Initialize page when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', funInitializePage);
+} else {
+  funInitializePage();
+}
+
+// Re-initialize icons after dynamic content updates
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+});
+</script></body></html>

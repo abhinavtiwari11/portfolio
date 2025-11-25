@@ -1,0 +1,986 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>History &amp; Audit - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<section class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-primary">History &amp; Audit</h1>
+      <p class="text-sm leading-[1.375rem] font-normal text-gray-600 mt-2">
+        Review your audit trail for transparency and recovery
+      </p>
+    </div>
+    <div class="flex items-center gap-4">
+      <!-- Export Button -->
+      <button id="exportAuditBtn" class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors flex items-center gap-2 text-sm font-semibold focus:outline-2 focus:outline-secondary focus:outline-offset-2" aria-label="Export audit events as JSON">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        Export JSON
+      </button>
+      <!-- Back to My Week -->
+      <a href="my_week_dashboard.html" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm font-semibold focus:outline-2 focus:outline-primary focus:outline-offset-2">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Back to My Week
+      </a>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border mb-6">
+    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+      <!-- Week Filter -->
+      <div class="flex-1 min-w-0">
+        <label for="weekFilter" class="block text-sm font-semibold text-gray-700 mb-2">
+          Week
+        </label>
+        <select id="weekFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+          <option value="">All Weeks</option>
+        </select>
+      </div>
+
+      <!-- Event Type Filter -->
+      <div class="flex-1 min-w-0">
+        <label for="eventTypeFilter" class="block text-sm font-semibold text-gray-700 mb-2">
+          Event Type
+        </label>
+        <select id="eventTypeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+          <option value="">All Types</option>
+          <option value="ACTIVITY_CREATED">Activity Created</option>
+          <option value="CAPACITY_UPDATED">Capacity Updated</option>
+          <option value="ASSIGNMENT_CREATED">Assignment Created</option>
+          <option value="PROGRESS_LOGGED">Progress Logged</option>
+          <option value="PRIORITY_CHANGED">Priority Changed</option>
+          <option value="CLASSIFICATION_OVERRIDE">Classification Override</option>
+          <option value="PLAN_PUBLISHED">Plan Published</option>
+          <option value="APPROVAL_DECISION">Approval Decision</option>
+        </select>
+      </div>
+
+      <!-- Search -->
+      <div class="flex-1 min-w-0">
+        <label for="searchFilter" class="block text-sm font-semibold text-gray-700 mb-2">
+          Search
+        </label>
+        <input type="text" id="searchFilter" placeholder="Search entity ID or type..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+      </div>
+
+      <!-- Apply Filters Button -->
+      <button id="applyFilters" class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors text-sm font-semibold whitespace-nowrap">
+        Apply Filters
+      </button>
+    </div>
+
+    <!-- Event Type Summary -->
+    <div id="eventSummary" class="mt-4 pt-4 border-t border-gray-100">
+      <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+        <span>Total Events: <span id="totalCount" class="font-semibold">0</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div id="timelineContainer">
+    <!-- Loading State -->
+    <div id="loadingState" class="text-center py-12">
+      <div class="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+      <p class="text-gray-600">Loading audit events...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-12">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="history" class="w-8 h-8 text-gray-400"></i>
+      </div>
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">No audit events yet</h3>
+      <p class="text-sm text-gray-600 mb-6">No audit events found for the selected filters. Try adjusting your filters or check back later.</p>
+      <a href="my_week_dashboard.html" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold">
+        <i data-lucide="calendar-check" class="w-4 h-4"></i>
+        Go to My Week
+      </a>
+    </div>
+
+    <!-- Timeline Content -->
+    <div id="timelineContent" class="hidden space-y-6">
+      <!-- Timeline items will be populated here -->
+    </div>
+  </div>
+</section>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { getUserAuditEvents, getAvailableWeeks, getUiState, setUiState } from './page-logic.js';
+
+// Get current user from container utilities
+const currentUser = window.UserUtils?.getCurrentUser();
+const currentUserId = currentUser?.id || 'u-bob';
+
+// State management
+let auditEvents = [];
+let filteredEvents = [];
+let availableWeeks = [];
+
+// Initialize page
+async function funInitializePage() {
+  try {
+    // Show loading state
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('timelineContent').classList.add('hidden');
+    document.getElementById('emptyState').classList.add('hidden');
+
+    // Get available weeks for filter
+    // Expected return: Array of week objects with {id, startDate, endDate, status}
+    // Method should fetch from weekCalendar collection
+    availableWeeks = await getAvailableWeeks();
+    funPopulateWeekFilter();
+
+    // Get current week from UI state or default
+    const uiState = await getUiState(currentUserId);
+    const currentWeekId = uiState?.currentWeekId || availableWeeks[0]?.id || null;
+    
+    // Set week filter to current week if available
+    if (currentWeekId) {
+      document.getElementById('weekFilter').value = currentWeekId;
+    }
+
+    // Load audit events for current user
+    // Expected return: Array of audit events filtered by userId
+    // Method should fetch from auditEvents collection where whoId matches currentUserId
+    // Each event should have: {id, type, when, entityType, entityId, before, after, metadata, weekId}
+    auditEvents = await getUserAuditEvents(currentUserId);
+    
+    // Apply initial filters
+    await funApplyFilters();
+
+    // Update UI state
+    await setUiState(currentUserId, { lastSelectedTab: 'history' });
+
+  } catch (error) {
+    console.error('Error initializing page:', error);
+    funShowErrorState('Failed to load audit events. Please try again.');
+  }
+}
+
+function funPopulateWeekFilter() {
+  const weekFilter = document.getElementById('weekFilter');
+  weekFilter.innerHTML = '<option value="">All Weeks</option>';
+  
+  availableWeeks.forEach(week => {
+    const option = document.createElement('option');
+    option.value = week.id;
+    const startDate = new Date(week.startDate).toLocaleDateString('en-GB');
+    const endDate = new Date(week.endDate).toLocaleDateString('en-GB');
+    option.textContent = `${week.id} (${startDate} - ${endDate})`;
+    weekFilter.appendChild(option);
+  });
+}
+
+async function funApplyFilters() {
+  const weekFilter = document.getElementById('weekFilter').value;
+  const typeFilter = document.getElementById('eventTypeFilter').value;
+  const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+
+  // Filter events
+  filteredEvents = auditEvents.filter(event => {
+    // Week filter
+    if (weekFilter && event.weekId !== weekFilter) return false;
+    
+    // Type filter
+    if (typeFilter && event.type !== typeFilter) return false;
+    
+    // Search filter
+    if (searchFilter) {
+      const searchText = `${event.type} ${event.entityType} ${event.entityId}`.toLowerCase();
+      if (!searchText.includes(searchFilter)) return false;
+    }
+    
+    return true;
+  });
+
+  // Sort by date descending
+  filteredEvents.sort((a, b) => new Date(b.when) - new Date(a.when));
+
+  funUpdateEventSummary();
+  funRenderTimeline();
+}
+
+function funUpdateEventSummary() {
+  document.getElementById('totalCount').textContent = filteredEvents.length;
+}
+
+function funRenderTimeline() {
+  const loadingState = document.getElementById('loadingState');
+  const emptyState = document.getElementById('emptyState');
+  const timelineContent = document.getElementById('timelineContent');
+
+  loadingState.classList.add('hidden');
+
+  if (filteredEvents.length === 0) {
+    emptyState.classList.remove('hidden');
+    timelineContent.classList.add('hidden');
+    return;
+  }
+
+  emptyState.classList.add('hidden');
+  timelineContent.classList.remove('hidden');
+
+  // Group events by day
+  const eventsByDay = funGroupEventsByDay(filteredEvents);
+  
+  timelineContent.innerHTML = '';
+
+  Object.keys(eventsByDay).forEach(dateKey => {
+    const dayEvents = eventsByDay[dateKey];
+    const dayContainer = funCreateDaySection(dateKey, dayEvents);
+    timelineContent.appendChild(dayContainer);
+  });
+}
+
+function funGroupEventsByDay(events) {
+  const grouped = {};
+  
+  events.forEach(event => {
+    const eventDate = new Date(event.when);
+    const dateKey = eventDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    if (!grouped[dateKey]) {
+      grouped[dateKey] = [];
+    }
+    grouped[dateKey].push(event);
+  });
+
+  return grouped;
+}
+
+function funCreateDaySection(dateKey, events) {
+  const container = document.createElement('div');
+  container.className = 'bg-white rounded-xl shadow-sm border overflow-hidden';
+
+  const date = new Date(dateKey);
+  const formattedDate = date.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  container.innerHTML = `
+    <div class="bg-gray-50 px-6 py-3 border-b">
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">${formattedDate}</h3>
+      <p class="text-sm text-gray-600">${events.length} event${events.length !== 1 ? 's' : ''}</p>
+    </div>
+    <div class="p-6">
+      <div class="space-y-4" id="events-${dateKey}">
+        ${events.map(event => funCreateEventCard(event)).join('')}
+      </div>
+    </div>
+  `;
+
+  return container;
+}
+
+function funCreateEventCard(event) {
+  const eventTime = new Date(event.when).toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  const eventTypeClass = funGetEventTypeClass(event.type);
+  const eventIcon = funGetEventTypeIcon(event.type);
+  const eventDescription = funGetEventDescription(event);
+
+  return `
+    <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+      <div class="flex-shrink-0">
+        <div class="w-10 h-10 ${eventTypeClass} rounded-full flex items-center justify-center">
+          <i data-lucide="${eventIcon}" class="w-5 h-5 text-white"></i>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-sm font-semibold text-gray-900">${funGetEventTypeLabel(event.type)}</span>
+              <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                ${event.entityType}
+              </span>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">${eventDescription}</p>
+            ${event.metadata ? `<p class="text-xs text-gray-500">Metadata: ${event.metadata}</p>` : ''}
+          </div>
+          <div class="flex-shrink-0 text-xs text-gray-500" aria-label="Event time: ${eventTime}">
+            ${eventTime}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function funGetEventTypeClass(type) {
+  const classMap = {
+    'ACTIVITY_CREATED': 'bg-green-500',
+    'CAPACITY_UPDATED': 'bg-blue-500',
+    'ASSIGNMENT_CREATED': 'bg-purple-500',
+    'PROGRESS_LOGGED': 'bg-orange-500',
+    'PRIORITY_CHANGED': 'bg-yellow-500',
+    'CLASSIFICATION_OVERRIDE': 'bg-red-500',
+    'PLAN_PUBLISHED': 'bg-primary',
+    'APPROVAL_DECISION': 'bg-secondary'
+  };
+  return classMap[type] || 'bg-gray-500';
+}
+
+function funGetEventTypeIcon(type) {
+  const iconMap = {
+    'ACTIVITY_CREATED': 'plus',
+    'CAPACITY_UPDATED': 'calendar',
+    'ASSIGNMENT_CREATED': 'user-plus',
+    'PROGRESS_LOGGED': 'activity',
+    'PRIORITY_CHANGED': 'arrow-up-down',
+    'CLASSIFICATION_OVERRIDE': 'alert-triangle',
+    'PLAN_PUBLISHED': 'send',
+    'APPROVAL_DECISION': 'check-circle'
+  };
+  return iconMap[type] || 'circle';
+}
+
+function funGetEventTypeLabel(type) {
+  const labelMap = {
+    'ACTIVITY_CREATED': 'Activity Created',
+    'CAPACITY_UPDATED': 'Capacity Updated',
+    'ASSIGNMENT_CREATED': 'Assignment Created',
+    'PROGRESS_LOGGED': 'Progress Logged',
+    'PRIORITY_CHANGED': 'Priority Changed',
+    'CLASSIFICATION_OVERRIDE': 'Classification Override',
+    'PLAN_PUBLISHED': 'Plan Published',
+    'APPROVAL_DECISION': 'Approval Decision'
+  };
+  return labelMap[type] || type;
+}
+
+function funGetEventDescription(event) {
+  let description = `${event.entityType}`;
+  
+  if (event.entityId) {
+    description += ` (${event.entityId})`;
+  }
+
+  // Add specific context based on event type
+  if (event.before && event.after) {
+    try {
+      const before = JSON.parse(event.before);
+      const after = JSON.parse(event.after);
+      
+      if (event.type === 'CAPACITY_UPDATED') {
+        const beforeTotal = before.weeklyTotal || 'Unknown';
+        const afterTotal = after.weeklyTotal || 'Unknown';
+        description += ` - Weekly capacity changed from ${beforeTotal}h to ${afterTotal}h`;
+      } else if (event.type === 'PRIORITY_CHANGED') {
+        description += ' - Priority order updated';
+      } else if (event.type === 'ASSIGNMENT_CREATED') {
+        const segments = after.segments || 'Unknown';
+        description += ` - Assigned ${segments} hours`;
+      }
+    } catch (e) {
+      // If parsing fails, keep basic description
+    }
+  }
+
+  return description;
+}
+
+async function funExportAuditEvents() {
+  try {
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      userId: currentUserId,
+      userName: window.UserUtils?.getUserDisplayName(currentUser) || 'Unknown User',
+      totalEvents: filteredEvents.length,
+      filters: {
+        week: document.getElementById('weekFilter').value || 'All Weeks',
+        eventType: document.getElementById('eventTypeFilter').value || 'All Types',
+        search: document.getElementById('searchFilter').value || 'None'
+      },
+      events: filteredEvents
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `audit-history-${currentUserId}-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // Show success message
+    funShowSuccessMessage('Audit history exported successfully!');
+
+  } catch (error) {
+    console.error('Error exporting audit events:', error);
+    funShowErrorMessage('Failed to export audit history. Please try again.');
+  }
+}
+
+function funShowSuccessMessage(message) {
+  // Create temporary success message
+  const successDiv = document.createElement('div');
+  successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+  successDiv.textContent = message;
+  document.body.appendChild(successDiv);
+  
+  setTimeout(() => {
+    if (successDiv.parentNode) {
+      successDiv.parentNode.removeChild(successDiv);
+    }
+  }, 3000);
+}
+
+function funShowErrorMessage(message) {
+  // Create temporary error message
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+  errorDiv.textContent = message;
+  document.body.appendChild(errorDiv);
+  
+  setTimeout(() => {
+    if (errorDiv.parentNode) {
+      errorDiv.parentNode.removeChild(errorDiv);
+    }
+  }, 3000);
+}
+
+function funShowErrorState(message) {
+  const loadingState = document.getElementById('loadingState');
+  const timelineContent = document.getElementById('timelineContent');
+  const emptyState = document.getElementById('emptyState');
+  
+  loadingState.classList.add('hidden');
+  timelineContent.classList.add('hidden');
+  emptyState.classList.remove('hidden');
+  
+  const emptyStateTitle = emptyState.querySelector('h3');
+  const emptyStateText = emptyState.querySelector('p');
+  
+  if (emptyStateTitle) emptyStateTitle.textContent = 'Error Loading Audit Events';
+  if (emptyStateText) emptyStateText.textContent = message;
+}
+
+// Event listeners
+document.getElementById('applyFilters').addEventListener('click', funApplyFilters);
+document.getElementById('exportAuditBtn').addEventListener('click', funExportAuditEvents);
+
+// Real-time filter updates
+document.getElementById('weekFilter').addEventListener('change', funApplyFilters);
+document.getElementById('eventTypeFilter').addEventListener('change', funApplyFilters);
+
+// Debounced search
+let searchTimeout;
+document.getElementById('searchFilter').addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(funApplyFilters, 300);
+});
+
+// Initialize page when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Re-initialize Lucide icons for dynamically created content
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+  
+  funInitializePage();
+});
+
+// Re-initialize icons when timeline is updated
+const originalRenderTimeline = funRenderTimeline;
+funRenderTimeline = function() {
+  originalRenderTimeline();
+  if (window.lucide) {
+    setTimeout(() => window.lucide.createIcons(), 100);
+  }
+};
+
+</script></body></html>
