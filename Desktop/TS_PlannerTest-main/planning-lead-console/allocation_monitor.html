@@ -1,0 +1,1216 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Planning Lead Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 1rem;
+            --text-display-sm--line-height: 1.5rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        .focus-visible:focus-visible {
+            outline: 2px solid theme('colors.primary');
+            outline-offset: 2px;
+        }
+
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: theme('colors.slate.500');
+            margin-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-group-header:first-child {
+            margin-top: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: theme('radius.md');
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: theme('colors.slate.700');
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: theme('colors.slate.100');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active {
+            background-color: theme('colors.primary/10');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: theme('colors.primary');
+            border-radius: 0 2px 2px 0;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: white;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-slate-800">
+
+    <!-- Skip to main content -->
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+
+    <!-- Top Header -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b border-slate-200 sticky top-0 z-30">
+        <div class="flex items-center gap-4">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 focus-visible" aria-label="Open navigation menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                        <!-- Palette: navy (#0B63A7) and teal (#00A99D) -->
+                        <!-- Rounded calendar outline -->
+                        <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                        <!-- Day cells (3x2 grid) -->
+                        <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                            <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        </g>
+                        <!-- Asynchronous loop (teal) wrapping the calendar -->
+                        <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22"></path>
+                            <circle cx="300" cy="245" r="8"></circle>
+                            <circle cx="280" cy="200" r="8"></circle>
+                            <circle cx="270" cy="150" r="8"></circle>
+                            <path d="M260 100 L246 116 L274 116 Z"></path>
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="text-display-md leading-display-md font-bold text-primary">Planning Lead Console</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <!-- User Profile Button -->
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors focus-visible" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-medium text-slate-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-slate-200 rounded-xl shadow-lg p-4 w-64 z-50 hidden" role="dialog" aria-labelledby="userProfileTitle">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-slate-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-slate-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors focus-visible">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Desktop Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r border-slate-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-6" role="navigation" aria-label="Main navigation" id="sideNav">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        
+        <!-- Mobile Sidebar -->
+        <aside id="mobileSidebar" class="mobile-sidebar md:hidden">
+            <nav class="p-6" role="navigation" aria-label="Main navigation">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Allocation Monitor - Planning Lead Console</title>
+</head_content_code>
+
+<html_content_code>
+<!-- Breadcrumb Navigation -->
+<nav class="flex items-center gap-2 text-sm mb-6" aria-label="Breadcrumb">
+    <a href="planning_week_overview.html" class="text-slate-500 hover:text-primary transition-colors">Overview</a>
+    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+    <span class="text-slate-900 font-medium">Monitoring</span>
+</nav>
+
+<!-- Header Section -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-slate-900 mb-2">Allocation Monitor</h1>
+        <p class="text-sm leading-[1.375rem] text-slate-600">Track team capacity and allocation compliance in real-time</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <button id="refreshMonitorBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors focus-visible flex items-center gap-2">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            Refresh
+        </button>
+        <button id="forcePublishBtn" class="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors focus-visible flex items-center gap-2">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            Force Publish Request
+        </button>
+    </div>
+</div>
+
+<!-- Readiness Banner -->
+<div id="readinessBanner" class="hidden mb-6">
+    <!-- Success banner for ready state -->
+    <div id="readyBanner" class="hidden bg-secondary/10 border border-secondary/20 rounded-lg p-4">
+        <div class="flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-secondary"></i>
+            <div class="flex-1">
+                <h3 class="font-semibold text-secondary">All members ready for publication</h3>
+                <p class="text-sm text-slate-600 mt-1">Team capacity targets met across all categories</p>
+            </div>
+            <button id="publishNowBtn" class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors focus-visible">
+                Publish Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Warning banner for waiting state -->
+    <div id="waitingBanner" class="hidden bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+            <i data-lucide="clock" class="w-5 h-5 text-amber-600 mt-0.5"></i>
+            <div class="flex-1">
+                <h3 class="font-semibold text-amber-800">Waiting for <span id="waitingCount">0</span> members</h3>
+                <div id="blockersList" class="text-sm text-slate-600 mt-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error banner -->
+    <div id="errorBanner" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mt-0.5"></i>
+            <div class="flex-1">
+                <h3 class="font-semibold text-red-800">Publication Failed</h3>
+                <p class="text-sm text-red-600 mt-1" id="errorMessage"></p>
+            </div>
+            <button id="retryPublishBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors focus-visible">
+                Retry
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Section -->
+<div class="bg-white rounded-xl border border-slate-200 p-4 mb-6">
+    <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+            <label for="memberSearch" class="block text-sm font-medium text-slate-700 mb-2">Search Members</label>
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input type="text" id="memberSearch" placeholder="Search by name..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            </div>
+        </div>
+        <div class="flex gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Filters</label>
+                <div class="flex gap-2">
+                    <button id="filterUnderTarget" class="px-3 py-2 text-sm border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors focus-visible" data-filter="underTarget">
+                        Under Target
+                    </button>
+                    <button id="filterZeroCapacity" class="px-3 py-2 text-sm border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors focus-visible" data-filter="zeroCapacity">
+                        Zero Capacity
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Members Grid -->
+<div class="bg-white rounded-xl border border-slate-200">
+    <!-- Grid Header -->
+    <div class="grid grid-cols-12 gap-4 p-4 border-b border-slate-200 bg-slate-50 rounded-t-xl">
+        <div class="col-span-3">
+            <span class="text-sm font-semibold text-slate-700">Member</span>
+        </div>
+        <div class="col-span-3">
+            <span class="text-sm font-semibold text-slate-700">Total Allocation</span>
+        </div>
+        <div class="col-span-6">
+            <span class="text-sm font-semibold text-slate-700">Category Compliance</span>
+        </div>
+    </div>
+
+    <!-- Members List -->
+    <div id="membersGrid" class="divide-y divide-slate-200">
+        <!-- Member rows will be populated by JavaScript -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden p-8 text-center">
+        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="users" class="w-8 h-8 text-slate-400"></i>
+        </div>
+        <h3 class="text-lg font-medium text-slate-900 mb-2">No allocation required</h3>
+        <p class="text-slate-600 mb-4">No team members have capacity for this week</p>
+        <a href="plan_snapshot_viewer.html" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+            View Snapshots
+        </a>
+    </div>
+</div>
+
+<!-- Force Publish Request Drawer -->
+<div id="forcePublishDrawer" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" id="drawerOverlay"></div>
+    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl">
+        <div class="flex flex-col h-full">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b border-slate-200">
+                <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900">Force Publish Request</h2>
+                <button id="closeDrawerBtn" class="p-2 hover:bg-slate-100 rounded-lg transition-colors focus-visible">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 p-6 overflow-y-auto">
+                <div class="mb-4">
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 mt-0.5"></i>
+                            <div>
+                                <h3 class="font-semibold text-amber-800">Publishing before readiness</h3>
+                                <p class="text-sm text-amber-700 mt-1">This will publish the plan even though not all members have met their allocation targets.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <label for="forcePublishReason" class="block text-sm font-medium text-slate-700 mb-2">
+                        Reason for force publish <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="forcePublishReason" rows="4" placeholder="Explain why this plan needs to be published before all members are ready..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" required=""></textarea>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-6 border-t border-slate-200 bg-slate-50">
+                <div class="flex gap-3">
+                    <button id="cancelForcePublishBtn" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors focus-visible">
+                        Cancel
+                    </button>
+                    <button id="submitForcePublishBtn" class="flex-1 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors focus-visible">
+                        Submit Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Plan Published Success Modal -->
+<div id="planPublishedModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="check-circle" class="w-8 h-8 text-secondary"></i>
+                </div>
+                <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-slate-900 mb-2">Plan Published Successfully</h2>
+                <p class="text-slate-600 mb-6">The plan has been published and team notifications have been sent.</p>
+                
+                <!-- Summary Stats -->
+                <div id="publishedSummary" class="bg-slate-50 rounded-lg p-4 mb-6">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <div class="flex gap-3">
+                    <button id="closePublishedModalBtn" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors focus-visible">
+                        Close
+                    </button>
+                    <a id="viewSnapshotBtn" href="#" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-center">
+                        View Snapshot
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'PLC__';
+
+        // Mobile navigation toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = sidebar.classList.contains('open');
+                
+                btn.setAttribute('aria-expanded', String(!isOpen));
+                
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.focus();
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // Navigation active state management
+        function updateActiveNavItem() {
+            const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                               window.location.pathname.split('/').pop() || 
+                               'planning_week_overview.html';
+            
+            // Update both desktop and mobile nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const itemPage = item.getAttribute('data-page') || item.getAttribute('href');
+                if (itemPage === currentPage) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'page');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Update active state on page load and when navigation changes
+        updateActiveNavItem();
+        window.addEventListener('popstate', updateActiveNavItem);
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-alice');
+                    currentUserId = 'u-alice';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users_' + currentUserId);
+                try { 
+                    if (userData) return JSON.parse(userData);
+                    
+                    // Fallback to dummy data from localStorage if available
+                    const usersData = localStorage.getItem('plc::users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        if (user) return user;
+                    }
+                    
+                    // Final fallback
+                    return {
+                        id: 'u-alice',
+                        firstName: 'Alice',
+                        lastName: 'Nguyen',
+                        role: 'PLANNING_LEAD',
+                        email: 'alice.nguyen@example.local'
+                    };
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            const initials = UserUtils.getUserInitials(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverUserAvatar) popoverUserAvatar.textContent = initials;
+            if (popoverUserName) popoverUserName.textContent = displayName;
+            if (popoverUserEmail) popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover management
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popoverVisible = !popoverVisible;
+                
+                if (popoverVisible) {
+                    popover.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first interactive element in popover
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                } else {
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Sign out handler
+            const signOutBtn = document.getElementById('signOutButton');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        UserUtils.signOut();
+                    }
+                });
+            }
+        }());
+
+        // Import/Export functionality (namespaced)
+        document.getElementById('exportAppData')?.addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith(APP_PREFIX) || key.startsWith('plc::'))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "planning_console_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData')?.addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile')?.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX) || key.startsWith('plc::')) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        alert(`✅ Successfully imported ${importedCount} data items. Please refresh the page to see changes.`);
+                    } else {
+                        alert('⚠️ No compatible data found in the file.');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    alert('❌ Failed to import: Invalid JSON format or corrupted file.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions handler
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (error) {
+                    console.error(`Error executing action ${action}:`, error);
+                    el.setAttribute('disabled', 'true');
+                    el.setAttribute('title', 'Action failed');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Action not available');
+                console.warn(`Action ${action} not found in window.AppActions`);
+            }
+        });
+
+        // Toast notification helper
+        window.showToast = function(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-opacity duration-300 ${
+                type === 'success' ? 'bg-secondary' : 
+                type === 'error' ? 'bg-error' : 
+                'bg-slate-600'
+            }`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        };
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { 
+    getMonitoringData, 
+    checkReadinessStatus, 
+    publishPlan, 
+    createForcePublishRequest,
+    getCurrentWeek 
+} from './page-logic.js';
+
+// Page state
+let currentMonitoringData = null;
+let activeFilters = new Set();
+let searchQuery = '';
+
+// DOM elements
+const membersGrid = document.getElementById('membersGrid');
+const emptyState = document.getElementById('emptyState');
+const memberSearch = document.getElementById('memberSearch');
+const readinessBanner = document.getElementById('readinessBanner');
+const readyBanner = document.getElementById('readyBanner');
+const waitingBanner = document.getElementById('waitingBanner');
+const errorBanner = document.getElementById('errorBanner');
+const waitingCount = document.getElementById('waitingCount');
+const blockersList = document.getElementById('blockersList');
+const errorMessage = document.getElementById('errorMessage');
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', funInitializePage);
+
+async function funInitializePage() {
+    try {
+        await funLoadMonitoringData();
+        funSetupEventListeners();
+        funUpdateActiveNavigationState();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(funLoadMonitoringData, 30000);
+        
+        // Initialize icons
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    } catch (error) {
+        console.error('Failed to initialize monitoring page:', error);
+        funShowErrorBanner('Failed to load monitoring data');
+    }
+}
+
+function funSetupEventListeners() {
+    // Search functionality
+    memberSearch.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        funFilterAndRenderMembers();
+    });
+
+    // Filter buttons
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const filterType = e.target.dataset.filter;
+            
+            if (activeFilters.has(filterType)) {
+                activeFilters.delete(filterType);
+                e.target.classList.remove('bg-primary', 'text-white');
+                e.target.classList.add('border-slate-300', 'hover:bg-slate-50');
+            } else {
+                activeFilters.add(filterType);
+                e.target.classList.remove('border-slate-300', 'hover:bg-slate-50');
+                e.target.classList.add('bg-primary', 'text-white');
+            }
+            
+            funFilterAndRenderMembers();
+        });
+    });
+
+    // Action buttons
+    document.getElementById('refreshMonitorBtn').addEventListener('click', funLoadMonitoringData);
+    document.getElementById('forcePublishBtn').addEventListener('click', funOpenForcePublishDrawer);
+    document.getElementById('publishNowBtn').addEventListener('click', funPublishPlan);
+    document.getElementById('retryPublishBtn').addEventListener('click', funPublishPlan);
+
+    // Drawer controls
+    document.getElementById('closeDrawerBtn').addEventListener('click', funCloseForcePublishDrawer);
+    document.getElementById('drawerOverlay').addEventListener('click', funCloseForcePublishDrawer);
+    document.getElementById('cancelForcePublishBtn').addEventListener('click', funCloseForcePublishDrawer);
+    document.getElementById('submitForcePublishBtn').addEventListener('click', funSubmitForcePublishRequest);
+
+    // Modal controls
+    document.getElementById('closePublishedModalBtn').addEventListener('click', funClosePlanPublishedModal);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            funCloseForcePublishDrawer();
+            funClosePlanPublishedModal();
+        }
+        if (e.key === 'r' && e.ctrlKey) {
+            e.preventDefault();
+            funLoadMonitoringData();
+        }
+    });
+}
+
+async function funLoadMonitoringData() {
+    try {
+        // Show loading state
+        document.getElementById('refreshMonitorBtn').innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Loading...';
+        
+        const currentWeek = getCurrentWeek();
+        
+        /*
+         * Expected return from getMonitoringData(weekId):
+         * {
+         *   members: [
+         *     {
+         *       userId: string,
+         *       firstName: string,
+         *       lastName: string,
+         *       capacity: {
+         *         weeklyTotal: number,
+         *         targets: { client: number, techDebt: number, rnd: number },
+         *         zeroCapacity: boolean
+         *       },
+         *       allocations: {
+         *         total: number,
+         *         byCategory: { client: number, techDebt: number, rnd: number }
+         *       },
+         *       compliance: {
+         *         client: boolean,
+         *         techDebt: boolean, 
+         *         rnd: boolean,
+         *         overall: boolean
+         *       }
+         *     }
+         *   ],
+         *   readiness: {
+         *     isReady: boolean,
+         *     waitingCount: number,
+         *     blockers: [{ userId: string, categories: string[] }]
+         *   }
+         * }
+         * 
+         * Data sources: capacities, assignments, users collections
+         * Computes: per-member allocation totals by category, compliance flags
+         */
+        currentMonitoringData = await getMonitoringData(currentWeek.id);
+        
+        funUpdateReadinessBanner();
+        funFilterAndRenderMembers();
+        
+    } catch (error) {
+        console.error('Error loading monitoring data:', error);
+        funShowErrorBanner('Failed to load monitoring data');
+    } finally {
+        document.getElementById('refreshMonitorBtn').innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh';
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+}
+
+function funUpdateReadinessBanner() {
+    if (!currentMonitoringData) return;
+
+    const { readiness } = currentMonitoringData;
+    
+    // Hide all banners first
+    readyBanner.classList.add('hidden');
+    waitingBanner.classList.add('hidden');
+    errorBanner.classList.add('hidden');
+    
+    if (readiness.isReady) {
+        readyBanner.classList.remove('hidden');
+        readinessBanner.classList.remove('hidden');
+    } else {
+        waitingBanner.classList.remove('hidden');
+        readinessBanner.classList.remove('hidden');
+        
+        waitingCount.textContent = readiness.waitingCount;
+        
+        // Build blockers list
+        const blockersText = readiness.blockers.map(blocker => {
+            const member = currentMonitoringData.members.find(m => m.userId === blocker.userId);
+            const memberName = member ? `${member.firstName} ${member.lastName}` : 'Unknown';
+            return `${memberName}: ${blocker.categories.join(', ')} targets`;
+        }).join('; ');
+        
+        blockersList.textContent = blockersText;
+    }
+}
+
+function funFilterAndRenderMembers() {
+    if (!currentMonitoringData) return;
+
+    let filteredMembers = currentMonitoringData.members.filter(member => {
+        // Search filter
+        if (searchQuery) {
+            const fullName = `${member.firstName} ${member.lastName}`.toLowerCase();
+            if (!fullName.includes(searchQuery)) {
+                return false;
+            }
+        }
+
+        // Under target filter
+        if (activeFilters.has('underTarget') && member.compliance.overall) {
+            return false;
+        }
+
+        // Zero capacity filter
+        if (activeFilters.has('zeroCapacity') && !member.capacity.zeroCapacity) {
+            return false;
+        }
+
+        return true;
+    });
+
+    if (filteredMembers.length === 0) {
+        membersGrid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+    }
+
+    membersGrid.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    membersGrid.innerHTML = filteredMembers.map(member => funRenderMemberRow(member)).join('');
+    
+    // Announce changes to screen readers
+    const announcement = `${filteredMembers.length} members displayed`;
+    funAnnounceToScreenReader(announcement);
+}
+
+function funRenderMemberRow(member) {
+    const initials = `${member.firstName.charAt(0)}${member.lastName.charAt(0)}`.toUpperCase();
+    const fullName = `${member.firstName} ${member.lastName}`;
+    
+    const totalPct = member.capacity.weeklyTotal > 0 ? 
+        Math.round((member.allocations.total / member.capacity.weeklyTotal) * 100) : 0;
+    
+    const isOverallocated = totalPct > 100;
+    const totalBarClass = isOverallocated ? 'bg-red-500' : 'bg-secondary';
+    
+    return `
+        <div class="grid grid-cols-12 gap-4 p-4 hover:bg-slate-50">
+            <!-- Member Info -->
+            <div class="col-span-3 flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                    ${initials}
+                </div>
+                <div>
+                    <div class="font-medium text-slate-900">${fullName}</div>
+                    ${member.capacity.zeroCapacity ? 
+                        '<span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">Zero Capacity</span>' : ''}
+                </div>
+            </div>
+
+            <!-- Total Allocation -->
+            <div class="col-span-3">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-sm font-medium text-slate-900">
+                        ${member.allocations.total}h / ${member.capacity.weeklyTotal}h
+                    </span>
+                    <span class="text-sm text-slate-500">(${totalPct}%)</span>
+                    ${isOverallocated ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Over</span>' : ''}
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div class="${totalBarClass} h-2 rounded-full transition-all" style="width: ${Math.min(totalPct, 100)}%"></div>
+                </div>
+                <div class="text-xs text-slate-500 mt-1" role="progressbar" aria-valuenow="${totalPct}" aria-valuemin="0" aria-valuemax="100">
+                    ${totalPct}% allocated
+                </div>
+            </div>
+
+            <!-- Category Compliance -->
+            <div class="col-span-6 grid grid-cols-3 gap-2">
+                ${funRenderCategoryBar('Client', member.allocations.byCategory.client, member.capacity.targets.client, member.compliance.client)}
+                ${funRenderCategoryBar('Tech Debt', member.allocations.byCategory.techDebt, member.capacity.targets.techDebt, member.compliance.techDebt)}
+                ${funRenderCategoryBar('R&D', member.allocations.byCategory.rnd, member.capacity.targets.rnd, member.compliance.rnd)}
+            </div>
+        </div>
+    `;
+}
+
+function funRenderCategoryBar(label, allocated, target, isCompliant) {
+    const pct = target > 0 ? Math.round((allocated / target) * 100) : 0;
+    const barClass = isCompliant ? 'bg-secondary' : 'bg-amber-500';
+    const badgeClass = isCompliant ? 'bg-secondary/10 text-secondary' : 'bg-amber-50 text-amber-700';
+    const badgeText = isCompliant ? '✓' : '!';
+    
+    return `
+        <div>
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-medium text-slate-700">${label}</span>
+                <span class="text-xs ${badgeClass} px-1.5 py-0.5 rounded-full font-medium">${badgeText}</span>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-slate-600 mb-1">
+                <span>${allocated}h / ${target}h</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-1.5">
+                <div class="${barClass} h-1.5 rounded-full transition-all" style="width: ${Math.min(pct, 100)}%"></div>
+            </div>
+        </div>
+    `;
+}
+
+async function funPublishPlan() {
+    try {
+        const currentWeek = getCurrentWeek();
+        
+        /*
+         * Expected behavior of publishPlan(weekId):
+         * - Creates immutable plan snapshot with current state
+         * - Updates week status to 'Published'  
+         * - Queues notifications for team members
+         * - Creates audit event
+         * - Returns: { success: boolean, snapshotId: string, summary: {...} }
+         * 
+         * Data sources: activities, capacities, assignments, activityPriorities
+         * Data targets: planSnapshots, notifications, auditEvents
+         */
+        const result = await publishPlan(currentWeek.id);
+        
+        if (result.success) {
+            funShowPlanPublishedModal(result.summary, result.snapshotId);
+            await funLoadMonitoringData(); // Refresh to show new state
+        } else {
+            funShowErrorBanner('Failed to publish plan. Please try again.');
+        }
+        
+    } catch (error) {
+        console.error('Error publishing plan:', error);
+        funShowErrorBanner(`Publication failed: ${error.message}`);
+    }
+}
+
+function funOpenForcePublishDrawer() {
+    document.getElementById('forcePublishDrawer').classList.remove('hidden');
+    document.getElementById('forcePublishReason').focus();
+}
+
+function funCloseForcePublishDrawer() {
+    document.getElementById('forcePublishDrawer').classList.add('hidden');
+    document.getElementById('forcePublishReason').value = '';
+}
+
+async function funSubmitForcePublishRequest() {
+    const reason = document.getElementById('forcePublishReason').value.trim();
+    
+    if (!reason) {
+        alert('Please provide a reason for the force publish request.');
+        return;
+    }
+    
+    try {
+        const currentWeek = getCurrentWeek();
+        const currentUser = window.UserUtils.getCurrentUser();
+        
+        /*
+         * Expected behavior of createForcePublishRequest(weekId, reason, requesterId):
+         * - Creates change request with type 'FORCE_PUBLISH'
+         * - Sets status to 'PENDING' 
+         * - Creates audit event
+         * - Returns: { success: boolean, requestId: string }
+         * 
+         * Data targets: changeRequests, auditEvents
+         */
+        const result = await createForcePublishRequest(currentWeek.id, reason, currentUser.id);
+        
+        if (result.success) {
+            funCloseForcePublishDrawer();
+            window.showToast('Force publish request submitted successfully', 'success');
+            
+            // Navigate to approvals queue
+            setTimeout(() => {
+                window.location.href = 'approvals_queue.html?filter=change_requests';
+            }, 1500);
+        } else {
+            alert('Failed to submit force publish request. Please try again.');
+        }
+        
+    } catch (error) {
+        console.error('Error submitting force publish request:', error);
+        alert(`Failed to submit request: ${error.message}`);
+    }
+}
+
+function funShowPlanPublishedModal(summary, snapshotId) {
+    const modal = document.getElementById('planPublishedModal');
+    const summaryEl = document.getElementById('publishedSummary');
+    const viewSnapshotBtn = document.getElementById('viewSnapshotBtn');
+    
+    // Populate summary
+    summaryEl.innerHTML = `
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <span class="text-slate-600">Total Capacity:</span>
+                <span class="font-medium">${summary.capacity}h</span>
+            </div>
+            <div>
+                <span class="text-slate-600">Total Allocated:</span>
+                <span class="font-medium">${summary.allocated}h</span>
+            </div>
+            <div>
+                <span class="text-slate-600">Client Focus:</span>
+                <span class="font-medium">${summary.byCategoryClient}h</span>
+            </div>
+            <div>
+                <span class="text-slate-600">Tech Debt:</span>
+                <span class="font-medium">${summary.byCategoryTechDebt}h</span>
+            </div>
+            <div>
+                <span class="text-slate-600">R&D:</span>
+                <span class="font-medium">${summary.byCategoryRnd}h</span>
+            </div>
+        </div>
+    `;
+    
+    // Set snapshot link
+    viewSnapshotBtn.href = `plan_snapshot_viewer.html?snapshotId=${snapshotId}`;
+    
+    modal.classList.remove('hidden');
+}
+
+function funClosePlanPublishedModal() {
+    document.getElementById('planPublishedModal').classList.add('hidden');
+}
+
+function funShowErrorBanner(message) {
+    errorMessage.textContent = message;
+    errorBanner.classList.remove('hidden');
+    readyBanner.classList.add('hidden');
+    waitingBanner.classList.add('hidden');
+    readinessBanner.classList.remove('hidden');
+}
+
+function funUpdateActiveNavigationState() {
+    // Update UI state to remember we're on monitoring tab
+    try {
+        const currentUser = window.UserUtils.getCurrentUser();
+        if (currentUser) {
+            const uiStateKey = `plc::uiState`;
+            const uiStateData = JSON.parse(localStorage.getItem(uiStateKey) || '[]');
+            
+            let userState = uiStateData.find(s => s.userId === currentUser.id);
+            if (!userState) {
+                userState = {
+                    id: `ui-${currentUser.id}`,
+                    userId: currentUser.id,
+                    currentWeekId: getCurrentWeek().id,
+                    lastSelectedTab: 'monitoring',
+                    filters: '{}',
+                    columnWidths: '{}',
+                    updatedAt: new Date().toISOString()
+                };
+                uiStateData.push(userState);
+            } else {
+                userState.lastSelectedTab = 'monitoring';
+                userState.updatedAt = new Date().toISOString();
+            }
+            
+            localStorage.setItem(uiStateKey, JSON.stringify(uiStateData));
+        }
+    } catch (error) {
+        console.error('Failed to update UI state:', error);
+    }
+}
+
+function funAnnounceToScreenReader(message) {
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
+    announcement.className = 'sr-only';
+    announcement.textContent = message;
+    
+    document.body.appendChild(announcement);
+    
+    setTimeout(() => {
+        document.body.removeChild(announcement);
+    }, 1000);
+}
+</script></body></html>

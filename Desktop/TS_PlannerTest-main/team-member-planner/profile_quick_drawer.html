@@ -1,0 +1,943 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>My Profile - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<!-- Profile Quick Drawer -->
+<div id="profileDrawer" class="fixed inset-0 bg-black/50 z-50 hidden" aria-hidden="true">
+    <div class="fixed inset-y-0 right-0 max-w-md w-full bg-surface shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out" role="dialog" aria-modal="true" aria-labelledby="profileDrawerTitle">
+        
+        <!-- Drawer Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <h2 id="profileDrawerTitle" class="text-display-md font-semibold text-gray-900">My Profile</h2>
+            <button id="closeProfileDrawer" class="p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Close profile drawer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Drawer Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <!-- Profile Form -->
+            <form id="profileForm" class="space-y-6">
+                <!-- Avatar Section -->
+                <div class="flex items-center gap-4 pb-4 border-b border-gray-100">
+                    <div id="profileAvatar" class="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-xl font-semibold">
+                    </div>
+                    <div>
+                        <h3 class="text-display-sm font-semibold text-gray-900">Profile Picture</h3>
+                        <p class="text-xs text-gray-500">Avatar is generated from your initials</p>
+                    </div>
+                </div>
+
+                <!-- Display Name Field -->
+                <div class="space-y-2">
+                    <label for="displayName" class="block text-display-sm font-medium text-gray-700">
+                        Display Name <span class="text-error">*</span>
+                    </label>
+                    <input type="text" id="displayName" name="displayName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter your display name" required="" aria-describedby="displayNameError">
+                    <div id="displayNameError" class="text-sm text-error hidden" role="alert"></div>
+                </div>
+
+                <!-- Email Field -->
+                <div class="space-y-2">
+                    <label for="email" class="block text-display-sm font-medium text-gray-700">
+                        Email Address <span class="text-error">*</span>
+                    </label>
+                    <input type="email" id="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter your email address" required="" aria-describedby="emailError">
+                    <div id="emailError" class="text-sm text-error hidden" role="alert"></div>
+                </div>
+
+                <!-- Settings Link -->
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                        <div>
+                            <h4 class="text-display-sm font-medium text-blue-900">Need more options?</h4>
+                            <p class="text-xs text-blue-700 mt-1">
+                                Use Settings to change timezone affecting week boundaries and other preferences.
+                            </p>
+                            <a href="settings.html" class="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                Open Settings
+                                <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex gap-3 pt-4 border-t border-gray-200">
+                    <button type="submit" id="saveProfileBtn" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                        Save Changes
+                    </button>
+                    <button type="button" id="cancelProfileBtn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="profileToast" class="fixed top-4 right-4 bg-secondary text-white px-6 py-3 rounded-lg shadow-lg z-60 hidden transform translate-x-full transition-transform duration-300" role="alert" aria-live="polite">
+    <div class="flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-4 h-4"></i>
+        <span id="toastMessage">Profile updated successfully!</span>
+    </div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { getUserById, updateUser, setUIState } from './page-logic.js';
+
+// Profile drawer functionality
+class ProfileDrawer {
+    constructor() {
+        this.drawer = document.getElementById('profileDrawer');
+        this.form = document.getElementById('profileForm');
+        this.isOpen = false;
+        this.currentUser = null;
+        this.focusableElements = [];
+        
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.loadCurrentUser();
+        this.setupFocusManagement();
+    }
+
+    setupEventListeners() {
+        // Close button
+        document.getElementById('closeProfileDrawer')?.addEventListener('click', () => {
+            this.close();
+        });
+
+        // Cancel button
+        document.getElementById('cancelProfileBtn')?.addEventListener('click', () => {
+            this.close();
+        });
+
+        // Form submission
+        this.form?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.funSaveProfile();
+        });
+
+        // Backdrop click
+        this.drawer?.addEventListener('click', (e) => {
+            if (e.target === this.drawer) {
+                this.close();
+            }
+        });
+
+        // Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen) {
+                this.close();
+            }
+        });
+
+        // Listen for profile button clicks from header
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#userProfileButton')) {
+                e.preventDefault();
+                this.open();
+            }
+        });
+    }
+
+    setupFocusManagement() {
+        this.focusableElements = [
+            'button', 'input', 'select', 'textarea', 'a[href]',
+            '[tabindex]:not([tabindex="-1"])'
+        ];
+    }
+
+    async loadCurrentUser() {
+        try {
+            // Get current user ID from UserUtils (from container)
+            const user = window.UserUtils?.getCurrentUser();
+            if (!user) {
+                console.error('No current user found');
+                return;
+            }
+
+            this.currentUser = user;
+            this.populateForm();
+        } catch (error) {
+            console.error('Error loading current user:', error);
+            this.showError('Failed to load user profile');
+        }
+    }
+
+    populateForm() {
+        if (!this.currentUser) return;
+
+        // Update avatar
+        const avatar = document.getElementById('profileAvatar');
+        if (avatar) {
+            avatar.textContent = window.UserUtils?.getUserInitials(this.currentUser) || '?';
+        }
+
+        // Populate form fields
+        const displayNameField = document.getElementById('displayName');
+        const emailField = document.getElementById('email');
+
+        if (displayNameField) {
+            displayNameField.value = window.UserUtils?.getUserDisplayName(this.currentUser) || '';
+        }
+
+        if (emailField) {
+            emailField.value = this.currentUser.email || '';
+        }
+    }
+
+    async funSaveProfile() {
+        try {
+            const formData = new FormData(this.form);
+            const displayName = formData.get('displayName')?.toString().trim();
+            const email = formData.get('email')?.toString().trim();
+
+            // Clear previous errors
+            this.clearErrors();
+
+            // Validate fields
+            const errors = this.validateForm(displayName, email);
+            if (errors.length > 0) {
+                this.showValidationErrors(errors);
+                return;
+            }
+
+            // Parse display name into first and last name
+            const nameParts = displayName.split(' ').filter(part => part.length > 0);
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            // Prepare update data
+            const updateData = {
+                firstName,
+                lastName,
+                email,
+                updatedAt: new Date().toISOString()
+            };
+
+            /**
+             * Call updateUser from page-logic.js
+             * Expected method signature: updateUser(userId, updateData)
+             * - userId: string - ID of user to update
+             * - updateData: object - Fields to update (firstName, lastName, email, updatedAt)
+             * Returns: Promise<User> - Updated user object
+             * Collections used: users
+             * This method should update the user record in localStorage and return the updated user
+             */
+            const updatedUser = await updateUser(this.currentUser.id, updateData);
+
+            if (updatedUser) {
+                this.currentUser = updatedUser;
+                
+                // Update UI state to track profile tab selection
+                /**
+                 * Call setUIState from page-logic.js
+                 * Expected method signature: setUIState(userId, stateUpdates)
+                 * - userId: string - ID of user
+                 * - stateUpdates: object - UI state updates (lastSelectedTab: 'profile')
+                 * Collections used: uiState
+                 * This method should update the user's UI state preferences
+                 */
+                await setUIState(this.currentUser.id, { lastSelectedTab: 'profile' });
+
+                // Update header user display
+                this.updateHeaderUserInfo();
+                
+                // Show success message and close drawer
+                this.showToast('Profile updated successfully!');
+                this.close();
+            }
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            this.showError('Failed to update profile. Please try again.');
+        }
+    }
+
+    validateForm(displayName, email) {
+        const errors = [];
+
+        if (!displayName) {
+            errors.push({ field: 'displayName', message: 'Display name is required' });
+        }
+
+        if (!email) {
+            errors.push({ field: 'email', message: 'Email address is required' });
+        } else if (!this.isValidEmail(email)) {
+            errors.push({ field: 'email', message: 'Please enter a valid email address' });
+        }
+
+        return errors;
+    }
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    showValidationErrors(errors) {
+        errors.forEach(error => {
+            const errorElement = document.getElementById(`${error.field}Error`);
+            const inputElement = document.getElementById(error.field);
+            
+            if (errorElement && inputElement) {
+                errorElement.textContent = error.message;
+                errorElement.classList.remove('hidden');
+                inputElement.classList.add('border-error', 'focus:ring-error');
+                inputElement.setAttribute('aria-invalid', 'true');
+            }
+        });
+
+        // Focus first error field
+        if (errors.length > 0) {
+            const firstErrorField = document.getElementById(errors[0].field);
+            firstErrorField?.focus();
+        }
+    }
+
+    clearErrors() {
+        ['displayName', 'email'].forEach(fieldName => {
+            const errorElement = document.getElementById(`${fieldName}Error`);
+            const inputElement = document.getElementById(fieldName);
+            
+            if (errorElement) {
+                errorElement.classList.add('hidden');
+                errorElement.textContent = '';
+            }
+            
+            if (inputElement) {
+                inputElement.classList.remove('border-error', 'focus:ring-error');
+                inputElement.removeAttribute('aria-invalid');
+            }
+        });
+    }
+
+    showError(message) {
+        // Show error in a simple alert for now
+        // Could be enhanced with a proper error toast
+        alert(message);
+    }
+
+    showToast(message) {
+        const toast = document.getElementById('profileToast');
+        const messageElement = document.getElementById('toastMessage');
+        
+        if (toast && messageElement) {
+            messageElement.textContent = message;
+            toast.classList.remove('hidden', 'translate-x-full');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+    }
+
+    updateHeaderUserInfo() {
+        // Update header display with new user info
+        if (window.UserUtils && this.currentUser) {
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = window.UserUtils.getUserInitials(this.currentUser);
+            const displayName = window.UserUtils.getUserDisplayName(this.currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverUserAvatar) popoverUserAvatar.textContent = initials;
+            if (popoverUserName) popoverUserName.textContent = displayName;
+            if (popoverUserEmail) popoverUserEmail.textContent = this.currentUser.email || '';
+        }
+    }
+
+    open() {
+        if (this.isOpen) return;
+
+        this.isOpen = true;
+        this.drawer.classList.remove('hidden');
+        this.drawer.setAttribute('aria-hidden', 'false');
+        
+        // Trigger animation
+        requestAnimationFrame(() => {
+            const drawerContent = this.drawer.querySelector('[role="dialog"]');
+            if (drawerContent) {
+                drawerContent.classList.remove('translate-x-full');
+            }
+        });
+
+        // Focus management
+        this.trapFocus();
+        
+        // Focus first input
+        const firstInput = document.getElementById('displayName');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+        }
+
+        // Reload user data
+        this.loadCurrentUser();
+    }
+
+    close() {
+        if (!this.isOpen) return;
+
+        const drawerContent = this.drawer.querySelector('[role="dialog"]');
+        if (drawerContent) {
+            drawerContent.classList.add('translate-x-full');
+        }
+
+        setTimeout(() => {
+            this.isOpen = false;
+            this.drawer.classList.add('hidden');
+            this.drawer.setAttribute('aria-hidden', 'true');
+            
+            // Clear form errors
+            this.clearErrors();
+            
+            // Return focus to trigger button
+            const profileButton = document.getElementById('userProfileButton');
+            if (profileButton) {
+                profileButton.focus();
+            }
+        }, 300);
+    }
+
+    trapFocus() {
+        const focusableElements = this.drawer.querySelectorAll(
+            this.focusableElements.join(', ')
+        );
+        const firstFocusable = focusableElements[0];
+        const lastFocusable = focusableElements[focusableElements.length - 1];
+
+        const handleTabKey = (e) => {
+            if (!this.isOpen) return;
+
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleTabKey);
+        
+        // Store cleanup function
+        this.cleanupFocusTrap = () => {
+            document.removeEventListener('keydown', handleTabKey);
+        };
+    }
+}
+
+// Initialize profile drawer when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Lucide icons
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+    
+    // Initialize profile drawer
+    new ProfileDrawer();
+});
+</script></body></html>

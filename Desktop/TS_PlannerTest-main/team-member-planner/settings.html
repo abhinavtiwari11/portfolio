@@ -1,0 +1,1335 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Settings - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<section class="max-w-6xl mx-auto space-y-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-primary">Settings</h1>
+      <p class="text-sm leading-[1.375rem] text-gray-600 mt-2">Manage your personal configuration and data preferences</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <button id="viewAuditLink" class="text-sm text-secondary hover:text-secondary/80 underline">
+        View Audit History
+      </button>
+      <button id="goToMyWeekLink" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+        Go to My Week
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile Section -->
+  <div class="bg-surface rounded-xl border border-gray-200 p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Profile Information</h2>
+      <button id="editProfileBtn" class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+        <i data-lucide="edit" class="w-4 h-4 inline mr-2"></i>
+        Edit Profile
+      </button>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
+        <div id="displayNameValue" class="text-sm text-gray-900 p-3 bg-gray-50 rounded-lg border">Loading...</div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
+        <div id="emailValue" class="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg border">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Timezone Section -->
+  <div class="bg-surface rounded-xl border border-gray-200 p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Team Timezone</h2>
+        <p class="text-sm text-gray-600 mt-1">Timezone drives week boundaries (Tuesday/Wednesday–Monday)</p>
+      </div>
+      <button id="editTimezoneBtn" class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+        <i data-lucide="clock" class="w-4 h-4 inline mr-2"></i>
+        Change Timezone
+      </button>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Current Timezone</label>
+        <div id="timezoneValue" class="text-sm text-gray-900 p-3 bg-gray-50 rounded-lg border">Loading...</div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Current Week Preview</label>
+        <div id="currentWeekPreview" class="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg border">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Policy Preview Section -->
+  <div class="bg-surface rounded-xl border border-gray-200 p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Active Policy</h2>
+        <p class="text-sm text-gray-600 mt-1">Current allocation policies and work segment configuration</p>
+      </div>
+      <div class="px-3 py-1 bg-secondary/10 text-secondary text-xs rounded-full">
+        Read-only
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="text-center p-4 bg-gray-50 rounded-lg border">
+        <div class="text-2xl font-bold text-primary mb-1" id="clientPctValue">-</div>
+        <div class="text-sm text-gray-600">Client Work</div>
+      </div>
+      <div class="text-center p-4 bg-gray-50 rounded-lg border">
+        <div class="text-2xl font-bold text-secondary mb-1" id="techPctValue">-</div>
+        <div class="text-sm text-gray-600">Tech Debt</div>
+      </div>
+      <div class="text-center p-4 bg-gray-50 rounded-lg border">
+        <div class="text-2xl font-bold text-accent mb-1" id="rdPctValue">-</div>
+        <div class="text-sm text-gray-600">R&amp;D</div>
+      </div>
+      <div class="text-center p-4 bg-gray-50 rounded-lg border">
+        <div class="text-2xl font-bold text-gray-700 mb-1" id="segmentSizeValue">-</div>
+        <div class="text-sm text-gray-600">Hour Segments</div>
+      </div>
+    </div>
+    <div class="mt-4 pt-4 border-t border-gray-100">
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Daily Baseline Hours</label>
+          <div id="baselineHoursValue" class="text-sm text-gray-900 p-3 bg-gray-50 rounded-lg border">Loading...</div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Policy Name</label>
+          <div id="policyNameValue" class="text-sm text-gray-900 p-3 bg-gray-50 rounded-lg border">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import/Export Section -->
+  <div class="bg-surface rounded-xl border border-gray-200 p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Data Management</h2>
+        <p class="text-sm text-gray-600 mt-1">Import and export your planning data for backup or transfer</p>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="border border-gray-200 rounded-lg p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i data-lucide="download" class="w-5 h-5 text-blue-600"></i>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-900">Export Data</h3>
+            <p class="text-sm text-gray-600">Download your complete planning data</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Export Scope</label>
+            <select id="exportScope" class="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+              <option value="all">All Data</option>
+              <option value="current_week">Current Week Only</option>
+              <option value="my_assignments">My Assignments Only</option>
+            </select>
+          </div>
+          <button id="exportDataBtn" class="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+            Export Data
+          </button>
+        </div>
+      </div>
+      <div class="border border-gray-200 rounded-lg p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <i data-lucide="upload" class="w-5 h-5 text-green-600"></i>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-900">Import Data</h3>
+            <p class="text-sm text-gray-600">Upload and validate planning data</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label for="importFile" class="block text-sm font-medium text-gray-700 mb-2">Select File</label>
+            <input type="file" id="importFileInput" accept=".json,application/json" class="w-full p-2 border border-gray-300 rounded-lg text-sm file:mr-4 file:py-1 file:px-3 file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          </div>
+          <button id="importDataBtn" class="w-full px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors" disabled="">
+            Import &amp; Validate
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- First Time User Setup Notice -->
+  <div id="ftueNotice" class="bg-blue-50 border border-blue-200 rounded-xl p-6 hidden">
+    <div class="flex items-start gap-4">
+      <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+        <i data-lucide="info" class="w-5 h-5 text-blue-600"></i>
+      </div>
+      <div class="flex-1">
+        <h3 class="font-medium text-blue-900 mb-2">Let's get you set up</h3>
+        <p class="text-sm text-blue-800 mb-4">Complete your profile and timezone settings to start using the planner effectively.</p>
+        <div class="flex items-center gap-4">
+          <button id="startSetupBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+            Set Profile &amp; Timezone
+          </button>
+          <button id="skipSetupBtn" class="px-4 py-2 text-blue-600 hover:text-blue-800 text-sm">
+            Skip for now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Profile & Timezone Drawer -->
+<div id="profileDrawer" class="fixed inset-0 bg-black/50 z-50 hidden">
+  <div class="fixed right-0 top-0 h-full w-full max-w-lg bg-surface shadow-lg transform translate-x-full transition-transform duration-300" id="profileDrawerContent">
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Profile &amp; Timezone</h2>
+      <button id="closeProfileDrawer" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-6 overflow-y-auto h-[calc(100%-140px)]">
+      <form id="profileForm" class="space-y-6">
+        <div>
+          <label for="editDisplayName" class="block text-sm font-medium text-gray-700 mb-2">Display Name *</label>
+          <input type="text" id="editDisplayName" required="" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter your display name">
+        </div>
+        <div>
+          <label for="editEmail" class="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
+          <input type="email" id="editEmail" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter your email address">
+        </div>
+        <div>
+          <label for="editTimezone" class="block text-sm font-medium text-gray-700 mb-2">Team Timezone *</label>
+          <select id="editTimezone" required="" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+            <option value="">Select timezone...</option>
+            <option value="America/New_York">America/New_York (Eastern Time)</option>
+            <option value="America/Chicago">America/Chicago (Central Time)</option>
+            <option value="America/Denver">America/Denver (Mountain Time)</option>
+            <option value="America/Los_Angeles">America/Los_Angeles (Pacific Time)</option>
+            <option value="America/Phoenix">America/Phoenix (Arizona)</option>
+            <option value="America/Anchorage">America/Anchorage (Alaska)</option>
+            <option value="Pacific/Honolulu">Pacific/Honolulu (Hawaii)</option>
+            <option value="Europe/London">Europe/London (GMT/BST)</option>
+            <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+            <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+            <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+            <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+            <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+            <option value="Australia/Sydney">Australia/Sydney (AEDT/AEST)</option>
+          </select>
+          <div id="timezoneError" class="text-sm text-error mt-1 hidden"></div>
+        </div>
+        <div id="weekPreviewContainer" class="p-4 bg-gray-50 rounded-lg border hidden">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">Current Week Preview</h4>
+          <div id="weekPreviewContent" class="text-sm text-gray-600"></div>
+        </div>
+      </form>
+    </div>
+    <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+      <button id="cancelProfileEdit" class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">Cancel</button>
+      <button id="saveProfile" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm">
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Validation Drawer -->
+<div id="importDrawer" class="fixed inset-0 bg-black/50 z-50 hidden">
+  <div class="fixed right-0 top-0 h-full w-full max-w-2xl bg-surface shadow-lg transform translate-x-full transition-transform duration-300" id="importDrawerContent">
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Import Data Validation</h2>
+      <button id="closeImportDrawer" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-6 overflow-y-auto h-[calc(100%-140px)]">
+      <div id="validationSummary" class="hidden">
+        <h3 class="font-medium text-gray-900 mb-3">Validation Summary</h3>
+        <div id="validationStats" class="grid grid-cols-2 gap-4 mb-4">
+          <div class="p-3 bg-green-50 rounded-lg border border-green-200">
+            <div class="text-lg font-bold text-green-700" id="validRecords">0</div>
+            <div class="text-sm text-green-600">Valid Records</div>
+          </div>
+          <div class="p-3 bg-red-50 rounded-lg border border-red-200">
+            <div class="text-lg font-bold text-red-700" id="invalidRecords">0</div>
+            <div class="text-sm text-red-600">Invalid Records</div>
+          </div>
+        </div>
+      </div>
+      <div id="validationIssues" class="hidden">
+        <h3 class="font-medium text-gray-900 mb-3">Validation Issues</h3>
+        <div id="issuesList" class="space-y-3"></div>
+      </div>
+      <div id="importPreview" class="hidden">
+        <h3 class="font-medium text-gray-900 mb-3">Import Preview</h3>
+        <div id="previewContent" class="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg border max-h-64 overflow-y-auto">
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+      <button id="cancelImport" class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">Cancel</button>
+      <button id="confirmImport" class="px-6 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors text-sm" disabled="">
+        Confirm Import
+      </button>
+    </div>
+  </div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { 
+  getUserProfile, 
+  updateUserProfile, 
+  getAppConfig, 
+  updateAppConfig, 
+  getActivePolicy,
+  getCurrentWeekId,
+  validateImportData,
+  performDataImport,
+  exportUserData,
+  updateUIState
+} from './page-logic.js';
+
+// Method requirements for page-logic.js:
+
+/*
+getUserProfile(userId: string): Promise<{
+  id: string,
+  firstName: string,
+  lastName: string, 
+  email?: string,
+  displayName: string
+}>
+Description: Get current user profile data from users collection
+Collections used: users
+*/
+
+/*
+updateUserProfile(userId: string, updates: {
+  firstName?: string,
+  lastName?: string,
+  email?: string
+}): Promise<void>
+Description: Update user profile information in users collection and create audit event
+Collections used: users, auditEvents
+*/
+
+/*
+getAppConfig(): Promise<{
+  teamTimezone: string,
+  policyId: string,
+  holidayProfileId: string
+}>
+Description: Get current app configuration from appConfig collection
+Collections used: appConfig
+*/
+
+/*
+updateAppConfig(updates: {
+  teamTimezone?: string,
+  policyId?: string,
+  holidayProfileId?: string
+}): Promise<void>
+Description: Update app configuration and create audit event
+Collections used: appConfig, auditEvents
+*/
+
+/*
+getActivePolicy(): Promise<{
+  name: string,
+  clientPct: number,
+  techPct: number,
+  rdPct: number,
+  segmentSizeHours: number,
+  dailyBaselineHours: number
+}>
+Description: Get active policy details from policies collection based on appConfig.policyId
+Collections used: policies, appConfig
+*/
+
+/*
+getCurrentWeekId(timezone: string): Promise<string>
+Description: Calculate current week ID based on timezone (Wed-Tue week boundaries)
+Collections used: weekCalendar
+*/
+
+/*
+validateImportData(fileData: any): Promise<{
+  isValid: boolean,
+  validRecords: number,
+  invalidRecords: number,
+  issues: Array<{
+    collection: string,
+    record: string,
+    issue: string
+  }>
+}>
+Description: Validate imported JSON data against schema requirements
+Collections used: all (for validation)
+*/
+
+/*
+performDataImport(validatedData: any): Promise<{
+  success: boolean,
+  importedCollections: number,
+  message: string
+}>
+Description: Import validated data into local storage and create audit events
+Collections used: all collections, auditEvents
+*/
+
+/*
+exportUserData(scope: 'all' | 'current_week' | 'my_assignments', userId: string): Promise<{
+  data: any,
+  filename: string
+}>
+Description: Export user data based on scope selection
+Collections used: varies by scope (all collections for 'all', specific collections for scoped exports)
+*/
+
+/*
+updateUIState(userId: string, updates: {
+  lastSelectedTab?: string,
+  currentWeekId?: string
+}): Promise<void>
+Description: Update UI state for user
+Collections used: uiState
+*/
+
+// Global state
+let currentUser = null;
+let appConfig = null;
+let activePolicy = null;
+let isFirstTimeUser = false;
+
+// Initialize page
+async function funInitializePage() {
+  try {
+    // Get current user
+    currentUser = window.UserUtils?.getCurrentUser();
+    if (!currentUser) {
+      window.location.href = 'access_denied.html';
+      return;
+    }
+
+    // Check permissions
+    if (!['TEAM_MEMBER', 'ADMIN'].includes(currentUser.role)) {
+      window.location.href = 'access_denied.html';
+      return;
+    }
+
+    // Load initial data
+    await Promise.all([
+      funLoadUserProfile(),
+      funLoadAppConfig(),
+      funLoadActivePolicy()
+    ]);
+
+    // Check if first time user
+    funCheckFirstTimeUser();
+    
+    // Update UI state
+    await updateUIState(currentUser.id, { lastSelectedTab: 'settings' });
+
+    // Setup event listeners
+    funSetupEventListeners();
+
+    // Show FTUE if needed
+    if (isFirstTimeUser) {
+      funShowFirstTimeUserExperience();
+    }
+
+  } catch (error) {
+    console.error('Failed to initialize settings page:', error);
+    funShowError('Failed to load settings. Please refresh the page.');
+  }
+}
+
+async function funLoadUserProfile() {
+  try {
+    const profile = await getUserProfile(currentUser.id);
+    
+    // Update display
+    document.getElementById('displayNameValue').textContent = 
+      profile.displayName || `${profile.firstName} ${profile.lastName}`;
+    document.getElementById('emailValue').textContent = 
+      profile.email || 'Not provided';
+      
+  } catch (error) {
+    console.error('Failed to load user profile:', error);
+    document.getElementById('displayNameValue').textContent = 'Error loading';
+    document.getElementById('emailValue').textContent = 'Error loading';
+  }
+}
+
+async function funLoadAppConfig() {
+  try {
+    appConfig = await getAppConfig();
+    
+    // Update timezone display
+    document.getElementById('timezoneValue').textContent = appConfig.teamTimezone;
+    
+    // Update current week preview
+    const currentWeekId = await getCurrentWeekId(appConfig.teamTimezone);
+    document.getElementById('currentWeekPreview').textContent = currentWeekId;
+    
+  } catch (error) {
+    console.error('Failed to load app config:', error);
+    document.getElementById('timezoneValue').textContent = 'Error loading';
+    document.getElementById('currentWeekPreview').textContent = 'Error loading';
+  }
+}
+
+async function funLoadActivePolicy() {
+  try {
+    activePolicy = await getActivePolicy();
+    
+    // Update policy display
+    document.getElementById('clientPctValue').textContent = 
+      Math.round(activePolicy.clientPct * 100) + '%';
+    document.getElementById('techPctValue').textContent = 
+      Math.round(activePolicy.techPct * 100) + '%';
+    document.getElementById('rdPctValue').textContent = 
+      Math.round(activePolicy.rdPct * 100) + '%';
+    document.getElementById('segmentSizeValue').textContent = 
+      activePolicy.segmentSizeHours + 'h';
+    document.getElementById('baselineHoursValue').textContent = 
+      activePolicy.dailyBaselineHours + ' hours';
+    document.getElementById('policyNameValue').textContent = activePolicy.name;
+    
+  } catch (error) {
+    console.error('Failed to load active policy:', error);
+    // Set error states
+    ['clientPctValue', 'techPctValue', 'rdPctValue', 'segmentSizeValue', 
+     'baselineHoursValue', 'policyNameValue'].forEach(id => {
+      document.getElementById(id).textContent = 'Error';
+    });
+  }
+}
+
+function funCheckFirstTimeUser() {
+  // Check if user has complete profile and app config
+  const hasCompleteProfile = currentUser.firstName && currentUser.lastName;
+  const hasTimezone = appConfig?.teamTimezone;
+  
+  isFirstTimeUser = !hasCompleteProfile || !hasTimezone;
+}
+
+function funShowFirstTimeUserExperience() {
+  const ftueNotice = document.getElementById('ftueNotice');
+  ftueNotice.classList.remove('hidden');
+}
+
+function funSetupEventListeners() {
+  // Navigation links
+  document.getElementById('viewAuditLink').addEventListener('click', () => {
+    window.location.href = 'audit_history.html';
+  });
+  
+  document.getElementById('goToMyWeekLink').addEventListener('click', () => {
+    window.location.href = 'my_week_dashboard.html';
+  });
+
+  // Profile editing
+  document.getElementById('editProfileBtn').addEventListener('click', funOpenProfileDrawer);
+  document.getElementById('editTimezoneBtn').addEventListener('click', funOpenProfileDrawer);
+  
+  // FTUE actions
+  document.getElementById('startSetupBtn')?.addEventListener('click', funOpenProfileDrawer);
+  document.getElementById('skipSetupBtn')?.addEventListener('click', () => {
+    document.getElementById('ftueNotice').classList.add('hidden');
+  });
+
+  // Profile drawer
+  document.getElementById('closeProfileDrawer').addEventListener('click', funCloseProfileDrawer);
+  document.getElementById('cancelProfileEdit').addEventListener('click', funCloseProfileDrawer);
+  document.getElementById('saveProfile').addEventListener('click', funSaveProfile);
+  
+  // Timezone preview
+  document.getElementById('editTimezone').addEventListener('change', funUpdateWeekPreview);
+
+  // Import/Export
+  document.getElementById('exportDataBtn').addEventListener('click', funExportData);
+  document.getElementById('importFileInput').addEventListener('change', funHandleFileSelect);
+  document.getElementById('importDataBtn').addEventListener('click', funImportData);
+  
+  // Import drawer
+  document.getElementById('closeImportDrawer').addEventListener('click', funCloseImportDrawer);
+  document.getElementById('cancelImport').addEventListener('click', funCloseImportDrawer);
+  document.getElementById('confirmImport').addEventListener('click', funConfirmImport);
+
+  // Drawer backdrop clicks
+  document.getElementById('profileDrawer').addEventListener('click', (e) => {
+    if (e.target.id === 'profileDrawer') funCloseProfileDrawer();
+  });
+  
+  document.getElementById('importDrawer').addEventListener('click', (e) => {
+    if (e.target.id === 'importDrawer') funCloseImportDrawer();
+  });
+}
+
+function funOpenProfileDrawer() {
+  const drawer = document.getElementById('profileDrawer');
+  const content = document.getElementById('profileDrawerContent');
+  
+  // Pre-populate form
+  const displayName = currentUser.firstName && currentUser.lastName ? 
+    `${currentUser.firstName} ${currentUser.lastName}` : '';
+  document.getElementById('editDisplayName').value = displayName;
+  document.getElementById('editEmail').value = currentUser.email || '';
+  document.getElementById('editTimezone').value = appConfig?.teamTimezone || '';
+  
+  // Show drawer
+  drawer.classList.remove('hidden');
+  setTimeout(() => {
+    content.classList.remove('translate-x-full');
+    document.getElementById('editDisplayName').focus();
+  }, 10);
+}
+
+function funCloseProfileDrawer() {
+  const drawer = document.getElementById('profileDrawer');
+  const content = document.getElementById('profileDrawerContent');
+  
+  content.classList.add('translate-x-full');
+  setTimeout(() => drawer.classList.add('hidden'), 300);
+}
+
+async function funUpdateWeekPreview() {
+  const timezone = document.getElementById('editTimezone').value;
+  const container = document.getElementById('weekPreviewContainer');
+  const content = document.getElementById('weekPreviewContent');
+  const errorDiv = document.getElementById('timezoneError');
+  
+  if (!timezone) {
+    container.classList.add('hidden');
+    errorDiv.classList.add('hidden');
+    return;
+  }
+
+  try {
+    const weekId = await getCurrentWeekId(timezone);
+    content.textContent = `Current week: ${weekId}`;
+    container.classList.remove('hidden');
+    errorDiv.classList.add('hidden');
+  } catch (error) {
+    container.classList.add('hidden');
+    errorDiv.textContent = 'Invalid timezone selected';
+    errorDiv.classList.remove('hidden');
+  }
+}
+
+async function funSaveProfile() {
+  const displayName = document.getElementById('editDisplayName').value.trim();
+  const email = document.getElementById('editEmail').value.trim();
+  const timezone = document.getElementById('editTimezone').value;
+  
+  // Validation
+  if (!displayName) {
+    funShowError('Display name is required');
+    return;
+  }
+  
+  if (!timezone) {
+    funShowError('Timezone is required');
+    return;
+  }
+
+  try {
+    // Parse display name
+    const nameParts = displayName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    // Update profile
+    await updateUserProfile(currentUser.id, {
+      firstName,
+      lastName,
+      email: email || null
+    });
+
+    // Update timezone
+    await updateAppConfig({ teamTimezone: timezone });
+
+    // Refresh displays
+    await funLoadUserProfile();
+    await funLoadAppConfig();
+    
+    // Close drawer
+    funCloseProfileDrawer();
+    
+    // Hide FTUE
+    document.getElementById('ftueNotice').classList.add('hidden');
+    
+    funShowSuccess('Settings saved successfully');
+    
+  } catch (error) {
+    console.error('Failed to save profile:', error);
+    funShowError('Failed to save settings. Please try again.');
+  }
+}
+
+function funHandleFileSelect(event) {
+  const file = event.target.files[0];
+  const importBtn = document.getElementById('importDataBtn');
+  
+  if (file) {
+    importBtn.disabled = false;
+    importBtn.textContent = `Import "${file.name}"`;
+  } else {
+    importBtn.disabled = true;
+    importBtn.textContent = 'Import & Validate';
+  }
+}
+
+async function funImportData() {
+  const fileInput = document.getElementById('importFileInput');
+  const file = fileInput.files[0];
+  
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    
+    // Validate data
+    const validation = await validateImportData(data);
+    
+    // Show validation results
+    funShowValidationResults(validation, data);
+    
+  } catch (error) {
+    console.error('Import validation failed:', error);
+    if (error instanceof SyntaxError) {
+      funShowError('Invalid JSON format in selected file');
+    } else {
+      funShowError('Failed to validate import data');
+    }
+  }
+}
+
+function funShowValidationResults(validation, data) {
+  const drawer = document.getElementById('importDrawer');
+  const content = document.getElementById('importDrawerContent');
+  
+  // Update validation summary
+  document.getElementById('validRecords').textContent = validation.validRecords;
+  document.getElementById('invalidRecords').textContent = validation.invalidRecords;
+  document.getElementById('validationSummary').classList.remove('hidden');
+  
+  // Show issues if any
+  if (validation.issues.length > 0) {
+    const issuesList = document.getElementById('issuesList');
+    issuesList.innerHTML = '';
+    
+    validation.issues.forEach(issue => {
+      const div = document.createElement('div');
+      div.className = 'p-3 bg-red-50 rounded-lg border border-red-200';
+      div.innerHTML = `
+        <div class="font-medium text-red-800">${issue.collection}</div>
+        <div class="text-sm text-red-600">${issue.record}: ${issue.issue}</div>
+      `;
+      issuesList.appendChild(div);
+    });
+    
+    document.getElementById('validationIssues').classList.remove('hidden');
+  }
+  
+  // Show preview
+  const preview = document.getElementById('previewContent');
+  preview.textContent = JSON.stringify(data, null, 2);
+  document.getElementById('importPreview').classList.remove('hidden');
+  
+  // Enable/disable confirm button
+  const confirmBtn = document.getElementById('confirmImport');
+  confirmBtn.disabled = !validation.isValid;
+  
+  if (validation.isValid) {
+    confirmBtn.textContent = 'Confirm Import';
+    confirmBtn.setAttribute('data-import-data', JSON.stringify(data));
+  }
+  
+  // Show drawer
+  drawer.classList.remove('hidden');
+  setTimeout(() => content.classList.remove('translate-x-full'), 10);
+}
+
+function funCloseImportDrawer() {
+  const drawer = document.getElementById('importDrawer');
+  const content = document.getElementById('importDrawerContent');
+  
+  content.classList.add('translate-x-full');
+  setTimeout(() => {
+    drawer.classList.add('hidden');
+    // Reset form
+    document.getElementById('importFileInput').value = '';
+    document.getElementById('importDataBtn').disabled = true;
+    document.getElementById('importDataBtn').textContent = 'Import & Validate';
+  }, 300);
+}
+
+async function funConfirmImport() {
+  const confirmBtn = document.getElementById('confirmImport');
+  const data = JSON.parse(confirmBtn.getAttribute('data-import-data'));
+  
+  if (!confirm('⚠️ This will overwrite existing data. Are you sure you want to proceed?')) {
+    return;
+  }
+
+  try {
+    const result = await performDataImport(data);
+    
+    if (result.success) {
+      funCloseImportDrawer();
+      funShowSuccess(`Import completed successfully! Imported ${result.importedCollections} collections. Please refresh the page.`);
+    } else {
+      funShowError(result.message || 'Import failed');
+    }
+    
+  } catch (error) {
+    console.error('Import failed:', error);
+    funShowError('Import failed. Please try again.');
+  }
+}
+
+async function funExportData() {
+  const scope = document.getElementById('exportScope').value;
+  
+  try {
+    const result = await exportUserData(scope, currentUser.id);
+    
+    // Download file
+    const blob = new Blob([JSON.stringify(result.data, null, 2)], 
+      { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = result.filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    
+    funShowSuccess('Data exported successfully');
+    
+  } catch (error) {
+    console.error('Export failed:', error);
+    funShowError('Failed to export data. Please try again.');
+  }
+}
+
+function funShowSuccess(message) {
+  // Simple toast implementation
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+function funShowError(message) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 5000);
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', funInitializePage);
+
+// Handle browser back/forward
+window.addEventListener('popstate', funInitializePage);
+</script></body></html>

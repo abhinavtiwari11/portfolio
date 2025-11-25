@@ -1,0 +1,1248 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Availability - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<section class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900">Availability</h1>
+      <p class="text-sm leading-[1.375rem] text-gray-600 mt-1">Mark unavailability for Wed–Mon and view computed capacity and category targets.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="weekSelector" class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border">
+        <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
+        <span id="currentWeekDisplay" class="text-sm font-medium text-gray-700"></span>
+      </div>
+      <button id="resetAvailabilityBtn" class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 border rounded-lg transition-colors" disabled="">
+        Reset Week Edits
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Availability Grid - Takes 2 columns on large screens -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-xl border shadow-sm">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Weekly Availability</h2>
+            <div id="publishedLockBadge" class="hidden px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded">
+              <i data-lucide="lock" class="w-3 h-3 inline mr-1"></i>
+              Published - Read Only
+            </div>
+          </div>
+          
+          <!-- Availability Grid -->
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b">Date</th>
+                  <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b">Day</th>
+                  <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b">Unavailable Hours</th>
+                  <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b">Reason</th>
+                  <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b">Available</th>
+                  <th class="text-left p-3 text-sm font-semibold text-gray-700 border-b">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="availabilityGrid">
+                <!-- Days will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Save Actions -->
+          <div class="flex items-center justify-between mt-6 pt-4 border-t">
+            <div class="text-sm text-gray-500">
+              <span id="unsavedChangesIndicator" class="hidden text-amber-600">
+                <i data-lucide="circle" class="w-3 h-3 inline mr-1 fill-current"></i>
+                Unsaved changes
+              </span>
+            </div>
+            <div class="flex gap-3">
+              <button id="revertChangesBtn" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 border rounded-lg transition-colors" disabled="">
+                Revert Changes
+              </button>
+              <button id="saveAvailabilityBtn" class="px-4 py-2 text-sm bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors" disabled="">
+                Save Availability
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Capacity Summary Panel -->
+    <div class="space-y-6">
+      
+      <!-- Live Capacity Panel -->
+      <div class="bg-white rounded-xl border shadow-sm">
+        <div class="p-6">
+          <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-4">Live Capacity</h3>
+          
+          <!-- Daily Breakdown -->
+          <div class="space-y-3 mb-6">
+            <div class="text-sm font-medium text-gray-700 mb-2">Daily Available Hours</div>
+            <div id="dailyCapacityList" class="space-y-2">
+              <!-- Daily capacity items will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Weekly Total -->
+          <div class="border-t pt-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700">Weekly Total</span>
+              <span id="weeklyTotalHours" class="text-lg font-bold text-gray-900">40h</span>
+            </div>
+            <div id="zeroCapacityBadge" class="hidden mt-2">
+              <span class="px-2 py-1 bg-red-50 text-red-700 text-xs font-medium rounded">
+                <i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1"></i>
+                Zero Capacity Week
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Targets -->
+      <div class="bg-white rounded-xl border shadow-sm">
+        <div class="p-6">
+          <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-4">Category Targets</h3>
+          
+          <div class="space-y-4">
+            <!-- Client-Focused -->
+            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span class="text-sm font-medium text-gray-700">Client-Focused</span>
+              </div>
+              <span id="clientTarget" class="text-sm font-bold text-gray-900">20h</span>
+            </div>
+
+            <!-- Tech Debt -->
+            <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span class="text-sm font-medium text-gray-700">Tech Debt</span>
+              </div>
+              <span id="techDebtTarget" class="text-sm font-bold text-gray-900">10h</span>
+            </div>
+
+            <!-- R&D -->
+            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span class="text-sm font-medium text-gray-700">R&amp;D</span>
+              </div>
+              <span id="rndTarget" class="text-sm font-bold text-gray-900">10h</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t">
+            <div class="text-xs text-gray-500">
+              Targets computed using <span id="policyName" class="font-medium">50/25/25 policy</span> with sum-preserving rounding.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="bg-gradient-to-br from-secondary/5 to-accent/5 rounded-xl border border-secondary/20 p-6">
+        <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-3">Next Steps</h3>
+        <div class="space-y-3">
+          <button onclick="window.location.href='assignments.html'" class="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 rounded-lg border transition-colors">
+            <div class="flex items-center gap-3">
+              <i data-lucide="target" class="w-5 h-5 text-secondary"></i>
+              <span class="text-sm font-medium text-gray-700">View Assignments</span>
+            </div>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400"></i>
+          </button>
+          
+          <div class="text-xs text-gray-500 mt-3">
+            <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>
+            Set hours you're unavailable (0–8). Capacity recalculates live.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Reset Availability Modal -->
+<div id="resetAvailabilityModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+    <div class="p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+        </div>
+        <div>
+          <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Reset Availability</h3>
+          <p class="text-sm text-gray-600">This will discard all unsaved changes</p>
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <div class="text-sm text-gray-700 mb-2">Current weekly total will be reset to:</div>
+        <div class="text-lg font-bold text-gray-900" id="resetPreviewTotal">40h</div>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="cancelResetBtn" class="flex-1 px-4 py-2 text-sm border rounded-lg hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button id="confirmResetBtn" class="flex-1 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          Reset Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toastNotification" class="fixed top-4 right-4 z-50 hidden">
+  <div class="bg-white border rounded-lg shadow-lg p-4 flex items-center gap-3 max-w-sm">
+    <div id="toastIcon" class="w-5 h-5 flex-shrink-0"></div>
+    <div>
+      <div id="toastTitle" class="text-sm font-semibold text-gray-900"></div>
+      <div id="toastMessage" class="text-xs text-gray-600 mt-1"></div>
+    </div>
+  </div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+// Import data handling methods from page-logic.js
+import { 
+  getCurrentWeekAvailability,
+  updateUserAvailability,
+  computeUserCapacity,
+  getActivePolicy,
+  getHolidayProfile,
+  getPlanStatus,
+  getCurrentUser,
+  getWeekCalendar
+} from './page-logic.js';
+
+// Global state
+let currentUser = null;
+let currentWeek = null;
+let currentAvailability = null;
+let originalAvailability = null;
+let activePolicy = null;
+let holidayProfile = null;
+let planStatus = null;
+let hasUnsavedChanges = false;
+
+// Initialize page
+async function funInitializePage() {
+  try {
+    // Get current user - from users collection where user.id matches current session
+    currentUser = await getCurrentUser();
+    if (!currentUser) {
+      throw new Error('No authenticated user found');
+    }
+
+    // Get current week from URL params or default to current planning week
+    const urlParams = new URLSearchParams(window.location.search);
+    const weekId = urlParams.get('week_id') || getCurrentWeekId();
+    
+    // Get week calendar data - from weekCalendar collection where weekId matches
+    currentWeek = await getWeekCalendar(weekId);
+    if (!currentWeek) {
+      throw new Error(`Week ${weekId} not found`);
+    }
+
+    // Get user's availability data for this week - from unavailability collection filtered by userId and weekId
+    // Returns: { weekId, userId, days: [{ date, hours, reasonCode }], version, updatedAt }
+    currentAvailability = await getCurrentWeekAvailability(currentUser.id, weekId);
+    originalAvailability = JSON.parse(JSON.stringify(currentAvailability));
+
+    // Get active policy for capacity calculation - from policies collection where effectiveFrom <= now and effectiveTo >= now or null
+    // Returns: { clientPct, techPct, rdPct, segmentSizeHours, dailyBaselineHours, roundingStrategy }
+    activePolicy = await getActivePolicy();
+
+    // Get holiday profile - from holidayDates collection filtered by holidayProfileId from appConfig
+    // Returns: [{ date, reducesBaseline, description }]
+    holidayProfile = await getHolidayProfile();
+
+    // Get plan status to check if published (read-only mode) - from planSnapshots collection where weekId matches
+    // Returns: { status: 'Published'|'Draft'|'Monitoring'|'Archived' }
+    planStatus = await getPlanStatus(weekId);
+
+    // Initialize UI
+    funUpdatePageHeader();
+    funRenderAvailabilityGrid();
+    funUpdateCapacityPanel();
+    funUpdateUIState();
+
+    console.log('Availability page initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize availability page:', error);
+    funShowToast('error', 'Error', 'Failed to load availability data');
+  }
+}
+
+// Get current week ID (simplified - in real app would use proper date logic)
+function getCurrentWeekId() {
+  return '2025-W47'; // Default to current week from sample data
+}
+
+// Update page header with week info
+function funUpdatePageHeader() {
+  const weekDisplay = document.getElementById('currentWeekDisplay');
+  if (currentWeek && weekDisplay) {
+    const startDate = new Date(currentWeek.startDate).toLocaleDateString('en-GB', { 
+      day: '2-digit', 
+      month: '2-digit' 
+    });
+    const endDate = new Date(currentWeek.endDate).toLocaleDateString('en-GB', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
+    weekDisplay.textContent = `${currentWeek.id} (${startDate} – ${endDate})`;
+  }
+
+  // Show published lock badge if plan is published
+  const lockBadge = document.getElementById('publishedLockBadge');
+  if (planStatus?.status === 'Published' && lockBadge) {
+    lockBadge.classList.remove('hidden');
+  }
+}
+
+// Render the availability grid for Wed-Mon
+function funRenderAvailabilityGrid() {
+  const gridBody = document.getElementById('availabilityGrid');
+  if (!gridBody || !currentWeek || !currentAvailability) return;
+
+  gridBody.innerHTML = '';
+
+  // Generate Wed-Mon dates from the week
+  const weekDates = funGenerateWeekDates(currentWeek);
+  
+  weekDates.forEach((dateInfo, index) => {
+    const dayData = currentAvailability.days.find(d => d.date === dateInfo.date) || 
+                   { date: dateInfo.date, hours: 0, reasonCode: null };
+    
+    const holiday = holidayProfile?.find(h => h.date === dateInfo.date && h.reducesBaseline);
+    const baseline = activePolicy?.dailyBaselineHours || 8;
+    const holidayReduction = holiday ? baseline : 0;
+    const unavailable = dayData.hours || 0;
+    const available = Math.max(0, baseline - holidayReduction - unavailable);
+
+    const row = document.createElement('tr');
+    row.className = 'border-b hover:bg-gray-50';
+    
+    const isReadOnly = planStatus?.status === 'Published';
+    
+    row.innerHTML = `
+      <td class="p-3 text-sm text-gray-900 font-medium">${dateInfo.date}</td>
+      <td class="p-3 text-sm text-gray-600">${dateInfo.dayName}</td>
+      <td class="p-3">
+        <input 
+          type="number" 
+          min="0" 
+          max="8" 
+          value="${unavailable}"
+          data-date="${dateInfo.date}"
+          class="unavailable-input w-20 px-3 py-2 border rounded text-sm text-center ${isReadOnly ? 'bg-gray-50 cursor-not-allowed' : ''}"
+          ${isReadOnly ? 'disabled' : ''}
+          aria-label="Unavailable hours for ${dateInfo.dayName} ${dateInfo.date}"
+          aria-describedby="hours-constraint-${index}"
+        >
+        <div id="hours-constraint-${index}" class="sr-only">Hours must be between 0 and 8</div>
+      </td>
+      <td class="p-3">
+        <select 
+          data-date="${dateInfo.date}"
+          class="reason-select w-32 px-3 py-2 border rounded text-sm ${isReadOnly ? 'bg-gray-50 cursor-not-allowed' : ''}"
+          ${isReadOnly ? 'disabled' : ''}
+          aria-label="Reason for ${dateInfo.dayName} ${dateInfo.date}"
+        >
+          <option value="">None</option>
+          <option value="PTO" ${dayData.reasonCode === 'PTO' ? 'selected' : ''}>PTO</option>
+          <option value="Sick" ${dayData.reasonCode === 'Sick' ? 'selected' : ''}>Sick</option>
+          <option value="Training" ${dayData.reasonCode === 'Training' ? 'selected' : ''}>Training</option>
+          <option value="Holiday" ${dayData.reasonCode === 'Holiday' ? 'selected' : ''}>Holiday</option>
+          <option value="Other" ${dayData.reasonCode === 'Other' ? 'selected' : ''}>Other</option>
+        </select>
+      </td>
+      <td class="p-3">
+        <span class="inline-flex items-center px-2 py-1 rounded text-sm font-medium ${
+          available === baseline ? 'bg-green-50 text-green-700' : 
+          available > 0 ? 'bg-amber-50 text-amber-700' : 
+          'bg-red-50 text-red-700'
+        }">
+          ${available}h
+        </span>
+      </td>
+      <td class="p-3 text-xs text-gray-500">
+        ${holiday ? `Holiday: ${holiday.description}` : ''}
+        ${holidayReduction > 0 ? `(-${holidayReduction}h baseline)` : ''}
+      </td>
+    `;
+
+    gridBody.appendChild(row);
+  });
+
+  // Add event listeners for input changes
+  if (!isReadOnly) {
+    funAttachGridEventListeners();
+  }
+}
+
+// Generate Wed-Mon dates for the current week
+function funGenerateWeekDates(week) {
+  const dates = [];
+  const startDate = new Date(week.startDate);
+  const dayNames = ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday'];
+  
+  for (let i = 0; i < 6; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+    
+    dates.push({
+      date: currentDate.toISOString().split('T')[0],
+      dayName: dayNames[i]
+    });
+  }
+  
+  return dates;
+}
+
+// Attach event listeners to grid inputs
+function funAttachGridEventListeners() {
+  const unavailableInputs = document.querySelectorAll('.unavailable-input');
+  const reasonSelects = document.querySelectorAll('.reason-select');
+
+  unavailableInputs.forEach(input => {
+    input.addEventListener('input', funHandleAvailabilityChange);
+    input.addEventListener('blur', funValidateHoursInput);
+  });
+
+  reasonSelects.forEach(select => {
+    select.addEventListener('change', funHandleAvailabilityChange);
+  });
+}
+
+// Handle availability input changes
+function funHandleAvailabilityChange(event) {
+  const date = event.target.getAttribute('data-date');
+  const isHoursInput = event.target.classList.contains('unavailable-input');
+  
+  // Find or create day data
+  let dayData = currentAvailability.days.find(d => d.date === date);
+  if (!dayData) {
+    dayData = { date, hours: 0, reasonCode: null };
+    currentAvailability.days.push(dayData);
+  }
+
+  if (isHoursInput) {
+    const hours = parseInt(event.target.value) || 0;
+    dayData.hours = Math.max(0, Math.min(8, hours)); // Clamp between 0-8
+    event.target.value = dayData.hours; // Update input to clamped value
+  } else {
+    dayData.reasonCode = event.target.value || null;
+  }
+
+  // Mark as having unsaved changes
+  hasUnsavedChanges = true;
+  funUpdateUIState();
+  
+  // Live update capacity
+  funUpdateCapacityPanel();
+  
+  // Re-render grid to update available hours
+  funRenderAvailabilityGrid();
+}
+
+// Validate hours input
+function funValidateHoursInput(event) {
+  const input = event.target;
+  const value = parseInt(input.value);
+  
+  if (isNaN(value) || value < 0 || value > 8) {
+    input.classList.add('border-red-500');
+    input.setAttribute('aria-invalid', 'true');
+    
+    // Show inline error
+    let errorEl = input.parentNode.querySelector('.error-message');
+    if (!errorEl) {
+      errorEl = document.createElement('div');
+      errorEl.className = 'error-message text-xs text-red-600 mt-1';
+      input.parentNode.appendChild(errorEl);
+    }
+    errorEl.textContent = 'Hours must be between 0 and 8';
+  } else {
+    input.classList.remove('border-red-500');
+    input.removeAttribute('aria-invalid');
+    
+    const errorEl = input.parentNode.querySelector('.error-message');
+    if (errorEl) {
+      errorEl.remove();
+    }
+  }
+}
+
+// Update capacity panel with live calculations
+function funUpdateCapacityPanel() {
+  if (!currentAvailability || !activePolicy) return;
+
+  // Calculate daily and weekly totals
+  const dailyCapacityList = document.getElementById('dailyCapacityList');
+  const weeklyTotalEl = document.getElementById('weeklyTotalHours');
+  const zeroCapacityBadge = document.getElementById('zeroCapacityBadge');
+
+  if (dailyCapacityList) {
+    dailyCapacityList.innerHTML = '';
+    
+    let weeklyTotal = 0;
+    const weekDates = funGenerateWeekDates(currentWeek);
+    
+    weekDates.forEach(dateInfo => {
+      const dayData = currentAvailability.days.find(d => d.date === dateInfo.date) || { hours: 0 };
+      const holiday = holidayProfile?.find(h => h.date === dateInfo.date && h.reducesBaseline);
+      const baseline = activePolicy.dailyBaselineHours;
+      const holidayReduction = holiday ? baseline : 0;
+      const unavailable = dayData.hours || 0;
+      const available = Math.max(0, baseline - holidayReduction - unavailable);
+      
+      weeklyTotal += available;
+
+      const dayEl = document.createElement('div');
+      dayEl.className = 'flex items-center justify-between text-sm';
+      dayEl.innerHTML = `
+        <span class="text-gray-600">${dateInfo.dayName.substring(0, 3)}</span>
+        <span class="font-medium ${available === 0 ? 'text-red-600' : 'text-gray-900'}">${available}h</span>
+      `;
+      dailyCapacityList.appendChild(dayEl);
+    });
+
+    if (weeklyTotalEl) {
+      weeklyTotalEl.textContent = `${weeklyTotal}h`;
+    }
+
+    // Show/hide zero capacity badge
+    if (zeroCapacityBadge) {
+      if (weeklyTotal === 0) {
+        zeroCapacityBadge.classList.remove('hidden');
+      } else {
+        zeroCapacityBadge.classList.add('hidden');
+      }
+    }
+
+    // Update category targets
+    funUpdateCategoryTargets(weeklyTotal);
+  }
+}
+
+// Update category targets based on weekly total
+function funUpdateCategoryTargets(weeklyTotal) {
+  if (!activePolicy) return;
+
+  // Calculate targets using policy percentages with sum-preserving rounding
+  const clientTarget = Math.round(weeklyTotal * activePolicy.clientPct);
+  const techDebtTarget = Math.round(weeklyTotal * activePolicy.techPct);
+  const rndTarget = weeklyTotal - clientTarget - techDebtTarget; // Ensure sum preservation
+
+  const clientEl = document.getElementById('clientTarget');
+  const techDebtEl = document.getElementById('techDebtTarget');
+  const rndEl = document.getElementById('rndTarget');
+  const policyNameEl = document.getElementById('policyName');
+
+  if (clientEl) clientEl.textContent = `${clientTarget}h`;
+  if (techDebtEl) techDebtEl.textContent = `${techDebtTarget}h`;
+  if (rndEl) rndEl.textContent = `${rndTarget}h`;
+  if (policyNameEl) policyNameEl.textContent = activePolicy.name || '50/25/25 policy';
+}
+
+// Update UI state (buttons, indicators)
+function funUpdateUIState() {
+  const saveBtn = document.getElementById('saveAvailabilityBtn');
+  const revertBtn = document.getElementById('revertChangesBtn');
+  const resetBtn = document.getElementById('resetAvailabilityBtn');
+  const unsavedIndicator = document.getElementById('unsavedChangesIndicator');
+
+  const isReadOnly = planStatus?.status === 'Published';
+  
+  if (saveBtn) {
+    saveBtn.disabled = !hasUnsavedChanges || isReadOnly;
+  }
+  
+  if (revertBtn) {
+    revertBtn.disabled = !hasUnsavedChanges || isReadOnly;
+  }
+
+  if (resetBtn) {
+    resetBtn.disabled = !hasUnsavedChanges || isReadOnly;
+  }
+
+  if (unsavedIndicator) {
+    if (hasUnsavedChanges && !isReadOnly) {
+      unsavedIndicator.classList.remove('hidden');
+    } else {
+      unsavedIndicator.classList.add('hidden');
+    }
+  }
+}
+
+// Save availability changes
+async function funSaveAvailability() {
+  if (!hasUnsavedChanges) return;
+
+  try {
+    // Update availability data - calls unavailabilityService.upsert() and capacitiesService.recompute()
+    // Also triggers auditService.append('CAPACITY_UPDATED') and uiStateService.set({lastSelectedTab:'availability'})
+    await updateUserAvailability(currentUser.id, currentWeek.id, currentAvailability);
+    
+    // Reset unsaved changes state
+    hasUnsavedChanges = false;
+    originalAvailability = JSON.parse(JSON.stringify(currentAvailability));
+    
+    funUpdateUIState();
+    funShowToast('success', 'Availability Saved', 'Your availability has been updated and targets recalculated.');
+    
+    console.log('Availability saved successfully');
+  } catch (error) {
+    console.error('Failed to save availability:', error);
+    
+    if (error.message.includes('version conflict')) {
+      funShowToast('error', 'Conflict Detected', 'Data was modified by another session. Please refresh and try again.');
+    } else {
+      funShowToast('error', 'Save Failed', 'Failed to save availability changes. Please try again.');
+    }
+  }
+}
+
+// Revert changes to last saved state
+function funRevertChanges() {
+  if (!hasUnsavedChanges) return;
+
+  currentAvailability = JSON.parse(JSON.stringify(originalAvailability));
+  hasUnsavedChanges = false;
+  
+  funRenderAvailabilityGrid();
+  funUpdateCapacityPanel();
+  funUpdateUIState();
+  
+  funShowToast('info', 'Changes Reverted', 'All changes have been reverted to the last saved state.');
+}
+
+// Show reset availability modal
+function funShowResetModal() {
+  const modal = document.getElementById('resetAvailabilityModal');
+  const resetPreview = document.getElementById('resetPreviewTotal');
+  
+  if (modal && resetPreview) {
+    // Calculate what weekly total would be with all zeros
+    const weekDates = funGenerateWeekDates(currentWeek);
+    let resetTotal = 0;
+    
+    weekDates.forEach(dateInfo => {
+      const holiday = holidayProfile?.find(h => h.date === dateInfo.date && h.reducesBaseline);
+      const baseline = activePolicy?.dailyBaselineHours || 8;
+      const holidayReduction = holiday ? baseline : 0;
+      const available = Math.max(0, baseline - holidayReduction - 0); // 0 unavailable hours
+      resetTotal += available;
+    });
+    
+    resetPreview.textContent = `${resetTotal}h`;
+    modal.classList.remove('hidden');
+    
+    // Focus the cancel button for accessibility
+    const cancelBtn = document.getElementById('cancelResetBtn');
+    if (cancelBtn) cancelBtn.focus();
+  }
+}
+
+// Hide reset modal
+function funHideResetModal() {
+  const modal = document.getElementById('resetAvailabilityModal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+// Confirm reset availability
+function funConfirmReset() {
+  // Reset all days to 0 hours and no reason
+  currentAvailability.days = currentAvailability.days.map(day => ({
+    ...day,
+    hours: 0,
+    reasonCode: null
+  }));
+  
+  hasUnsavedChanges = true;
+  
+  funHideResetModal();
+  funRenderAvailabilityGrid();
+  funUpdateCapacityPanel();
+  funUpdateUIState();
+  
+  funShowToast('info', 'Availability Reset', 'All unavailability has been cleared for this week.');
+}
+
+// Show toast notification
+function funShowToast(type, title, message) {
+  const toast = document.getElementById('toastNotification');
+  const icon = document.getElementById('toastIcon');
+  const titleEl = document.getElementById('toastTitle');
+  const messageEl = document.getElementById('toastMessage');
+
+  if (!toast || !icon || !titleEl || !messageEl) return;
+
+  // Set icon based on type
+  let iconHtml = '';
+  switch (type) {
+    case 'success':
+      iconHtml = '<i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>';
+      break;
+    case 'error':
+      iconHtml = '<i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>';
+      break;
+    case 'info':
+      iconHtml = '<i data-lucide="info" class="w-5 h-5 text-blue-600"></i>';
+      break;
+    default:
+      iconHtml = '<i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>';
+  }
+  
+  icon.innerHTML = iconHtml;
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+  
+  toast.classList.remove('hidden');
+  
+  // Recreate icons
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+  
+  // Auto hide after 4 seconds
+  setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 4000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  // Save button
+  document.getElementById('saveAvailabilityBtn')?.addEventListener('click', funSaveAvailability);
+  
+  // Revert button
+  document.getElementById('revertChangesBtn')?.addEventListener('click', funRevertChanges);
+  
+  // Reset availability button
+  document.getElementById('resetAvailabilityBtn')?.addEventListener('click', funShowResetModal);
+  
+  // Reset modal buttons
+  document.getElementById('cancelResetBtn')?.addEventListener('click', funHideResetModal);
+  document.getElementById('confirmResetBtn')?.addEventListener('click', funConfirmReset);
+  
+  // Close modal on backdrop click
+  document.getElementById('resetAvailabilityModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'resetAvailabilityModal') {
+      funHideResetModal();
+    }
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('resetAvailabilityModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        funHideResetModal();
+      }
+    }
+  });
+  
+  // Initialize page
+  funInitializePage();
+});
+</script></body></html>

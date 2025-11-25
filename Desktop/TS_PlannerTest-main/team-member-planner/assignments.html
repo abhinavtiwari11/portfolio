@@ -1,0 +1,1507 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Assignments - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<!-- Breadcrumb -->
+<nav class="mb-6" aria-label="Breadcrumb">
+  <ol class="flex items-center space-x-2 text-sm text-gray-600">
+    <li><a href="my_week_dashboard.html" class="hover:text-primary transition-colors">My Week</a></li>
+    <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+    <li class="text-gray-900 font-medium">Assignments</li>
+  </ol>
+</nav>
+
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+  <div>
+    <h1 class="text-display-lg font-bold text-gray-900 mb-2">Assignments</h1>
+    <p class="text-gray-600">Allocate hours to meet your 50/25/25 targets and reach 100% capacity utilization.</p>
+  </div>
+  <div class="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0">
+    <button id="editAvailabilityBtn" class="flex items-center gap-2 px-4 py-2 text-secondary border border-secondary rounded-lg hover:bg-secondary hover:text-white transition-colors">
+      <i data-lucide="calendar" class="w-4 h-4"></i>
+      Edit Availability
+    </button>
+    <button id="createActivityBtn" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+      <i data-lucide="plus" class="w-4 h-4"></i>
+      Create Activity
+    </button>
+  </div>
+</div>
+
+<!-- Week Selector -->
+<div class="mb-6">
+  <div class="flex items-center gap-4">
+    <label class="text-sm font-medium text-gray-700">Planning Week:</label>
+    <select id="weekSelector" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+      <!-- Options populated by JS -->
+    </select>
+    <div id="weekStatus" class="px-3 py-1 text-xs font-medium rounded-full">
+      <!-- Status populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Published Lock Notice -->
+<div id="publishedLockNotice" class="hidden bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+  <div class="flex items-start gap-3">
+    <i data-lucide="lock" class="w-5 h-5 text-amber-600 mt-0.5"></i>
+    <div>
+      <h3 class="font-semibold text-amber-900 mb-1">Plan Published - Read Only</h3>
+      <p class="text-amber-800 text-sm">This week's plan has been published and is now in monitoring phase. Assignments cannot be modified.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Allocation Summary -->
+<div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+  <h2 class="text-display-md font-semibold text-gray-900 mb-4">Allocation Summary</h2>
+  
+  <!-- Overall Progress -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm font-medium text-gray-700">Total Allocation</span>
+      <span id="totalAllocationText" class="text-sm font-medium text-gray-900">0 / 40 hours</span>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-3">
+      <div id="totalAllocationBar" class="bg-primary h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+    </div>
+    <div class="flex justify-between text-xs text-gray-500 mt-1">
+      <span>0%</span>
+      <span>100%</span>
+    </div>
+  </div>
+
+  <!-- Category Breakdown -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Client-Focused -->
+    <div class="bg-blue-50 rounded-lg p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-medium text-blue-900">Client-Focused</h3>
+        <span id="clientBadge" class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"></span>
+      </div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm text-blue-700">Target: <span id="clientTarget">20</span>h</span>
+        <span id="clientAllocationText" class="text-sm font-medium text-blue-900">0h allocated</span>
+      </div>
+      <div class="w-full bg-blue-200 rounded-full h-2">
+        <div id="clientAllocationBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Tech Debt -->
+    <div class="bg-orange-50 rounded-lg p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-medium text-orange-900">Tech Debt</h3>
+        <span id="techDebtBadge" class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800"></span>
+      </div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm text-orange-700">Target: <span id="techDebtTarget">10</span>h</span>
+        <span id="techDebtAllocationText" class="text-sm font-medium text-orange-900">0h allocated</span>
+      </div>
+      <div class="w-full bg-orange-200 rounded-full h-2">
+        <div id="techDebtAllocationBar" class="bg-orange-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- R&D -->
+    <div class="bg-purple-50 rounded-lg p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-medium text-purple-900">R&amp;D</h3>
+        <span id="rndBadge" class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800"></span>
+      </div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm text-purple-700">Target: <span id="rndTarget">10</span>h</span>
+        <span id="rndAllocationText" class="text-sm font-medium text-purple-900">0h allocated</span>
+      </div>
+      <div class="w-full bg-purple-200 rounded-full h-2">
+        <div id="rndAllocationBar" class="bg-purple-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning Messages -->
+  <div id="allocationWarnings" class="mt-4 space-y-2">
+    <!-- Warnings populated by JS -->
+  </div>
+</div>
+
+<!-- Activities by Classification -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <!-- Client-Focused Activities -->
+  <div class="bg-white rounded-xl shadow-sm border">
+    <div class="p-4 border-b bg-blue-50 rounded-t-xl">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 bg-blue-600 rounded-full"></div>
+        <h2 class="font-semibold text-blue-900">Client-Focused</h2>
+        <span id="clientCount" class="text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full">0 activities</span>
+      </div>
+    </div>
+    <div class="p-4">
+      <div id="clientActivities" class="space-y-3">
+        <!-- Activities populated by JS -->
+      </div>
+      <div id="clientEmptyState" class="hidden text-center py-8">
+        <i data-lucide="clipboard" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+        <p class="text-gray-500 text-sm">No client-focused activities yet</p>
+        <button class="text-primary text-sm hover:underline mt-1" onclick="funCreateActivity()">Create one now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech Debt Activities -->
+  <div class="bg-white rounded-xl shadow-sm border">
+    <div class="p-4 border-b bg-orange-50 rounded-t-xl">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 bg-orange-600 rounded-full"></div>
+        <h2 class="font-semibold text-orange-900">Tech Debt</h2>
+        <span id="techDebtCount" class="text-xs text-orange-700 bg-orange-100 px-2 py-1 rounded-full">0 activities</span>
+      </div>
+    </div>
+    <div class="p-4">
+      <div id="techDebtActivities" class="space-y-3">
+        <!-- Activities populated by JS -->
+      </div>
+      <div id="techDebtEmptyState" class="hidden text-center py-8">
+        <i data-lucide="wrench" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+        <p class="text-gray-500 text-sm">No tech debt activities yet</p>
+        <button class="text-primary text-sm hover:underline mt-1" onclick="funCreateActivity()">Create one now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- R&D Activities -->
+  <div class="bg-white rounded-xl shadow-sm border">
+    <div class="p-4 border-b bg-purple-50 rounded-t-xl">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+        <h2 class="font-semibold text-purple-900">R&amp;D</h2>
+        <span id="rndCount" class="text-xs text-purple-700 bg-purple-100 px-2 py-1 rounded-full">0 activities</span>
+      </div>
+    </div>
+    <div class="p-4">
+      <div id="rndActivities" class="space-y-3">
+        <!-- Activities populated by JS -->
+      </div>
+      <div id="rndEmptyState" class="hidden text-center py-8">
+        <i data-lucide="lightbulb" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+        <p class="text-gray-500 text-sm">No R&amp;D activities yet</p>
+        <button class="text-primary text-sm hover:underline mt-1" onclick="funCreateActivity()">Create one now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Allocation Drawer -->
+<div id="allocationDrawer" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-black/50" id="allocationDrawerBackdrop"></div>
+  <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transform translate-x-full transition-transform duration-300" id="allocationDrawerPanel">
+    <div class="flex items-center justify-between p-4 border-b">
+      <h3 class="text-display-md font-semibold">Allocate Segments</h3>
+      <button id="closeAllocationDrawer" class="p-2 hover:bg-gray-100 rounded-lg" aria-label="Close drawer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <div class="p-4 space-y-4">
+      <!-- Activity Info -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h4 id="drawerActivityTitle" class="font-semibold text-gray-900 mb-1"></h4>
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <div id="drawerActivityBadge" class="px-2 py-1 text-xs font-medium rounded-full"></div>
+          <span>Priority #<span id="drawerActivityPriority">1</span></span>
+        </div>
+      </div>
+
+      <!-- Current Allocation -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Current Allocation</label>
+        <div class="text-lg font-semibold text-gray-900">
+          <span id="drawerCurrentAllocation">0</span> hours
+        </div>
+      </div>
+
+      <!-- Segments Input -->
+      <div>
+        <label for="segmentsInput" class="block text-sm font-medium text-gray-700 mb-1">Allocate Segments</label>
+        <div class="flex items-center gap-2">
+          <button id="decrementSegments" class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i data-lucide="minus" class="w-4 h-4"></i>
+          </button>
+          <input type="number" id="segmentsInput" min="1" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-center focus:ring-2 focus:ring-primary focus:border-primary" placeholder="0">
+          <button id="incrementSegments" class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">Each segment = 1 hour</p>
+      </div>
+
+      <!-- Impact Preview -->
+      <div class="bg-blue-50 rounded-lg p-3">
+        <h5 class="font-medium text-blue-900 mb-2">Impact on Targets</h5>
+        <div id="impactPreview" class="text-sm text-blue-800">
+          <!-- Impact preview populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Drawer Actions -->
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t bg-white">
+      <div class="flex gap-3">
+        <button id="cancelAllocation" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button id="saveAllocation" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+          Save Allocation
+        </button>
+      </div>
+      <button id="removeAllocation" class="w-full mt-2 px-4 py-2 text-error border border-error rounded-lg hover:bg-red-50 transition-colors hidden">
+        Remove Allocation
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Allocation Modal -->
+<div id="removeAllocationModal" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-black/50" id="removeModalBackdrop"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-error"></i>
+        </div>
+        <h3 class="text-display-md font-semibold">Remove Allocation</h3>
+      </div>
+      
+      <p class="text-gray-600 mb-4">
+        Are you sure you want to remove your allocation for "<span id="removeModalActivityTitle"></span>"?
+      </p>
+      
+      <div id="removeModalImpact" class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+        <p class="text-sm text-amber-800">
+          <strong>Impact:</strong> <span id="removeModalImpactText"></span>
+        </p>
+      </div>
+      
+      <div class="flex gap-3">
+        <button id="cancelRemoveAllocation" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button id="confirmRemoveAllocation" class="flex-1 px-4 py-2 bg-error text-white rounded-lg hover:bg-red-700 transition-colors">
+          Remove
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
+  <!-- Toasts populated by JS -->
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { 
+  getAssignmentsData, 
+  updateAssignment, 
+  createAssignment, 
+  removeAssignment,
+  getWeeksList,
+  getCurrentWeek,
+  updateUIState 
+} from './page-logic.js';
+
+// State Management
+let currentState = {
+  currentWeekId: null,
+  currentUserId: null,
+  capacity: null,
+  assignments: [],
+  activities: [],
+  priorities: {},
+  isReadOnly: false
+};
+
+let drawerState = {
+  isOpen: false,
+  activityId: null,
+  currentAssignment: null
+};
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await funInitializePage();
+  } catch (error) {
+    console.error('Failed to initialize assignments page:', error);
+    funShowToast('Failed to load assignments data', 'error');
+  }
+});
+
+// Initialize page data and UI
+async function funInitializePage() {
+  // Get current user and week
+  const currentUser = window.UserUtils?.getCurrentUser();
+  if (!currentUser) {
+    window.location.href = 'access_denied.html';
+    return;
+  }
+  
+  currentState.currentUserId = currentUser.id;
+  
+  // Get week from URL params or default
+  const urlParams = new URLSearchParams(window.location.search);
+  const weekParam = urlParams.get('week_id');
+  
+  // Load weeks and set current
+  await funLoadWeeks();
+  
+  if (weekParam) {
+    currentState.currentWeekId = weekParam;
+  } else {
+    currentState.currentWeekId = await getCurrentWeek();
+  }
+  
+  // Load page data
+  await funLoadAssignmentsData();
+  
+  // Initialize UI
+  funInitializeEventHandlers();
+  funRenderPage();
+  
+  // Update UI state
+  await updateUIState({ lastSelectedTab: 'assignments' });
+}
+
+// Load weeks list and populate selector
+async function funLoadWeeks() {
+  try {
+    /*
+     * Expected method: getWeeksList()
+     * Returns: Array of week objects with id, startDate, endDate, status
+     * Collections used: weekCalendar
+     */
+    const weeks = await getWeeksList();
+    const selector = document.getElementById('weekSelector');
+    
+    selector.innerHTML = '';
+    weeks.forEach(week => {
+      const option = document.createElement('option');
+      option.value = week.id;
+      option.textContent = `${week.id} (${new Date(week.startDate).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })} - ${new Date(week.endDate).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })})`;
+      selector.appendChild(option);
+    });
+    
+    // Handle week selection change
+    selector.addEventListener('change', (e) => {
+      const newWeekId = e.target.value;
+      if (newWeekId !== currentState.currentWeekId) {
+        window.location.search = `?week_id=${newWeekId}`;
+      }
+    });
+    
+  } catch (error) {
+    console.error('Failed to load weeks:', error);
+  }
+}
+
+// Load assignments data for current user and week
+async function funLoadAssignmentsData() {
+  try {
+    /*
+     * Expected method: getAssignmentsData(userId, weekId)
+     * Returns: {
+     *   capacity: { weeklyTotal, targets: { client, techDebt, rnd }, zeroCapacity },
+     *   assignments: [{ id, activityId, segments, classification, status }],
+     *   activities: [{ id, title, description, classification, priorityRank, status }],
+     *   priorities: { 'client-focused': [...], 'tech-debt': [...], 'R&D': [...] },
+     *   weekStatus: string,
+     *   isReadOnly: boolean
+     * }
+     * Collections used: capacities, assignments, activities, activityPriorities, planSnapshots
+     */
+    const data = await getAssignmentsData(currentState.currentUserId, currentState.currentWeekId);
+    
+    currentState.capacity = data.capacity;
+    currentState.assignments = data.assignments || [];
+    currentState.activities = data.activities || [];
+    currentState.priorities = data.priorities || {};
+    currentState.isReadOnly = data.isReadOnly || false;
+    
+    // Update week status in UI
+    const weekStatusEl = document.getElementById('weekStatus');
+    weekStatusEl.textContent = data.weekStatus || 'Draft';
+    weekStatusEl.className = `px-3 py-1 text-xs font-medium rounded-full ${funGetStatusClasses(data.weekStatus)}`;
+    
+    // Update week selector
+    document.getElementById('weekSelector').value = currentState.currentWeekId;
+    
+  } catch (error) {
+    console.error('Failed to load assignments data:', error);
+    throw error;
+  }
+}
+
+// Render the entire page
+function funRenderPage() {
+  funRenderPublishedLock();
+  funRenderAllocationSummary();
+  funRenderActivitiesColumns();
+}
+
+// Render published lock notice
+function funRenderPublishedLock() {
+  const notice = document.getElementById('publishedLockNotice');
+  if (currentState.isReadOnly) {
+    notice.classList.remove('hidden');
+  } else {
+    notice.classList.add('hidden');
+  }
+}
+
+// Render allocation summary
+function funRenderAllocationSummary() {
+  const capacity = currentState.capacity;
+  if (!capacity) return;
+  
+  // Calculate current allocations
+  const allocations = {
+    client: 0,
+    techDebt: 0,
+    rnd: 0,
+    total: 0
+  };
+  
+  currentState.assignments.forEach(assignment => {
+    const segments = assignment.segments || 0;
+    allocations.total += segments;
+    
+    if (assignment.classification === 'client-focused') {
+      allocations.client += segments;
+    } else if (assignment.classification === 'tech-debt') {
+      allocations.techDebt += segments;
+    } else if (assignment.classification === 'R&D') {
+      allocations.rnd += segments;
+    }
+  });
+  
+  // Update total allocation
+  const totalPercent = capacity.weeklyTotal > 0 ? Math.round((allocations.total / capacity.weeklyTotal) * 100) : 0;
+  document.getElementById('totalAllocationText').textContent = `${allocations.total} / ${capacity.weeklyTotal} hours`;
+  document.getElementById('totalAllocationBar').style.width = `${Math.min(totalPercent, 100)}%`;
+  
+  // Update category allocations
+  funUpdateCategoryAllocation('client', allocations.client, capacity.targets.client);
+  funUpdateCategoryAllocation('techDebt', allocations.techDebt, capacity.targets.techDebt);
+  funUpdateCategoryAllocation('rnd', allocations.rnd, capacity.targets.rnd);
+  
+  // Update warnings
+  funRenderAllocationWarnings(allocations, capacity);
+}
+
+// Update category allocation display
+function funUpdateCategoryAllocation(category, allocated, target) {
+  const percent = target > 0 ? Math.round((allocated / target) * 100) : 0;
+  const isUnderTarget = allocated < target;
+  const isMeetingTarget = allocated >= target;
+  
+  // Update text and progress
+  document.getElementById(`${category}Target`).textContent = target;
+  document.getElementById(`${category}AllocationText`).textContent = `${allocated}h allocated`;
+  document.getElementById(`${category}AllocationBar`).style.width = `${Math.min(percent, 100)}%`;
+  
+  // Update badge
+  const badge = document.getElementById(`${category}Badge`);
+  if (isMeetingTarget) {
+    badge.textContent = 'On Track';
+    badge.className = badge.className.replace(/bg-\w+-\d+/, 'bg-green-100').replace(/text-\w+-\d+/, 'text-green-800');
+  } else {
+    badge.textContent = 'Under Target';
+    badge.className = badge.className.replace(/bg-\w+-\d+/, 'bg-red-100').replace(/text-\w+-\d+/, 'text-red-800');
+  }
+}
+
+// Render allocation warnings
+function funRenderAllocationWarnings(allocations, capacity) {
+  const warningsEl = document.getElementById('allocationWarnings');
+  warningsEl.innerHTML = '';
+  
+  const warnings = [];
+  
+  // Check under-target warnings
+  if (allocations.client < capacity.targets.client) {
+    warnings.push(`Client-focused: ${capacity.targets.client - allocations.client}h short of target`);
+  }
+  if (allocations.techDebt < capacity.targets.techDebt) {
+    warnings.push(`Tech debt: ${capacity.targets.techDebt - allocations.techDebt}h short of target`);
+  }
+  if (allocations.rnd < capacity.targets.rnd) {
+    warnings.push(`R&D: ${capacity.targets.rnd - allocations.rnd}h short of target`);
+  }
+  
+  // Check over-allocation
+  if (allocations.total > capacity.weeklyTotal) {
+    warnings.push(`Over-allocated by ${allocations.total - capacity.weeklyTotal}h`);
+  }
+  
+  // Render warnings
+  warnings.forEach(warning => {
+    const warningEl = document.createElement('div');
+    warningEl.className = 'flex items-center gap-2 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3';
+    warningEl.innerHTML = `
+      <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+      <span>${warning}</span>
+    `;
+    warningsEl.appendChild(warningEl);
+  });
+  
+  // Reinitialize icons
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+// Render activities columns
+function funRenderActivitiesColumns() {
+  funRenderActivitiesForClassification('client-focused', 'clientActivities', 'clientCount', 'clientEmptyState');
+  funRenderActivitiesForClassification('tech-debt', 'techDebtActivities', 'techDebtCount', 'techDebtEmptyState');
+  funRenderActivitiesForClassification('R&D', 'rndActivities', 'rndCount', 'rndEmptyState');
+}
+
+// Render activities for specific classification
+function funRenderActivitiesForClassification(classification, containerId, countId, emptyStateId) {
+  const container = document.getElementById(containerId);
+  const countEl = document.getElementById(countId);
+  const emptyState = document.getElementById(emptyStateId);
+  
+  // Get activities for this classification
+  const activities = currentState.activities.filter(activity => 
+    activity.classification === classification && 
+    activity.status !== 'Cancelled' &&
+    activity.status !== 'Done' &&
+    !activity.deletedAt
+  );
+  
+  // Sort by priority rank
+  activities.sort((a, b) => {
+    const rankA = a.priorityRank || 999;
+    const rankB = b.priorityRank || 999;
+    return rankA - rankB;
+  });
+  
+  // Update count
+  countEl.textContent = `${activities.length} activities`;
+  
+  // Show/hide empty state
+  if (activities.length === 0) {
+    container.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    return;
+  } else {
+    container.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+  }
+  
+  // Render activities
+  container.innerHTML = '';
+  activities.forEach(activity => {
+    const assignment = currentState.assignments.find(a => a.activityId === activity.id);
+    const segments = assignment ? assignment.segments : 0;
+    
+    const activityEl = document.createElement('div');
+    activityEl.className = 'border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow';
+    activityEl.innerHTML = `
+      <div class="flex items-start justify-between mb-3">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xs font-medium text-gray-500">Priority #${activity.priorityRank || '—'}</span>
+            <span class="px-2 py-1 text-xs font-medium rounded-full ${funGetStatusClasses(activity.status)}">
+              ${activity.status}
+            </span>
+          </div>
+          <h3 class="font-medium text-gray-900 mb-1">${activity.title}</h3>
+          <p class="text-sm text-gray-600 line-clamp-2">${activity.description || ''}</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center justify-between">
+        <div class="text-sm">
+          <span class="text-gray-600">Allocated:</span>
+          <span class="font-medium text-gray-900">${segments}h</span>
+        </div>
+        <div class="flex items-center gap-2">
+          ${segments > 0 ? `
+            <button 
+              class="text-gray-500 hover:text-gray-700 p-1 rounded"
+              onclick="funOpenAllocationDrawer('${activity.id}')"
+              aria-label="Edit allocation for ${activity.title}"
+            >
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+          ` : ''}
+          <button 
+            class="bg-primary text-white px-3 py-1 rounded-lg hover:bg-primary/90 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            onclick="funQuickAddHour('${activity.id}')"
+            ${currentState.isReadOnly ? 'disabled' : ''}
+            aria-label="Add 1 hour to ${activity.title}"
+          >
+            +1h
+          </button>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(activityEl);
+  });
+  
+  // Reinitialize icons
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+// Initialize event handlers
+function funInitializeEventHandlers() {
+  // Navigation buttons
+  document.getElementById('editAvailabilityBtn').addEventListener('click', () => {
+    window.location.href = `availability.html?week_id=${currentState.currentWeekId}`;
+  });
+  
+  document.getElementById('createActivityBtn').addEventListener('click', funCreateActivity);
+  
+  // Drawer handlers
+  document.getElementById('closeAllocationDrawer').addEventListener('click', funCloseAllocationDrawer);
+  document.getElementById('allocationDrawerBackdrop').addEventListener('click', funCloseAllocationDrawer);
+  document.getElementById('cancelAllocation').addEventListener('click', funCloseAllocationDrawer);
+  document.getElementById('saveAllocation').addEventListener('click', funSaveAllocation);
+  document.getElementById('removeAllocation').addEventListener('click', funShowRemoveModal);
+  
+  // Drawer input handlers
+  document.getElementById('incrementSegments').addEventListener('click', () => {
+    const input = document.getElementById('segmentsInput');
+    input.value = Math.max(1, parseInt(input.value || '0') + 1);
+    funUpdateImpactPreview();
+  });
+  
+  document.getElementById('decrementSegments').addEventListener('click', () => {
+    const input = document.getElementById('segmentsInput');
+    input.value = Math.max(1, parseInt(input.value || '1') - 1);
+    funUpdateImpactPreview();
+  });
+  
+  document.getElementById('segmentsInput').addEventListener('input', funUpdateImpactPreview);
+  
+  // Remove modal handlers
+  document.getElementById('removeModalBackdrop').addEventListener('click', funHideRemoveModal);
+  document.getElementById('cancelRemoveAllocation').addEventListener('click', funHideRemoveModal);
+  document.getElementById('confirmRemoveAllocation').addEventListener('click', funConfirmRemoveAllocation);
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (drawerState.isOpen) {
+        funCloseAllocationDrawer();
+      }
+      if (document.getElementById('removeAllocationModal').classList.contains('hidden') === false) {
+        funHideRemoveModal();
+      }
+    }
+  });
+}
+
+// Quick add 1 hour to activity
+async function funQuickAddHour(activityId) {
+  if (currentState.isReadOnly) return;
+  
+  try {
+    const activity = currentState.activities.find(a => a.id === activityId);
+    if (!activity) return;
+    
+    const existingAssignment = currentState.assignments.find(a => a.activityId === activityId);
+    
+    if (existingAssignment) {
+      /*
+       * Expected method: updateAssignment(assignmentId, { segments: newSegments })
+       * Returns: updated assignment object
+       * Collections used: assignments
+       * Side effects: creates audit event
+       */
+      await updateAssignment(existingAssignment.id, { 
+        segments: existingAssignment.segments + 1 
+      });
+      existingAssignment.segments += 1;
+    } else {
+      /*
+       * Expected method: createAssignment({ activityId, weekId, userId, segments: 1, classification })
+       * Returns: new assignment object
+       * Collections used: assignments
+       * Side effects: creates audit event
+       */
+      const newAssignment = await createAssignment({
+        activityId: activityId,
+        weekId: currentState.currentWeekId,
+        userId: currentState.currentUserId,
+        segments: 1,
+        classification: activity.classification
+      });
+      currentState.assignments.push(newAssignment);
+    }
+    
+    funShowToast('Added 1 hour', 'success');
+    funRenderPage();
+    
+  } catch (error) {
+    console.error('Failed to add hour:', error);
+    funShowToast('Failed to add hour', 'error');
+  }
+}
+
+// Open allocation drawer
+function funOpenAllocationDrawer(activityId) {
+  if (currentState.isReadOnly) return;
+  
+  const activity = currentState.activities.find(a => a.id === activityId);
+  if (!activity) return;
+  
+  const assignment = currentState.assignments.find(a => a.activityId === activityId);
+  
+  drawerState.activityId = activityId;
+  drawerState.currentAssignment = assignment;
+  drawerState.isOpen = true;
+  
+  // Populate drawer
+  document.getElementById('drawerActivityTitle').textContent = activity.title;
+  document.getElementById('drawerActivityPriority').textContent = activity.priorityRank || '—';
+  document.getElementById('drawerCurrentAllocation').textContent = assignment ? assignment.segments : 0;
+  document.getElementById('segmentsInput').value = assignment ? assignment.segments : 1;
+  
+  // Update badge
+  const badge = document.getElementById('drawerActivityBadge');
+  badge.textContent = activity.classification;
+  badge.className = `px-2 py-1 text-xs font-medium rounded-full ${funGetClassificationClasses(activity.classification)}`;
+  
+  // Show/hide remove button
+  const removeBtn = document.getElementById('removeAllocation');
+  if (assignment && assignment.segments > 0) {
+    removeBtn.classList.remove('hidden');
+  } else {
+    removeBtn.classList.add('hidden');
+  }
+  
+  // Update impact preview
+  funUpdateImpactPreview();
+  
+  // Show drawer
+  const drawer = document.getElementById('allocationDrawer');
+  const panel = document.getElementById('allocationDrawerPanel');
+  
+  drawer.classList.remove('hidden');
+  // Force reflow
+  drawer.offsetHeight;
+  panel.classList.remove('translate-x-full');
+  
+  // Focus input
+  document.getElementById('segmentsInput').focus();
+}
+
+// Close allocation drawer
+function funCloseAllocationDrawer() {
+  const panel = document.getElementById('allocationDrawerPanel');
+  
+  panel.classList.add('translate-x-full');
+  
+  setTimeout(() => {
+    document.getElementById('allocationDrawer').classList.add('hidden');
+    drawerState.isOpen = false;
+    drawerState.activityId = null;
+    drawerState.currentAssignment = null;
+  }, 300);
+}
+
+// Update impact preview in drawer
+function funUpdateImpactPreview() {
+  const segments = parseInt(document.getElementById('segmentsInput').value || '0');
+  const activity = currentState.activities.find(a => a.id === drawerState.activityId);
+  if (!activity) return;
+  
+  const preview = document.getElementById('impactPreview');
+  const classification = activity.classification;
+  const currentSegments = drawerState.currentAssignment ? drawerState.currentAssignment.segments : 0;
+  const difference = segments - currentSegments;
+  
+  let text = '';
+  if (difference > 0) {
+    text = `+${difference}h to ${funGetClassificationDisplayName(classification)}`;
+  } else if (difference < 0) {
+    text = `${difference}h from ${funGetClassificationDisplayName(classification)}`;
+  } else {
+    text = 'No change';
+  }
+  
+  preview.textContent = text;
+}
+
+// Save allocation
+async function funSaveAllocation() {
+  if (currentState.isReadOnly) return;
+  
+  const segments = parseInt(document.getElementById('segmentsInput').value || '0');
+  if (segments < 1) {
+    funShowToast('Segments must be at least 1', 'error');
+    return;
+  }
+  
+  try {
+    const activity = currentState.activities.find(a => a.id === drawerState.activityId);
+    if (!activity) return;
+    
+    if (drawerState.currentAssignment) {
+      // Update existing assignment
+      await updateAssignment(drawerState.currentAssignment.id, { segments });
+      drawerState.currentAssignment.segments = segments;
+    } else {
+      // Create new assignment
+      const newAssignment = await createAssignment({
+        activityId: drawerState.activityId,
+        weekId: currentState.currentWeekId,
+        userId: currentState.currentUserId,
+        segments: segments,
+        classification: activity.classification
+      });
+      currentState.assignments.push(newAssignment);
+    }
+    
+    funShowToast('Allocation updated', 'success');
+    funCloseAllocationDrawer();
+    funRenderPage();
+    
+  } catch (error) {
+    console.error('Failed to save allocation:', error);
+    funShowToast('Failed to save allocation', 'error');
+  }
+}
+
+// Show remove allocation modal
+function funShowRemoveModal() {
+  const activity = currentState.activities.find(a => a.id === drawerState.activityId);
+  if (!activity || !drawerState.currentAssignment) return;
+  
+  document.getElementById('removeModalActivityTitle').textContent = activity.title;
+  
+  // Calculate impact
+  const segments = drawerState.currentAssignment.segments;
+  const classification = activity.classification;
+  const impactText = `Removing ${segments}h from ${funGetClassificationDisplayName(classification)}`;
+  document.getElementById('removeModalImpactText').textContent = impactText;
+  
+  document.getElementById('removeAllocationModal').classList.remove('hidden');
+}
+
+// Hide remove allocation modal
+function funHideRemoveModal() {
+  document.getElementById('removeAllocationModal').classList.add('hidden');
+}
+
+// Confirm remove allocation
+async function funConfirmRemoveAllocation() {
+  if (currentState.isReadOnly) return;
+  
+  try {
+    if (drawerState.currentAssignment) {
+      /*
+       * Expected method: removeAssignment(assignmentId)
+       * Returns: void
+       * Collections used: assignments
+       * Side effects: soft deletes assignment, creates audit event
+       */
+      await removeAssignment(drawerState.currentAssignment.id);
+      
+      // Remove from local state
+      currentState.assignments = currentState.assignments.filter(a => a.id !== drawerState.currentAssignment.id);
+      
+      funShowToast('Allocation removed', 'success');
+      funHideRemoveModal();
+      funCloseAllocationDrawer();
+      funRenderPage();
+    }
+    
+  } catch (error) {
+    console.error('Failed to remove allocation:', error);
+    funShowToast('Failed to remove allocation', 'error');
+  }
+}
+
+// Navigate to create activity
+function funCreateActivity() {
+  window.location.href = 'backlog.html';
+}
+
+// Utility functions
+function funGetStatusClasses(status) {
+  const classes = {
+    'Proposed': 'bg-gray-100 text-gray-800',
+    'Ready': 'bg-blue-100 text-blue-800',
+    'In Progress': 'bg-yellow-100 text-yellow-800',
+    'Blocked': 'bg-red-100 text-red-800',
+    'Done': 'bg-green-100 text-green-800',
+    'Cancelled': 'bg-gray-100 text-gray-800',
+    'Draft': 'bg-gray-100 text-gray-800',
+    'Published': 'bg-green-100 text-green-800',
+    'Monitoring': 'bg-blue-100 text-blue-800',
+    'Archived': 'bg-gray-100 text-gray-800'
+  };
+  return classes[status] || 'bg-gray-100 text-gray-800';
+}
+
+function funGetClassificationClasses(classification) {
+  const classes = {
+    'client-focused': 'bg-blue-100 text-blue-800',
+    'tech-debt': 'bg-orange-100 text-orange-800',
+    'R&D': 'bg-purple-100 text-purple-800'
+  };
+  return classes[classification] || 'bg-gray-100 text-gray-800';
+}
+
+function funGetClassificationDisplayName(classification) {
+  const names = {
+    'client-focused': 'Client-Focused',
+    'tech-debt': 'Tech Debt',
+    'R&D': 'R&D'
+  };
+  return names[classification] || classification;
+}
+
+// Toast notification system
+function funShowToast(message, type = 'info') {
+  const toastContainer = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  
+  const bgClasses = {
+    success: 'bg-green-500',
+    error: 'bg-red-500',
+    warning: 'bg-amber-500',
+    info: 'bg-blue-500'
+  };
+  
+  toast.className = `${bgClasses[type]} text-white px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
+  toast.innerHTML = `
+    <div class="flex items-center gap-3">
+      <span>${message}</span>
+      <button class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+  `;
+  
+  toastContainer.appendChild(toast);
+  
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.remove('translate-x-full', 'opacity-0');
+  }, 100);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.classList.add('translate-x-full', 'opacity-0');
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 5000);
+  
+  // Reinitialize icons
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+// Make functions globally available
+window.funQuickAddHour = funQuickAddHour;
+window.funOpenAllocationDrawer = funOpenAllocationDrawer;
+window.funCreateActivity = funCreateActivity;
+</script></body></html>

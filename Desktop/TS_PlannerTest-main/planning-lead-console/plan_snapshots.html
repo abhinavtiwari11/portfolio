@@ -1,0 +1,1080 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Planning Lead Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 1rem;
+            --text-display-sm--line-height: 1.5rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        .focus-visible:focus-visible {
+            outline: 2px solid theme('colors.primary');
+            outline-offset: 2px;
+        }
+
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: theme('colors.slate.500');
+            margin-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .nav-group-header:first-child {
+            margin-top: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: theme('radius.md');
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: theme('colors.slate.700');
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: theme('colors.slate.100');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active {
+            background-color: theme('colors.primary/10');
+            color: theme('colors.primary');
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: theme('colors.primary');
+            border-radius: 0 2px 2px 0;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: white;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-slate-800">
+
+    <!-- Skip to main content -->
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+
+    <!-- Top Header -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b border-slate-200 sticky top-0 z-30">
+        <div class="flex items-center gap-4">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 focus-visible" aria-label="Open navigation menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                        <!-- Palette: navy (#0B63A7) and teal (#00A99D) -->
+                        <!-- Rounded calendar outline -->
+                        <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                        <!-- Day cells (3x2 grid) -->
+                        <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                            <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                            <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        </g>
+                        <!-- Asynchronous loop (teal) wrapping the calendar -->
+                        <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22"></path>
+                            <circle cx="300" cy="245" r="8"></circle>
+                            <circle cx="280" cy="200" r="8"></circle>
+                            <circle cx="270" cy="150" r="8"></circle>
+                            <path d="M260 100 L246 116 L274 116 Z"></path>
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="text-display-md leading-display-md font-bold text-primary">Planning Lead Console</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors focus-visible">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <!-- User Profile Button -->
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors focus-visible" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-medium text-slate-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-slate-200 rounded-xl shadow-lg p-4 w-64 z-50 hidden" role="dialog" aria-labelledby="userProfileTitle">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-slate-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-slate-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors focus-visible">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Desktop Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r border-slate-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-6" role="navigation" aria-label="Main navigation" id="sideNav">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        
+        <!-- Mobile Sidebar -->
+        <aside id="mobileSidebar" class="mobile-sidebar md:hidden">
+            <nav class="p-6" role="navigation" aria-label="Main navigation">
+                <div class="nav-group-header">Planning</div>
+                <a href="planning_week_overview.html" class="nav-item" data-page="planning_week_overview.html">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Overview
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto min-h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Plan Snapshots - Planning Lead Console</title>
+</head_content_code>
+
+<html_content_code>
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-start">
+        <div>
+            <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-primary mb-2">Plan Snapshots</h1>
+            <p class="text-sm text-slate-600">Review and export immutable plan snapshots across weeks</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="bulkExportBtn" class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+                <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                Export Selected
+            </button>
+        </div>
+    </div>
+
+    <!-- Contextual Tip -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+            <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"></i>
+            <div class="text-sm text-blue-800">
+                <p class="font-medium">About Plan Snapshots</p>
+                <p class="mt-1">Snapshots are immutable records of a week's plan at the time of publication. They preserve the exact state of activities, priorities, and capacity allocations.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label for="statusFilter" class="text-sm font-medium text-slate-700">Status:</label>
+                <select id="statusFilter" class="px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                    <option value="">All Statuses</option>
+                    <option value="Published">Published</option>
+                    <option value="Archived">Archived</option>
+                    <option value="Monitoring">Monitoring</option>
+                    <option value="Draft">Draft</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label for="searchInput" class="text-sm font-medium text-slate-700">Search:</label>
+                <input type="text" id="searchInput" placeholder="Week ID..." class="px-3 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-32">
+            </div>
+            <button id="clearFilters" class="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-800 border border-slate-300 rounded hover:bg-slate-50">
+                Clear Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden bg-white border border-slate-200 rounded-lg p-8 text-center">
+        <div class="flex items-center justify-center gap-3 text-slate-600">
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+            Loading snapshots...
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <div class="flex items-center justify-center gap-3 text-red-700 mb-4">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            <span class="font-medium">Failed to load snapshots</span>
+        </div>
+        <p class="text-sm text-red-600 mb-4">There was an error loading the plan snapshots. Please try again.</p>
+        <button id="retryBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+            <i data-lucide="refresh-cw" class="w-4 h-4 inline mr-2"></i>
+            Retry
+        </button>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden bg-white border border-slate-200 rounded-lg p-8 text-center">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                <i data-lucide="archive" class="w-6 h-6 text-slate-400"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-slate-900 mb-2">No snapshots yet</h3>
+                <p class="text-sm text-slate-600 mb-4">Plan snapshots are created when weekly plans are published.</p>
+                <a href="allocation_monitor.html" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                    <i data-lucide="eye" class="w-4 h-4 mr-2"></i>
+                    Go to Monitoring
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snapshots Table -->
+    <div id="snapshotsContainer" class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left">
+                            <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-primary focus:ring-primary/20 focus:ring-2">
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-slate-700">Week</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-slate-700">Published At</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-slate-700">Status</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-slate-700">Capacity / Allocated</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="snapshotsTableBody" class="divide-y divide-slate-200">
+                    <!-- Table rows will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer" class="px-4 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div class="text-sm text-slate-600">
+                Showing <span id="pageInfo">0</span> results
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="prevPage" class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Previous
+                </button>
+                <span id="pageNumbers" class="flex items-center gap-1"></span>
+                <button id="nextPage" class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'PLC__';
+
+        // Mobile navigation toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = sidebar.classList.contains('open');
+                
+                btn.setAttribute('aria-expanded', String(!isOpen));
+                
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.focus();
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            });
+
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // Navigation active state management
+        function updateActiveNavItem() {
+            const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                               window.location.pathname.split('/').pop() || 
+                               'planning_week_overview.html';
+            
+            // Update both desktop and mobile nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const itemPage = item.getAttribute('data-page') || item.getAttribute('href');
+                if (itemPage === currentPage) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'page');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Update active state on page load and when navigation changes
+        updateActiveNavItem();
+        window.addEventListener('popstate', updateActiveNavItem);
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-alice');
+                    currentUserId = 'u-alice';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users_' + currentUserId);
+                try { 
+                    if (userData) return JSON.parse(userData);
+                    
+                    // Fallback to dummy data from localStorage if available
+                    const usersData = localStorage.getItem('plc::users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        if (user) return user;
+                    }
+                    
+                    // Final fallback
+                    return {
+                        id: 'u-alice',
+                        firstName: 'Alice',
+                        lastName: 'Nguyen',
+                        role: 'PLANNING_LEAD',
+                        email: 'alice.nguyen@example.local'
+                    };
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            const initials = UserUtils.getUserInitials(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverUserAvatar) popoverUserAvatar.textContent = initials;
+            if (popoverUserName) popoverUserName.textContent = displayName;
+            if (popoverUserEmail) popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover management
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popoverVisible = !popoverVisible;
+                
+                if (popoverVisible) {
+                    popover.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first interactive element in popover
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                } else {
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Sign out handler
+            const signOutBtn = document.getElementById('signOutButton');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        UserUtils.signOut();
+                    }
+                });
+            }
+        }());
+
+        // Import/Export functionality (namespaced)
+        document.getElementById('exportAppData')?.addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith(APP_PREFIX) || key.startsWith('plc::'))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "planning_console_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData')?.addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile')?.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX) || key.startsWith('plc::')) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        alert(`✅ Successfully imported ${importedCount} data items. Please refresh the page to see changes.`);
+                    } else {
+                        alert('⚠️ No compatible data found in the file.');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    alert('❌ Failed to import: Invalid JSON format or corrupted file.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions handler
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (error) {
+                    console.error(`Error executing action ${action}:`, error);
+                    el.setAttribute('disabled', 'true');
+                    el.setAttribute('title', 'Action failed');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Action not available');
+                console.warn(`Action ${action} not found in window.AppActions`);
+            }
+        });
+
+        // Toast notification helper
+        window.showToast = function(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-opacity duration-300 ${
+                type === 'success' ? 'bg-secondary' : 
+                type === 'error' ? 'bg-error' : 
+                'bg-slate-600'
+            }`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        };
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+    import { getSnapshotsList, exportSnapshotData } from './page-logic.js';
+
+    // Page state
+    let currentSnapshots = [];
+    let filteredSnapshots = [];
+    let currentPage = 1;
+    const pageSize = 25;
+    let selectedSnapshots = new Set();
+
+    // DOM elements
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    const emptyState = document.getElementById('emptyState');
+    const snapshotsContainer = document.getElementById('snapshotsContainer');
+    const snapshotsTableBody = document.getElementById('snapshotsTableBody');
+    const statusFilter = document.getElementById('statusFilter');
+    const searchInput = document.getElementById('searchInput');
+    const clearFilters = document.getElementById('clearFilters');
+    const selectAll = document.getElementById('selectAll');
+    const bulkExportBtn = document.getElementById('bulkExportBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const prevPage = document.getElementById('prevPage');
+    const nextPage = document.getElementById('nextPage');
+    const pageInfo = document.getElementById('pageInfo');
+    const pageNumbers = document.getElementById('pageNumbers');
+
+    // Initialize page
+    function funInitializePage() {
+        funLoadSnapshots();
+        funSetupEventListeners();
+        funUpdateBulkExportButton();
+    }
+
+    // Load snapshots from data service
+    async function funLoadSnapshots() {
+        try {
+            funShowLoadingState();
+            
+            // Call method from page-logic.js to get snapshots list
+            // Expected return: Array of snapshot objects with fields:
+            // - id, weekId, publishedAt, status, summary.capacity, summary.allocated
+            // - weekLabel (computed from weekId)
+            // Collections used: planSnapshots, weekCalendar for week label computation
+            const snapshots = await getSnapshotsList({ 
+                sortBy: 'publishedAt', 
+                sortDirection: 'desc',
+                includeWeekLabels: true
+            });
+
+            currentSnapshots = snapshots || [];
+            funApplyFilters();
+            
+        } catch (error) {
+            console.error('Failed to load snapshots:', error);
+            funShowErrorState();
+        }
+    }
+
+    // Apply filters and search
+    function funApplyFilters() {
+        const statusFilterValue = statusFilter.value.toLowerCase();
+        const searchValue = searchInput.value.toLowerCase();
+
+        filteredSnapshots = currentSnapshots.filter(snapshot => {
+            const matchesStatus = !statusFilterValue || snapshot.status.toLowerCase() === statusFilterValue;
+            const matchesSearch = !searchValue || snapshot.weekId.toLowerCase().includes(searchValue);
+            return matchesStatus && matchesSearch;
+        });
+
+        currentPage = 1;
+        selectedSnapshots.clear();
+        funUpdateTable();
+        funUpdateSelectAllState();
+        funUpdateBulkExportButton();
+    }
+
+    // Update table with current page data
+    function funUpdateTable() {
+        if (filteredSnapshots.length === 0) {
+            funShowEmptyState();
+            return;
+        }
+
+        funShowTableState();
+
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const pageData = filteredSnapshots.slice(startIndex, endIndex);
+
+        snapshotsTableBody.innerHTML = pageData.map(snapshot => {
+            const isSelected = selectedSnapshots.has(snapshot.id);
+            const publishedDate = snapshot.publishedAt 
+                ? new Date(snapshot.publishedAt).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric'
+                })
+                : '-';
+            
+            const statusClass = {
+                'Published': 'bg-green-100 text-green-800',
+                'Archived': 'bg-gray-100 text-gray-800',
+                'Monitoring': 'bg-blue-100 text-blue-800',
+                'Draft': 'bg-yellow-100 text-yellow-800'
+            };
+
+            return `
+                <tr class="hover:bg-slate-50 cursor-pointer" data-snapshot-id="${snapshot.id}">
+                    <td class="px-4 py-3">
+                        <input type="checkbox" class="snapshot-checkbox rounded border-slate-300 text-primary focus:ring-primary/20 focus:ring-2" 
+                               data-snapshot-id="${snapshot.id}" ${isSelected ? 'checked' : ''}>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-900 font-medium">
+                        ${snapshot.weekLabel || snapshot.weekId}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-600">
+                        ${publishedDate}
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${statusClass[snapshot.status] || 'bg-gray-100 text-gray-800'}">
+                            ${snapshot.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-600">
+                        ${snapshot.summary?.capacity || 0}h / ${snapshot.summary?.allocated || 0}h
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <button class="open-snapshot-btn px-3 py-1.5 text-sm bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+                                    data-snapshot-id="${snapshot.id}" 
+                                    aria-label="Open snapshot for ${snapshot.weekLabel || snapshot.weekId}">
+                                <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
+                                Open
+                            </button>
+                            <button class="export-single-btn px-3 py-1.5 text-sm border border-slate-300 text-slate-700 rounded hover:bg-slate-50 transition-colors"
+                                    data-snapshot-id="${snapshot.id}"
+                                    aria-label="Export snapshot for ${snapshot.weekLabel || snapshot.weekId}">
+                                <i data-lucide="download" class="w-4 h-4 inline mr-1"></i>
+                                Export
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        funUpdatePagination();
+        lucide.createIcons();
+    }
+
+    // Update pagination controls
+    function funUpdatePagination() {
+        const totalPages = Math.ceil(filteredSnapshots.length / pageSize);
+        const startItem = filteredSnapshots.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+        const endItem = Math.min(currentPage * pageSize, filteredSnapshots.length);
+        
+        pageInfo.textContent = `${startItem}-${endItem} of ${filteredSnapshots.length}`;
+        
+        prevPage.disabled = currentPage <= 1;
+        nextPage.disabled = currentPage >= totalPages;
+
+        // Generate page numbers
+        pageNumbers.innerHTML = '';
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.textContent = i;
+            pageBtn.className = `px-2 py-1 text-sm border ${i === currentPage ? 'bg-primary text-white border-primary' : 'border-slate-300 hover:bg-slate-100'}`;
+            pageBtn.addEventListener('click', () => {
+                currentPage = i;
+                funUpdateTable();
+            });
+            pageNumbers.appendChild(pageBtn);
+        }
+    }
+
+    // Show states
+    function funShowLoadingState() {
+        loadingState.classList.remove('hidden');
+        errorState.classList.add('hidden');
+        emptyState.classList.add('hidden');
+        snapshotsContainer.classList.add('hidden');
+    }
+
+    function funShowErrorState() {
+        loadingState.classList.add('hidden');
+        errorState.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        snapshotsContainer.classList.add('hidden');
+    }
+
+    function funShowEmptyState() {
+        loadingState.classList.add('hidden');
+        errorState.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        snapshotsContainer.classList.add('hidden');
+    }
+
+    function funShowTableState() {
+        loadingState.classList.add('hidden');
+        errorState.classList.add('hidden');
+        emptyState.classList.add('hidden');
+        snapshotsContainer.classList.remove('hidden');
+    }
+
+    // Setup event listeners
+    function funSetupEventListeners() {
+        // Filter controls
+        statusFilter.addEventListener('change', funApplyFilters);
+        searchInput.addEventListener('input', funDebounce(funApplyFilters, 300));
+        clearFilters.addEventListener('click', funClearFilters);
+
+        // Table interactions
+        selectAll.addEventListener('change', funToggleSelectAll);
+        snapshotsTableBody.addEventListener('change', funHandleCheckboxChange);
+        snapshotsTableBody.addEventListener('click', funHandleTableClick);
+
+        // Bulk actions
+        bulkExportBtn.addEventListener('click', funHandleBulkExport);
+
+        // Retry
+        retryBtn.addEventListener('click', funLoadSnapshots);
+
+        // Pagination
+        prevPage.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                funUpdateTable();
+            }
+        });
+
+        nextPage.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredSnapshots.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                funUpdateTable();
+            }
+        });
+    }
+
+    // Clear all filters
+    function funClearFilters() {
+        statusFilter.value = '';
+        searchInput.value = '';
+        funApplyFilters();
+    }
+
+    // Handle select all toggle
+    function funToggleSelectAll() {
+        const isChecked = selectAll.checked;
+        const pageData = funGetCurrentPageData();
+        
+        if (isChecked) {
+            pageData.forEach(snapshot => selectedSnapshots.add(snapshot.id));
+        } else {
+            pageData.forEach(snapshot => selectedSnapshots.delete(snapshot.id));
+        }
+        
+        funUpdateCheckboxes();
+        funUpdateBulkExportButton();
+    }
+
+    // Handle individual checkbox changes
+    function funHandleCheckboxChange(event) {
+        if (!event.target.classList.contains('snapshot-checkbox')) return;
+
+        const snapshotId = event.target.dataset.snapshotId;
+        if (event.target.checked) {
+            selectedSnapshots.add(snapshotId);
+        } else {
+            selectedSnapshots.delete(snapshotId);
+        }
+
+        funUpdateSelectAllState();
+        funUpdateBulkExportButton();
+    }
+
+    // Handle table row clicks
+    function funHandleTableClick(event) {
+        event.stopPropagation();
+
+        // Open snapshot
+        if (event.target.closest('.open-snapshot-btn')) {
+            const snapshotId = event.target.closest('.open-snapshot-btn').dataset.snapshotId;
+            funOpenSnapshot(snapshotId);
+            return;
+        }
+
+        // Export single
+        if (event.target.closest('.export-single-btn')) {
+            const snapshotId = event.target.closest('.export-single-btn').dataset.snapshotId;
+            funExportSnapshot(snapshotId);
+            return;
+        }
+
+        // Row click to open snapshot
+        const row = event.target.closest('tr[data-snapshot-id]');
+        if (row && !event.target.closest('input, button')) {
+            const snapshotId = row.dataset.snapshotId;
+            funOpenSnapshot(snapshotId);
+        }
+    }
+
+    // Open snapshot viewer
+    function funOpenSnapshot(snapshotId) {
+        window.location.href = `plan_snapshot_viewer.html?snapshotId=${encodeURIComponent(snapshotId)}`;
+    }
+
+    // Export single snapshot
+    async function funExportSnapshot(snapshotId) {
+        try {
+            const snapshot = currentSnapshots.find(s => s.id === snapshotId);
+            if (!snapshot) {
+                window.showToast('Snapshot not found', 'error');
+                return;
+            }
+
+            // Call method from page-logic.js to export snapshot data
+            // Expected: Downloads JSON file with snapshot data
+            // Collections used: planSnapshots, activities, capacities, assignments
+            await exportSnapshotData(snapshotId);
+            
+            window.showToast('Snapshot exported successfully', 'success');
+        } catch (error) {
+            console.error('Export failed:', error);
+            window.showToast('Failed to export snapshot', 'error');
+        }
+    }
+
+    // Handle bulk export
+    async function funHandleBulkExport() {
+        if (selectedSnapshots.size === 0) return;
+
+        const exportBtn = bulkExportBtn;
+        const originalText = exportBtn.innerHTML;
+        
+        try {
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline mr-2"></div>Exporting...';
+
+            for (const snapshotId of selectedSnapshots) {
+                await funExportSnapshot(snapshotId);
+                // Small delay between exports to prevent overwhelming the system
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            selectedSnapshots.clear();
+            funUpdateCheckboxes();
+            funUpdateSelectAllState();
+            funUpdateBulkExportButton();
+            
+            window.showToast(`Exported ${selectedSnapshots.size} snapshots`, 'success');
+        } catch (error) {
+            console.error('Bulk export failed:', error);
+            window.showToast('Some exports may have failed', 'error');
+        } finally {
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = originalText;
+        }
+    }
+
+    // Update checkbox states
+    function funUpdateCheckboxes() {
+        document.querySelectorAll('.snapshot-checkbox').forEach(checkbox => {
+            checkbox.checked = selectedSnapshots.has(checkbox.dataset.snapshotId);
+        });
+    }
+
+    // Update select all state
+    function funUpdateSelectAllState() {
+        const pageData = funGetCurrentPageData();
+        const pageIds = pageData.map(s => s.id);
+        const selectedOnPage = pageIds.filter(id => selectedSnapshots.has(id));
+        
+        selectAll.indeterminate = selectedOnPage.length > 0 && selectedOnPage.length < pageIds.length;
+        selectAll.checked = pageIds.length > 0 && selectedOnPage.length === pageIds.length;
+    }
+
+    // Update bulk export button
+    function funUpdateBulkExportButton() {
+        bulkExportBtn.disabled = selectedSnapshots.size === 0;
+        const count = selectedSnapshots.size;
+        bulkExportBtn.innerHTML = count > 0 
+            ? `<i data-lucide="download" class="w-4 h-4 inline mr-2"></i>Export Selected (${count})`
+            : '<i data-lucide="download" class="w-4 h-4 inline mr-2"></i>Export Selected';
+        
+        if (count > 0) {
+            lucide.createIcons();
+        }
+    }
+
+    // Get current page data
+    function funGetCurrentPageData() {
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        return filteredSnapshots.slice(startIndex, endIndex);
+    }
+
+    // Debounce utility
+    function funDebounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Initialize page when DOM is ready
+    document.addEventListener('DOMContentLoaded', funInitializePage);
+</script></body></html>

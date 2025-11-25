@@ -1,0 +1,1412 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Backlog - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<section class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-primary">Activity Backlog</h1>
+      <p class="text-sm leading-[1.375rem] text-gray-600 mt-1">Create and manage activities with auto-classification and optional override requests.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="btnAddActivity" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2" aria-label="Add new activity">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Add Activity
+      </button>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="bg-white rounded-lg border p-4 shadow-sm">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center">
+      <div class="flex-1">
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 transform -y-1/2 w-4 h-4 text-gray-400"></i>
+          <input type="text" id="searchInput" placeholder="Search activities by title or description..." class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <label for="filterClassification" class="text-sm font-medium text-gray-700">Classification:</label>
+        <select id="filterClassification" class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+          <option value="">All Classifications</option>
+          <option value="client-focused">Client-Focused</option>
+          <option value="tech-debt">Tech Debt</option>
+          <option value="R&amp;D">R&amp;D</option>
+        </select>
+        
+        <label for="filterStatus" class="text-sm font-medium text-gray-700">Status:</label>
+        <select id="filterStatus" class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+          <option value="">All Statuses</option>
+          <option value="Proposed">Proposed</option>
+          <option value="Ready">Ready</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Blocked">Blocked</option>
+          <option value="Done">Done</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activities Table -->
+  <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b">
+          <tr>
+            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Title</th>
+            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Classification</th>
+            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Status</th>
+            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Priority</th>
+            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Created</th>
+            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="activitiesTableBody" class="divide-y divide-gray-200">
+          <!-- Activities will be populated here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden text-center py-12 bg-white rounded-lg border">
+    <div class="max-w-sm mx-auto">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="inbox" class="w-8 h-8 text-gray-400"></i>
+      </div>
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">Start your backlog</h3>
+      <p class="text-sm leading-[1.375rem] text-gray-600 mb-6">Begin by adding your first activity. Classification will be auto-assigned based on your description.</p>
+      <button id="btnAddActivityEmpty" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+        Add Activity
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Add/Edit Activity Drawer -->
+<div id="activityDrawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 border-l" role="dialog" aria-labelledby="drawerTitle" aria-hidden="true">
+  <div class="flex flex-col h-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b">
+      <h2 id="drawerTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Add Activity</h2>
+      <button id="closeDrawer" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close drawer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <form id="activityForm" class="space-y-4">
+        <input type="hidden" id="activityId">
+        
+        <!-- Title -->
+        <div>
+          <label for="activityTitle" class="block text-sm font-medium text-gray-700 mb-1">
+            Title <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="activityTitle" name="title" required="" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Enter activity title...">
+          <div id="titleError" class="mt-1 text-sm text-red-600 hidden"></div>
+        </div>
+        
+        <!-- Description -->
+        <div>
+          <label for="activityDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea id="activityDescription" name="description" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Describe the activity..."></textarea>
+        </div>
+        
+        <!-- Predicted Classification -->
+        <div id="classificationPreview" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Predicted Classification</label>
+          <div class="flex items-center gap-2">
+            <span id="predictedClassificationBadge" class="px-3 py-1 rounded-full text-xs font-medium"></span>
+            <div class="text-xs text-gray-500" aria-live="polite" aria-atomic="true">
+              <span id="classificationExplanation">Classification auto-assigned based on content</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Manual Classification (fallback) -->
+        <div id="manualClassificationSection" class="hidden">
+          <label for="manualClassification" class="block text-sm font-medium text-gray-700 mb-1">Classification</label>
+          <select id="manualClassification" name="classification" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            <option value="">Select classification...</option>
+            <option value="client-focused">Client-Focused</option>
+            <option value="tech-debt">Tech Debt</option>
+            <option value="R&amp;D">R&amp;D</option>
+          </select>
+          <div class="mt-1 text-xs text-amber-600 flex items-center gap-1">
+            <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+            Auto-classification unavailable. Please select manually.
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t bg-gray-50 flex items-center justify-between">
+      <button id="cancelActivity" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Cancel
+      </button>
+      <div class="flex items-center gap-2">
+        <button id="saveActivity" type="submit" form="activityForm" class="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+          Save Activity
+        </button>
+        <button id="saveAndAssign" type="button" class="px-4 py-2 text-sm font-semibold bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors">
+          Save &amp; Assign
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Override Request Drawer -->
+<div id="overrideDrawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 border-l" role="dialog" aria-labelledby="overrideDrawerTitle" aria-hidden="true">
+  <div class="flex flex-col h-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b">
+      <h2 id="overrideDrawerTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Request Classification Override</h2>
+      <button id="closeOverrideDrawer" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close drawer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <form id="overrideForm" class="space-y-4">
+        <input type="hidden" id="overrideActivityId">
+        
+        <!-- Activity Info -->
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h3 id="overrideActivityTitle" class="font-medium text-gray-900 mb-1"></h3>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <span>Current classification:</span>
+            <span id="currentClassificationBadge" class="px-2 py-1 rounded-full text-xs font-medium"></span>
+          </div>
+        </div>
+        
+        <!-- Requested Classification -->
+        <div>
+          <label for="requestedClassification" class="block text-sm font-medium text-gray-700 mb-1">
+            Requested Classification <span class="text-red-500">*</span>
+          </label>
+          <select id="requestedClassification" name="requestedClassification" required="" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            <option value="">Select new classification...</option>
+            <option value="client-focused">Client-Focused</option>
+            <option value="tech-debt">Tech Debt</option>
+            <option value="R&amp;D">R&amp;D</option>
+          </select>
+        </div>
+        
+        <!-- Justification -->
+        <div>
+          <label for="overrideJustification" class="block text-sm font-medium text-gray-700 mb-1">
+            Justification <span class="text-red-500">*</span>
+          </label>
+          <textarea id="overrideJustification" name="justification" required="" rows="4" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Explain why this classification change is needed..."></textarea>
+          <div class="mt-1 text-xs text-gray-500">Provide a clear business justification for the override request.</div>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t bg-gray-50 flex items-center justify-between">
+      <button id="cancelOverride" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Cancel
+      </button>
+      <button id="submitOverride" type="submit" form="overrideForm" class="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+        Submit Request
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden" role="dialog" aria-labelledby="deleteModalTitle" aria-hidden="true">
+  <div class="bg-white rounded-xl max-w-md w-full mx-4 shadow-lg">
+    <div class="p-6">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <i data-lucide="trash-2" class="w-6 h-6 text-red-600"></i>
+        </div>
+        <div class="flex-1">
+          <h3 id="deleteModalTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">Delete Activity</h3>
+          <p class="text-sm leading-[1.375rem] text-gray-600 mb-4">
+            Are you sure you want to delete "<span id="deleteActivityTitle" class="font-medium"></span>"? This action cannot be undone.
+          </p>
+          <div id="assignmentImpact" class="hidden bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+            <div class="flex items-start gap-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i>
+              <div class="text-sm text-amber-700">
+                <div class="font-medium mb-1">Assignment Impact</div>
+                <div id="assignmentImpactText"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="px-6 py-4 bg-gray-50 rounded-b-xl flex items-center justify-end gap-3">
+      <button id="cancelDelete" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Cancel
+      </button>
+      <button id="confirmDelete" type="button" class="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+        Delete Activity
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer Overlay -->
+<div id="drawerOverlay" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-6 right-6 space-y-2 z-50" aria-live="polite" aria-atomic="true"></div>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { 
+  getActivitiesForBacklog, 
+  createActivity, 
+  updateActivity, 
+  softDeleteActivity, 
+  predictClassification, 
+  createOverrideRequest,
+  getAssignmentImpactSummary 
+} from './page-logic.js';
+
+// State management
+let allActivities = [];
+let filteredActivities = [];
+let currentActivityId = null;
+let isEditMode = false;
+
+// DOM elements
+const searchInput = document.getElementById('searchInput');
+const filterClassification = document.getElementById('filterClassification');
+const filterStatus = document.getElementById('filterStatus');
+const activitiesTableBody = document.getElementById('activitiesTableBody');
+const emptyState = document.getElementById('emptyState');
+
+// Drawer elements
+const activityDrawer = document.getElementById('activityDrawer');
+const overrideDrawer = document.getElementById('overrideDrawer');
+const drawerOverlay = document.getElementById('drawerOverlay');
+const deleteModal = document.getElementById('deleteModal');
+
+// Classification mapping for badges
+const classificationConfig = {
+  'client-focused': { 
+    label: 'Client-Focused', 
+    class: 'bg-blue-100 text-blue-800',
+    description: 'Work directly impacting client value'
+  },
+  'tech-debt': { 
+    label: 'Tech Debt', 
+    class: 'bg-orange-100 text-orange-800',
+    description: 'Technical improvements and maintenance'
+  },
+  'R&D': { 
+    label: 'R&D', 
+    class: 'bg-purple-100 text-purple-800',
+    description: 'Research and development initiatives'
+  }
+};
+
+const statusConfig = {
+  'Proposed': 'bg-gray-100 text-gray-800',
+  'Ready': 'bg-green-100 text-green-800',
+  'In Progress': 'bg-blue-100 text-blue-800',
+  'Blocked': 'bg-red-100 text-red-800',
+  'Done': 'bg-gray-100 text-gray-600',
+  'Cancelled': 'bg-gray-100 text-gray-500'
+};
+
+// Initialize page
+function funInitializePage() {
+  funLoadActivities();
+  funBindEventListeners();
+  lucide.createIcons();
+}
+
+// Load activities from data service
+// Expected return: Array of activity objects with computed override status
+// Collections used: activities, overrideRequests
+// Data transformations: Filter non-deleted, compute override badges, sort by priority then date
+async function funLoadActivities() {
+  try {
+    allActivities = await getActivitiesForBacklog();
+    funApplyFilters();
+  } catch (error) {
+    console.error('Failed to load activities:', error);
+    funShowToast('Failed to load activities', 'error');
+  }
+}
+
+// Apply search and filters
+function funApplyFilters() {
+  const searchTerm = searchInput.value.toLowerCase().trim();
+  const classificationFilter = filterClassification.value;
+  const statusFilter = filterStatus.value;
+
+  filteredActivities = allActivities.filter(activity => {
+    const matchesSearch = !searchTerm || 
+      activity.title.toLowerCase().includes(searchTerm) ||
+      (activity.description && activity.description.toLowerCase().includes(searchTerm));
+    
+    const matchesClassification = !classificationFilter || activity.classification === classificationFilter;
+    const matchesStatus = !statusFilter || activity.status === statusFilter;
+
+    return matchesSearch && matchesClassification && matchesStatus;
+  });
+
+  funRenderActivitiesTable();
+}
+
+// Render activities table
+function funRenderActivitiesTable() {
+  if (filteredActivities.length === 0) {
+    activitiesTableBody.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
+
+  emptyState.classList.add('hidden');
+
+  const rows = filteredActivities.map(activity => {
+    const classConfig = classificationConfig[activity.classification] || { 
+      label: activity.classification, 
+      class: 'bg-gray-100 text-gray-800' 
+    };
+    
+    const statusClass = statusConfig[activity.status] || 'bg-gray-100 text-gray-800';
+    
+    const priorityDisplay = activity.priorityRank ? `#${activity.priorityRank}` : '-';
+    
+    const createdDate = new Date(activity.createdAt).toLocaleDateString('en-GB');
+    
+    const overrideBadge = activity.overrideRequested 
+      ? `<span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">
+           <i data-lucide="alert-circle" class="w-3 h-3"></i>
+           <span class="sr-only">Classification </span>Override Requested
+         </span>`
+      : '';
+
+    return `
+      <tr class="hover:bg-gray-50 transition-colors">
+        <td class="px-6 py-4">
+          <div class="flex flex-col">
+            <div class="font-medium text-gray-900 text-sm">${funEscapeHtml(activity.title)}</div>
+            ${activity.description ? `<div class="text-xs text-gray-600 mt-1 line-clamp-2">${funEscapeHtml(activity.description)}</div>` : ''}
+            ${overrideBadge}
+          </div>
+        </td>
+        <td class="px-6 py-4">
+          <span class="px-3 py-1 rounded-full text-xs font-medium ${classConfig.class}">
+            ${classConfig.label}
+          </span>
+        </td>
+        <td class="px-6 py-4">
+          <span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">
+            ${activity.status}
+          </span>
+        </td>
+        <td class="px-6 py-4 text-sm text-gray-600">${priorityDisplay}</td>
+        <td class="px-6 py-4 text-sm text-gray-600">${createdDate}</td>
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-2">
+            <button 
+              class="p-1 hover:bg-gray-100 rounded text-gray-600 hover:text-gray-800 transition-colors"
+              onclick="funEditActivity('${activity.id}')"
+              aria-label="Edit ${funEscapeHtml(activity.title)}">
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+            <button 
+              class="p-1 hover:bg-amber-100 rounded text-amber-600 hover:text-amber-800 transition-colors"
+              onclick="funRequestOverride('${activity.id}')"
+              aria-label="Request classification override for ${funEscapeHtml(activity.title)}">
+              <i data-lucide="flag" class="w-4 h-4"></i>
+            </button>
+            <button 
+              class="p-1 hover:bg-red-100 rounded text-red-600 hover:text-red-800 transition-colors"
+              onclick="funConfirmDelete('${activity.id}')"
+              aria-label="Delete ${funEscapeHtml(activity.title)}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  activitiesTableBody.innerHTML = rows;
+  lucide.createIcons();
+}
+
+// Bind event listeners
+function funBindEventListeners() {
+  // Search and filters
+  searchInput.addEventListener('input', funDebounce(funApplyFilters, 300));
+  filterClassification.addEventListener('change', funApplyFilters);
+  filterStatus.addEventListener('change', funApplyFilters);
+
+  // Add activity buttons
+  document.getElementById('btnAddActivity').addEventListener('click', () => funOpenActivityDrawer());
+  document.getElementById('btnAddActivityEmpty').addEventListener('click', () => funOpenActivityDrawer());
+
+  // Activity drawer
+  document.getElementById('closeDrawer').addEventListener('click', funCloseActivityDrawer);
+  document.getElementById('cancelActivity').addEventListener('click', funCloseActivityDrawer);
+  document.getElementById('activityForm').addEventListener('submit', funSaveActivity);
+  document.getElementById('saveAndAssign').addEventListener('click', funSaveAndAssign);
+
+  // Live classification prediction
+  document.getElementById('activityTitle').addEventListener('input', funDebounce(funPredictClassification, 500));
+  document.getElementById('activityDescription').addEventListener('input', funDebounce(funPredictClassification, 500));
+
+  // Override drawer
+  document.getElementById('closeOverrideDrawer').addEventListener('click', funCloseOverrideDrawer);
+  document.getElementById('cancelOverride').addEventListener('click', funCloseOverrideDrawer);
+  document.getElementById('overrideForm').addEventListener('submit', funSubmitOverrideRequest);
+
+  // Delete modal
+  document.getElementById('cancelDelete').addEventListener('click', funCloseDeleteModal);
+  document.getElementById('confirmDelete').addEventListener('click', funDeleteActivity);
+
+  // Drawer overlay
+  drawerOverlay.addEventListener('click', (e) => {
+    if (e.target === drawerOverlay) {
+      funCloseAllDrawers();
+    }
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', funHandleKeyboardShortcuts);
+}
+
+// Handle keyboard shortcuts
+function funHandleKeyboardShortcuts(e) {
+  if (e.key === 'Escape') {
+    if (!deleteModal.classList.contains('hidden')) {
+      funCloseDeleteModal();
+    } else if (!activityDrawer.classList.contains('translate-x-full')) {
+      funCloseActivityDrawer();
+    } else if (!overrideDrawer.classList.contains('translate-x-full')) {
+      funCloseOverrideDrawer();
+    }
+  }
+}
+
+// Open activity drawer for add/edit
+function funOpenActivityDrawer(activityId = null) {
+  isEditMode = !!activityId;
+  currentActivityId = activityId;
+  
+  const title = document.getElementById('drawerTitle');
+  const form = document.getElementById('activityForm');
+  
+  if (isEditMode) {
+    title.textContent = 'Edit Activity';
+    const activity = allActivities.find(a => a.id === activityId);
+    if (activity) {
+      document.getElementById('activityId').value = activity.id;
+      document.getElementById('activityTitle').value = activity.title;
+      document.getElementById('activityDescription').value = activity.description || '';
+      
+      // Show current classification
+      funShowClassificationPreview(activity.classification);
+    }
+  } else {
+    title.textContent = 'Add Activity';
+    form.reset();
+    funHideClassificationPreview();
+  }
+
+  funShowDrawer(activityDrawer);
+  document.getElementById('activityTitle').focus();
+}
+
+// Close activity drawer
+function funCloseActivityDrawer() {
+  funHideDrawer(activityDrawer);
+  funResetActivityForm();
+}
+
+// Open override request drawer
+function funRequestOverride(activityId) {
+  const activity = allActivities.find(a => a.id === activityId);
+  if (!activity) return;
+
+  document.getElementById('overrideActivityId').value = activityId;
+  document.getElementById('overrideActivityTitle').textContent = activity.title;
+  
+  const currentBadge = document.getElementById('currentClassificationBadge');
+  const classConfig = classificationConfig[activity.classification];
+  currentBadge.textContent = classConfig.label;
+  currentBadge.className = `px-2 py-1 rounded-full text-xs font-medium ${classConfig.class}`;
+
+  // Reset form
+  document.getElementById('overrideForm').reset();
+
+  funShowDrawer(overrideDrawer);
+  document.getElementById('requestedClassification').focus();
+}
+
+// Close override drawer
+function funCloseOverrideDrawer() {
+  funHideDrawer(overrideDrawer);
+}
+
+// Show drawer
+function funShowDrawer(drawer) {
+  drawerOverlay.classList.remove('hidden');
+  drawer.classList.remove('translate-x-full');
+  drawer.setAttribute('aria-hidden', 'false');
+  
+  // Trap focus within drawer
+  const focusableElements = drawer.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (focusableElements.length > 0) {
+    focusableElements[0].focus();
+  }
+}
+
+// Hide drawer
+function funHideDrawer(drawer) {
+  drawer.classList.add('translate-x-full');
+  drawer.setAttribute('aria-hidden', 'true');
+  drawerOverlay.classList.add('hidden');
+}
+
+// Close all drawers
+function funCloseAllDrawers() {
+  funCloseActivityDrawer();
+  funCloseOverrideDrawer();
+}
+
+// Predict classification based on input
+// Expected: Call classification prediction service with title + description
+// Returns: { classification: string, confidence: number } or null on failure
+async function funPredictClassification() {
+  const title = document.getElementById('activityTitle').value.trim();
+  const description = document.getElementById('activityDescription').value.trim();
+  
+  if (!title) {
+    funHideClassificationPreview();
+    return;
+  }
+
+  const inputText = `${title}${description ? ' ' + description : ''}`;
+
+  try {
+    const prediction = await predictClassification(inputText);
+    if (prediction && prediction.classification) {
+      funShowClassificationPreview(prediction.classification);
+    } else {
+      funShowManualClassificationFallback();
+    }
+  } catch (error) {
+    console.warn('Classification prediction failed:', error);
+    funShowManualClassificationFallback();
+  }
+}
+
+// Show classification preview
+function funShowClassificationPreview(classification) {
+  const previewSection = document.getElementById('classificationPreview');
+  const manualSection = document.getElementById('manualClassificationSection');
+  const badge = document.getElementById('predictedClassificationBadge');
+  
+  const classConfig = classificationConfig[classification];
+  if (classConfig) {
+    badge.textContent = classConfig.label;
+    badge.className = `px-3 py-1 rounded-full text-xs font-medium ${classConfig.class}`;
+    
+    document.getElementById('classificationExplanation').textContent = classConfig.description;
+  }
+  
+  previewSection.classList.remove('hidden');
+  manualSection.classList.add('hidden');
+}
+
+// Hide classification preview
+function funHideClassificationPreview() {
+  document.getElementById('classificationPreview').classList.add('hidden');
+  document.getElementById('manualClassificationSection').classList.add('hidden');
+}
+
+// Show manual classification fallback
+function funShowManualClassificationFallback() {
+  document.getElementById('classificationPreview').classList.add('hidden');
+  document.getElementById('manualClassificationSection').classList.remove('hidden');
+}
+
+// Save activity
+// Expected: Create or update activity via service, refresh data, show success toast
+async function funSaveActivity(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const title = formData.get('title').trim();
+  const description = formData.get('description').trim();
+  
+  // Clear previous errors
+  document.getElementById('titleError').classList.add('hidden');
+  
+  if (!title) {
+    document.getElementById('titleError').textContent = 'Title is required';
+    document.getElementById('titleError').classList.remove('hidden');
+    document.getElementById('activityTitle').focus();
+    return;
+  }
+
+  // Get classification (predicted or manual)
+  let classification;
+  if (!document.getElementById('classificationPreview').classList.contains('hidden')) {
+    // Use predicted classification
+    const badge = document.getElementById('predictedClassificationBadge');
+    const classKey = Object.keys(classificationConfig).find(key => 
+      classificationConfig[key].label === badge.textContent
+    );
+    classification = classKey;
+  } else {
+    // Use manual classification
+    classification = formData.get('classification');
+    if (!classification) {
+      funShowToast('Please select a classification', 'error');
+      return;
+    }
+  }
+
+  const activityData = {
+    title,
+    description: description || null,
+    classification
+  };
+
+  try {
+    const saveButton = document.getElementById('saveActivity');
+    const originalText = saveButton.textContent;
+    saveButton.textContent = 'Saving...';
+    saveButton.disabled = true;
+
+    if (isEditMode) {
+      await updateActivity(currentActivityId, activityData);
+      funShowToast('Activity updated successfully', 'success');
+    } else {
+      await createActivity(activityData);
+      funShowToast(`Activity created with ${classificationConfig[classification].label} classification`, 'success');
+    }
+
+    funCloseActivityDrawer();
+    await funLoadActivities();
+
+  } catch (error) {
+    console.error('Failed to save activity:', error);
+    funShowToast('Failed to save activity', 'error');
+  } finally {
+    const saveButton = document.getElementById('saveActivity');
+    saveButton.textContent = 'Save Activity';
+    saveButton.disabled = false;
+  }
+}
+
+// Save and assign activity
+async function funSaveAndAssign() {
+  // First save the activity
+  const form = document.getElementById('activityForm');
+  const saveEvent = new Event('submit', { cancelable: true });
+  form.dispatchEvent(saveEvent);
+
+  // If save was successful, navigate to assignments
+  // This is a simplified approach - in reality you'd wait for save success
+  setTimeout(() => {
+    if (activityDrawer.classList.contains('translate-x-full')) {
+      window.location.href = 'assignments.html';
+    }
+  }, 100);
+}
+
+// Submit override request
+// Expected: Create override request via service, refresh data, show success toast
+async function funSubmitOverrideRequest(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const activityId = document.getElementById('overrideActivityId').value;
+  const requestedClassification = formData.get('requestedClassification');
+  const justification = formData.get('justification').trim();
+
+  if (!requestedClassification || !justification) {
+    funShowToast('Please fill in all required fields', 'error');
+    return;
+  }
+
+  const activity = allActivities.find(a => a.id === activityId);
+  const overrideData = {
+    activityId,
+    currentClassification: activity.classification,
+    requestedClassification,
+    justification
+  };
+
+  try {
+    const submitButton = document.getElementById('submitOverride');
+    const originalText = submitButton.textContent;
+    submitButton.textContent = 'Submitting...';
+    submitButton.disabled = true;
+
+    await createOverrideRequest(overrideData);
+    
+    funShowToast('Override request submitted successfully', 'success');
+    funCloseOverrideDrawer();
+    await funLoadActivities();
+
+  } catch (error) {
+    console.error('Failed to submit override request:', error);
+    funShowToast('Failed to submit override request', 'error');
+  } finally {
+    const submitButton = document.getElementById('submitOverride');
+    submitButton.textContent = 'Submit Request';
+    submitButton.disabled = false;
+  }
+}
+
+// Confirm delete activity
+// Expected: Get assignment impact summary, show confirmation modal
+async function funConfirmDelete(activityId) {
+  const activity = allActivities.find(a => a.id === activityId);
+  if (!activity) return;
+
+  document.getElementById('deleteActivityTitle').textContent = activity.title;
+  
+  try {
+    // Get assignment impact
+    const impactSummary = await getAssignmentImpactSummary(activityId);
+    
+    if (impactSummary && impactSummary.hasAssignments) {
+      document.getElementById('assignmentImpact').classList.remove('hidden');
+      document.getElementById('assignmentImpactText').textContent = impactSummary.summary;
+    } else {
+      document.getElementById('assignmentImpact').classList.add('hidden');
+    }
+
+    currentActivityId = activityId;
+    funShowDeleteModal();
+
+  } catch (error) {
+    console.error('Failed to get assignment impact:', error);
+    // Show modal anyway
+    document.getElementById('assignmentImpact').classList.add('hidden');
+    currentActivityId = activityId;
+    funShowDeleteModal();
+  }
+}
+
+// Show delete modal
+function funShowDeleteModal() {
+  deleteModal.classList.remove('hidden');
+  deleteModal.setAttribute('aria-hidden', 'false');
+  document.getElementById('cancelDelete').focus();
+}
+
+// Close delete modal
+function funCloseDeleteModal() {
+  deleteModal.classList.add('hidden');
+  deleteModal.setAttribute('aria-hidden', 'true');
+  currentActivityId = null;
+}
+
+// Delete activity
+// Expected: Soft delete activity via service, refresh data, show success toast
+async function funDeleteActivity() {
+  if (!currentActivityId) return;
+
+  try {
+    const confirmButton = document.getElementById('confirmDelete');
+    const originalText = confirmButton.textContent;
+    confirmButton.textContent = 'Deleting...';
+    confirmButton.disabled = true;
+
+    await softDeleteActivity(currentActivityId);
+    
+    funShowToast('Activity deleted successfully', 'success');
+    funCloseDeleteModal();
+    await funLoadActivities();
+
+  } catch (error) {
+    console.error('Failed to delete activity:', error);
+    funShowToast('Failed to delete activity', 'error');
+  } finally {
+    const confirmButton = document.getElementById('confirmDelete');
+    confirmButton.textContent = 'Delete Activity';
+    confirmButton.disabled = false;
+  }
+}
+
+// Reset activity form
+function funResetActivityForm() {
+  document.getElementById('activityForm').reset();
+  document.getElementById('titleError').classList.add('hidden');
+  funHideClassificationPreview();
+  currentActivityId = null;
+  isEditMode = false;
+}
+
+// Make functions available globally for onclick handlers
+window.funEditActivity = (activityId) => funOpenActivityDrawer(activityId);
+window.funRequestOverride = funRequestOverride;
+window.funConfirmDelete = funConfirmDelete;
+
+// Utility functions
+function funEscapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function funDebounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+// Toast notification system
+function funShowToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+  
+  let bgColor, textColor, icon;
+  switch (type) {
+    case 'success':
+      bgColor = 'bg-green-500';
+      textColor = 'text-white';
+      icon = 'check-circle';
+      break;
+    case 'error':
+      bgColor = 'bg-red-500';
+      textColor = 'text-white';
+      icon = 'alert-circle';
+      break;
+    case 'warning':
+      bgColor = 'bg-amber-500';
+      textColor = 'text-white';
+      icon = 'alert-triangle';
+      break;
+    default:
+      bgColor = 'bg-blue-500';
+      textColor = 'text-white';
+      icon = 'info';
+  }
+
+  toast.innerHTML = `
+    <i data-lucide="${icon}" class="w-5 h-5 ${textColor}"></i>
+    <span class="text-sm font-medium ${textColor}">${funEscapeHtml(message)}</span>
+    <button class="ml-auto ${textColor} hover:opacity-70" onclick="this.parentElement.remove()">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  `;
+  toast.classList.add(bgColor);
+
+  const container = document.getElementById('toastContainer');
+  container.appendChild(toast);
+  
+  lucide.createIcons();
+
+  // Animate in
+  setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.classList.add('translate-x-full');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
+// Initialize page on load
+document.addEventListener('DOMContentLoaded', funInitializePage);
+</script></body></html>

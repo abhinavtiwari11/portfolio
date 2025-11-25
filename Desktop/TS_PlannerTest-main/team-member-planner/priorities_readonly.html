@@ -1,0 +1,901 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Team Member Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #0B1F3A;
+            --color-secondary: #0F766E;
+            --color-accent: #D4AF37;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(2,6,23,0.06);
+            --shadow-lg: 0 8px 30px rgba(2,6,23,0.12);
+        }
+        
+        .nav-group-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748B;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+            color: #475569;
+            text-decoration: none;
+            font-size: var(--text-display-sm);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--color-primary);
+        }
+        
+        .nav-item:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            padding-left: 0.625rem;
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 4rem);
+                background: var(--color-surface);
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded hover:bg-gray-100 transition-colors" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" role="img" aria-hidden="true">
+                    <rect x="90" y="90" width="220" height="220" rx="24" ry="24" fill="none" stroke="#0B63A7" stroke-width="18" stroke-linejoin="round"></rect>
+                    <g stroke="#0B63A7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                        <rect x="122" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="147" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="122" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="178" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                        <rect x="234" y="209" width="44" height="44" rx="8" ry="8"></rect>
+                    </g>
+                    <g fill="#00A99D" stroke="#00A99D" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M320 260 C360 260 360 120 260 100" fill="none" stroke="#00A99D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <circle cx="300" cy="245" r="8"></circle>
+                        <circle cx="280" cy="200" r="8"></circle>
+                        <circle cx="270" cy="150" r="8"></circle>
+                        <path d="M260 100 L246 116 L274 116 Z"></path>
+                    </g>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Team Member Planner</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Import App Data
+            </button>
+            <button id="exportAppData" class="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border">
+                Export App Data
+            </button>
+            <input type="file" id="importFile" accept="application/json" class="hidden">
+
+            <button id="userProfileButton" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-semibold text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover" class="absolute top-16 right-6 bg-surface border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-semibold text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton" class="w-full flex items-center gap-2 px-3 py-2 text-left text-error hover:bg-red-50 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-surface hidden md:block transition-all duration-300 border-r h-[calc(100vh-4rem)] overflow-y-auto">
+            <nav class="p-4" role="navigation" id="sideNav">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <aside id="mobileSidebar" class="mobile-sidebar">
+            <nav class="p-4 h-full overflow-y-auto" role="navigation">
+                <!-- Plan Section -->
+                <div class="nav-group-header">Plan</div>
+                <a href="my_week_dashboard.html" class="nav-item" data-page="my_week_dashboard">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>My Week</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)]" id="pageContent" role="main"><head_content_code>
+<title>Priorities - Team Member Planner</title>
+</head_content_code>
+
+<html_content_code>
+<section class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-primary">Priority Order</h1>
+      <p class="text-sm leading-[1.375rem] text-gray-600 mt-1">Current week's activity priorities as set by the Planning Lead</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="weekSelector" class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg text-sm">
+        <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
+        <span id="currentWeekDisplay" class="font-medium text-gray-700">Loading...</span>
+      </div>
+      <a href="assignments.html" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium">
+        <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+        Go to Assignments
+      </a>
+    </div>
+  </div>
+
+  <!-- Priority Lists Container -->
+  <div id="priorityListsContainer" class="grid gap-6 lg:grid-cols-3">
+    <!-- Client-Focused Column -->
+    <div class="bg-white rounded-xl border shadow-sm">
+      <div class="p-4 border-b bg-gray-50 rounded-t-xl">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-primary"></div>
+          <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Client-Focused</h2>
+          <span id="clientCount" class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">0</span>
+        </div>
+      </div>
+      <div class="p-4">
+        <ol id="clientPriorityList" class="space-y-3" role="list">
+          <!-- Priority items will be populated here -->
+        </ol>
+        <div id="clientEmptyState" class="hidden text-center py-8 text-gray-500">
+          <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
+          <p class="text-sm">No client-focused activities</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech Debt Column -->
+    <div class="bg-white rounded-xl border shadow-sm">
+      <div class="p-4 border-b bg-gray-50 rounded-t-xl">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-secondary"></div>
+          <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Tech Debt</h2>
+          <span id="techDebtCount" class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">0</span>
+        </div>
+      </div>
+      <div class="p-4">
+        <ol id="techDebtPriorityList" class="space-y-3" role="list">
+          <!-- Priority items will be populated here -->
+        </ol>
+        <div id="techDebtEmptyState" class="hidden text-center py-8 text-gray-500">
+          <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
+          <p class="text-sm">No tech debt activities</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- R&D Column -->
+    <div class="bg-white rounded-xl border shadow-sm">
+      <div class="p-4 border-b bg-gray-50 rounded-t-xl">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-accent"></div>
+          <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">R&amp;D</h2>
+          <span id="rndCount" class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">0</span>
+        </div>
+      </div>
+      <div class="p-4">
+        <ol id="rndPriorityList" class="space-y-3" role="list">
+          <!-- Priority items will be populated here -->
+        </ol>
+        <div id="rndEmptyState" class="hidden text-center py-8 text-gray-500">
+          <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
+          <p class="text-sm">No R&amp;D activities</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Data State -->
+  <div id="noDataState" class="hidden text-center py-12">
+    <div class="max-w-md mx-auto">
+      <i data-lucide="list-ordered" class="w-16 h-16 mx-auto mb-4 text-gray-300"></i>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">No Priority Order Available</h3>
+      <p class="text-gray-600 mb-6">The Planning Lead hasn't set priorities for this week yet. Activities are sorted by creation date in the Assignments view.</p>
+      <a href="assignments.html" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+        <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+        Go to Assignments
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loadingState" class="text-center py-12">
+    <div class="animate-pulse space-y-4">
+      <div class="w-32 h-4 bg-gray-200 rounded mx-auto"></div>
+      <div class="grid gap-6 lg:grid-cols-3">
+        <div class="bg-gray-100 h-64 rounded-xl"></div>
+        <div class="bg-gray-100 h-64 rounded-xl"></div>
+        <div class="bg-gray-100 h-64 rounded-xl"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contextual Tips -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="flex gap-3">
+      <i data-lucide="info" class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0"></i>
+      <div>
+        <p class="text-sm text-blue-800">
+          <strong>Tip:</strong> The Planning Lead sets priorities on Tuesday. Use this order to guide your self-assignment decisions in the Assignments view.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+</html_content_code>
+
+<script_content_code>
+
+</script_content_code></main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'plc::';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            function toggleSidebar() {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    sidebar.classList.add('open');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav item
+                    const firstNavItem = sidebar.querySelector('.nav-item');
+                    if (firstNavItem) firstNavItem.focus();
+                }
+            }
+            
+            btn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('open') === false) {
+                    toggleSidebar();
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-bob');
+                    currentUserId = 'u-bob';
+                }
+                const userData = localStorage.getItem(APP_PREFIX + 'users');
+                try { 
+                    const users = userData ? JSON.parse(userData) : [];
+                    return users.find(u => u.id === currentUserId) || null;
+                } catch { 
+                    return null; 
+                }
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        window.UserUtils = UserUtils;
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const popoverUserAvatar = document.getElementById('popoverUserAvatar');
+            const popoverUserName = document.getElementById('popoverUserName');
+            const popoverUserEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            userAvatar.textContent = initials;
+            userName.textContent = displayName;
+            popoverUserAvatar.textContent = initials;
+            popoverUserName.textContent = displayName;
+            popoverUserEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            function togglePopover() {
+                popoverVisible = !popoverVisible;
+                popover.classList.toggle('hidden', !popoverVisible);
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                if (popoverVisible) {
+                    // Focus first interactive element
+                    const signOutBtn = document.getElementById('signOutButton');
+                    if (signOutBtn) signOutBtn.focus();
+                }
+            }
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                togglePopover();
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            // Close on Esc
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popoverVisible = false;
+                    popover.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) UserUtils.signOut();
+            });
+        }());
+
+        // Navigation active state management
+        (function navigationState() {
+            function updateActiveNav() {
+                const currentPage = new URLSearchParams(window.location.search).get('page') || 
+                                   window.location.pathname.split('/').pop().replace('.html', '') || 
+                                   'my_week_dashboard';
+                
+                // Update both desktop and mobile nav
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const page = item.getAttribute('data-page') || item.getAttribute('href')?.replace('.html', '');
+                    if (page === currentPage) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Update on load and popstate
+            updateActiveNav();
+            window.addEventListener('popstate', updateActiveNav);
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX.replace('::', ''))) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "team_member_planner_data.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedKeys = 0;
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX.replace('::', ''))) {
+                            localStorage.setItem(key, value);
+                            importedKeys++;
+                        }
+                    });
+                    if (importedKeys > 0) {
+                        alert(`✅ App data imported successfully (${importedKeys} keys). Please refresh the page.`);
+                    } else {
+                        alert('⚠️ No matching app data found in the file.');
+                    }
+                } catch (err) {
+                    alert('❌ Failed to import: Invalid JSON format.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                window.AppActions[action](el);
+            } else {
+                el.setAttribute('disabled','true');
+                el.setAttribute('title','Unavailable');
+                el.style.opacity = '0.5';
+                el.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Skip link for accessibility
+        const skipLink = document.createElement('a');
+        skipLink.href = '#pageContent';
+        skipLink.textContent = 'Skip to main content';
+        skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-lg z-50';
+        skipLink.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+        skipLink.addEventListener('focus', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                z-index: 50;
+                background-color: var(--color-primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+            `;
+        });
+        skipLink.addEventListener('blur', () => {
+            skipLink.style.cssText = `
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            `;
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    </script>
+
+    DYNAMIC_JS_LOGIC_SCRIPT
+
+
+
+<script id="page-logic" type="module">
+import { 
+  getPriorityListsForWeek, 
+  getActivitiesByIds, 
+  getCurrentWeekId,
+  getWeekById,
+  updateUIState 
+} from './page-logic.js';
+
+// Page initialization
+document.addEventListener('DOMContentLoaded', async function() {
+  await funInitializePage();
+});
+
+/**
+ * Initialize the priorities page
+ * Loads priority data for current week and renders the UI
+ */
+async function funInitializePage() {
+  try {
+    // Show loading state
+    funShowLoadingState(true);
+    
+    // Get current week ID (from URL param or default to current)
+    const urlParams = new URLSearchParams(window.location.search);
+    const weekId = urlParams.get('week_id') || getCurrentWeekId();
+    
+    // Update UI state to track page visit
+    await updateUIState({ 
+      lastSelectedTab: 'priorities',
+      currentWeekId: weekId 
+    });
+    
+    // Load priority data for the week
+    // Expected return type: {
+    //   'client-focused': { priorityList: [{activityId, rank}], version, updatedAt },
+    //   'tech-debt': { priorityList: [{activityId, rank}], version, updatedAt },
+    //   'R&D': { priorityList: [{activityId, rank}], version, updatedAt }
+    // }
+    // Collections used: activityPriorities (filtered by weekId), activities (for activity details)
+    const priorityData = await getPriorityListsForWeek(weekId);
+    
+    // Display current week info
+    await funDisplayWeekInfo(weekId);
+    
+    // Check if we have any priority data
+    if (!priorityData || Object.keys(priorityData).length === 0) {
+      funShowNoDataState();
+      return;
+    }
+    
+    // Load activities data for all activity IDs found in priority lists
+    const allActivityIds = [];
+    Object.values(priorityData).forEach(categoryData => {
+      if (categoryData && categoryData.priorityList) {
+        categoryData.priorityList.forEach(item => {
+          if (item.activityId) allActivityIds.push(item.activityId);
+        });
+      }
+    });
+    
+    // Get activity details by IDs
+    // Expected return type: { [activityId]: { id, title, description, classification, status, ... } }
+    // Collections used: activities (filtered by IDs)
+    const activitiesMap = await getActivitiesByIds(allActivityIds);
+    
+    // Render priority lists
+    await funRenderPriorityLists(priorityData, activitiesMap);
+    
+    // Hide loading state
+    funShowLoadingState(false);
+    
+  } catch (error) {
+    console.error('Failed to initialize priorities page:', error);
+    funShowErrorState();
+  }
+}
+
+/**
+ * Display week information in the header
+ */
+async function funDisplayWeekInfo(weekId) {
+  try {
+    // Get week details
+    // Expected return type: { id, startDate, endDate, planningDate, status, ... }
+    // Collections used: weekCalendar
+    const weekData = await getWeekById(weekId);
+    
+    const weekDisplay = document.getElementById('currentWeekDisplay');
+    if (weekDisplay && weekData) {
+      const startDate = new Date(weekData.startDate).toLocaleDateString('en-GB', { 
+        day: '2-digit', 
+        month: 'short' 
+      });
+      const endDate = new Date(weekData.endDate).toLocaleDateString('en-GB', { 
+        day: '2-digit', 
+        month: 'short' 
+      });
+      weekDisplay.textContent = `${weekData.id} (${startDate} - ${endDate})`;
+    }
+  } catch (error) {
+    console.error('Failed to load week info:', error);
+    document.getElementById('currentWeekDisplay').textContent = weekId || 'Current Week';
+  }
+}
+
+/**
+ * Render priority lists for all classifications
+ */
+async function funRenderPriorityLists(priorityData, activitiesMap) {
+  // Define classification mappings
+  const classifications = [
+    { key: 'client-focused', listId: 'clientPriorityList', countId: 'clientCount', emptyId: 'clientEmptyState' },
+    { key: 'tech-debt', listId: 'techDebtPriorityList', countId: 'techDebtCount', emptyId: 'techDebtEmptyState' },
+    { key: 'R&D', listId: 'rndPriorityList', countId: 'rndCount', emptyId: 'rndEmptyState' }
+  ];
+  
+  let hasAnyData = false;
+  
+  for (const classification of classifications) {
+    const categoryData = priorityData[classification.key];
+    const listElement = document.getElementById(classification.listId);
+    const countElement = document.getElementById(classification.countId);
+    const emptyElement = document.getElementById(classification.emptyId);
+    
+    if (!listElement || !countElement || !emptyElement) continue;
+    
+    // Clear existing content
+    listElement.innerHTML = '';
+    
+    if (categoryData && categoryData.priorityList && categoryData.priorityList.length > 0) {
+      hasAnyData = true;
+      
+      // Sort by rank (ascending - lower rank = higher priority)
+      const sortedItems = [...categoryData.priorityList].sort((a, b) => a.rank - b.rank);
+      
+      // Render each priority item
+      sortedItems.forEach((item, index) => {
+        const activity = activitiesMap[item.activityId];
+        if (activity) {
+          const listItem = funCreatePriorityItem(activity, item.rank, index + 1);
+          listElement.appendChild(listItem);
+        }
+      });
+      
+      // Update count
+      countElement.textContent = sortedItems.length;
+      
+      // Show list, hide empty state
+      listElement.classList.remove('hidden');
+      emptyElement.classList.add('hidden');
+      
+    } else {
+      // Show empty state
+      listElement.classList.add('hidden');
+      emptyElement.classList.remove('hidden');
+      countElement.textContent = '0';
+    }
+  }
+  
+  // Show main content
+  document.getElementById('priorityListsContainer').classList.remove('hidden');
+  
+  if (!hasAnyData) {
+    funShowNoDataState();
+  }
+}
+
+/**
+ * Create a priority item element
+ */
+function funCreatePriorityItem(activity, rank, displayOrder) {
+  const li = document.createElement('li');
+  li.className = 'flex items-start gap-3 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors';
+  li.setAttribute('role', 'listitem');
+  
+  // Status color mapping
+  const statusColors = {
+    'Ready': 'bg-green-100 text-green-800',
+    'Proposed': 'bg-blue-100 text-blue-800',
+    'In Progress': 'bg-amber-100 text-amber-800',
+    'Blocked': 'bg-red-100 text-red-800',
+    'Done': 'bg-gray-100 text-gray-800',
+    'Cancelled': 'bg-gray-100 text-gray-500'
+  };
+  
+  const statusClass = statusColors[activity.status] || 'bg-gray-100 text-gray-600';
+  
+  li.innerHTML = `
+    <div class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center">
+      ${displayOrder}
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <h3 class="font-medium text-gray-900 text-sm line-clamp-2" title="${activity.title}">
+          ${activity.title}
+        </h3>
+        <span class="px-2 py-1 text-xs font-medium rounded-full flex-shrink-0 ${statusClass}">
+          ${activity.status}
+        </span>
+      </div>
+      <p class="text-xs text-gray-600 line-clamp-2 mb-2" title="${activity.description}">
+        ${activity.description}
+      </p>
+      <div class="flex items-center gap-3 text-xs text-gray-500">
+        <span>Rank: ${rank}</span>
+        <span>•</span>
+        <span>ID: ${activity.id}</span>
+      </div>
+    </div>
+  `;
+  
+  // Add click handler to navigate to assignments
+  li.style.cursor = 'pointer';
+  li.addEventListener('click', () => {
+    window.location.href = `assignments.html?highlight=${activity.id}`;
+  });
+  
+  // Add keyboard navigation
+  li.setAttribute('tabindex', '0');
+  li.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      window.location.href = `assignments.html?highlight=${activity.id}`;
+    }
+  });
+  
+  return li;
+}
+
+/**
+ * Show/hide loading state
+ */
+function funShowLoadingState(show) {
+  const loadingElement = document.getElementById('loadingState');
+  const contentElement = document.getElementById('priorityListsContainer');
+  const noDataElement = document.getElementById('noDataState');
+  
+  if (show) {
+    loadingElement?.classList.remove('hidden');
+    contentElement?.classList.add('hidden');
+    noDataElement?.classList.add('hidden');
+  } else {
+    loadingElement?.classList.add('hidden');
+  }
+}
+
+/**
+ * Show no data state
+ */
+function funShowNoDataState() {
+  const noDataElement = document.getElementById('noDataState');
+  const contentElement = document.getElementById('priorityListsContainer');
+  const loadingElement = document.getElementById('loadingState');
+  
+  noDataElement?.classList.remove('hidden');
+  contentElement?.classList.add('hidden');
+  loadingElement?.classList.add('hidden');
+}
+
+/**
+ * Show error state
+ */
+function funShowErrorState() {
+  funShowLoadingState(false);
+  
+  const noDataElement = document.getElementById('noDataState');
+  if (noDataElement) {
+    noDataElement.innerHTML = `
+      <div class="max-w-md mx-auto">
+        <i data-lucide="alert-triangle" class="w-16 h-16 mx-auto mb-4 text-red-300"></i>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Failed to Load Priorities</h3>
+        <p class="text-gray-600 mb-6">There was an error loading the priority data. Please try refreshing the page.</p>
+        <button onclick="window.location.reload()" 
+                class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          Retry
+        </button>
+      </div>
+    `;
+    noDataElement.classList.remove('hidden');
+  }
+  
+  // Re-create icons for the error state
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+}
+
+// Initialize icons
+if (typeof lucide !== 'undefined') {
+  lucide.createIcons();
+}
+</script></body></html>
